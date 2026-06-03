@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Han Han · Roadmap to FAANG Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    /* aligned to hhanng.github.io — cherry-blossom palette */
+    --navy:#1F2A1B;        /* dark green-ink (headings / dark) */
+    --blue:#C45E7C;        /* deep rose (readable accent / labels) */
+    --rose:#E08DA0;        /* dusty rose (primary) */
+    --teal:#E892A6;        /* light rose (gradient start) */
+    --gold:#CE8E1B;        /* amber (today / key markers) */
+    --bg:#FFF6F8; --card:#ffffff; --line:#F3DDE3; --grey:#8A7B80; --ink:#1F2A1B;
+    --good:#E08DA0; --soft:#FFEEF2;
+    --shadow:0 1px 3px rgba(224,141,160,.10),0 8px 24px rgba(224,141,160,.14);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:"Poppins",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;line-height:1.5}
+  a{color:var(--rose)}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 20px 80px}
+  /* private access gate */
+  body.locked{overflow:hidden}
+  body.locked header, body.locked > .wrap, body.locked .save-note{filter:blur(7px);pointer-events:none;user-select:none}
+  #gate{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:20px;
+    background:linear-gradient(135deg,#FFEAF0,#FFD9E3)}
+  #gate.hidden{display:none}
+  .gate-card{background:#fff;border:1px solid var(--line);border-radius:20px;box-shadow:0 12px 40px rgba(224,141,160,.28);
+    padding:36px 34px;max-width:380px;width:100%;text-align:center}
+  .gate-lock{margin-bottom:8px;line-height:0}
+  .gate-card h2{margin:0 0 6px;color:var(--navy);font-size:22px;font-weight:800}
+  .gate-card p{margin:0 0 18px;color:var(--grey);font-size:13.5px;line-height:1.5}
+  #gatePw{width:100%;border:1.5px solid var(--line);border-radius:11px;padding:12px 14px;font:inherit;font-size:15px;
+    color:var(--ink);background:#FFF9FB;transition:.15s}
+  #gatePw:focus{outline:none;border-color:var(--rose);background:#fff;box-shadow:0 0 0 3px rgba(224,141,160,.18)}
+  .gate-remember{display:flex;align-items:center;gap:7px;justify-content:center;margin:12px 0 4px;font-size:12.5px;color:var(--grey)}
+  .gate-remember input{accent-color:var(--rose);width:15px;height:15px}
+  .gate-card button{margin-top:12px;width:100%;border:0;border-radius:11px;padding:12px;font:inherit;font-weight:700;
+    font-size:15px;color:#fff;background:linear-gradient(135deg,#FFB7C5,#E08DA0);cursor:pointer;transition:.15s;
+    box-shadow:0 4px 14px rgba(224,141,160,.35)}
+  .gate-card button:hover{filter:brightness(1.04)}
+  .gate-card button:active{transform:translateY(1px)}
+  .gate-err{min-height:18px;margin-top:10px;color:#C0395A;font-size:12.5px;font-weight:600}
+  .gate-foot{margin:18px 0 0;font-size:11px;color:#C2A9B0;letter-spacing:.03em}
+  /* header */
+  header{background:linear-gradient(135deg,#FFEAF0,#FFD9E3);color:var(--ink);padding:30px 0 26px;margin-bottom:26px;
+    border-bottom:4px solid var(--rose)}
+  header .wrap{padding-bottom:0}
+  .eyebrow{letter-spacing:.18em;text-transform:uppercase;font-size:12px;color:var(--blue);font-weight:700;margin:0}
+  h1{margin:6px 0 2px;font-size:30px;font-weight:800;color:var(--navy)}
+  .sub{color:#7A6A6F;font-size:15px;margin:0}
+  .who{margin-top:14px;font-size:12.5px;color:#9A878C}
+  .who b{color:var(--navy)}
+  /* countdown strip */
+  .counts{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:22px}
+  .count{background:#ffffff;border:1px solid var(--line);border-radius:12px;padding:12px 14px;box-shadow:0 2px 8px rgba(224,141,160,.10)}
+  .count .n{font-size:24px;font-weight:800;color:var(--navy);line-height:1.1}
+  .count .l{font-size:11.5px;color:var(--grey);margin-top:3px}
+  /* horizontal rail timeline */
+  .rail-scroll{overflow-x:auto;overflow-y:hidden}
+  .rail-wrap{position:relative;height:172px;margin:6px 0 0;min-width:600px}
+  .rail{position:absolute;left:58px;right:58px;top:84px;height:8px;background:var(--soft);border-radius:6px;overflow:hidden}
+  .rail-done{height:100%;width:0;background:linear-gradient(90deg,var(--teal),var(--blue));border-radius:6px;transition:width .6s}
+  /* today marker — vertical line through the rail */
+  .rail-today{position:absolute;top:0;height:172px;transform:translateX(-50%);z-index:6;pointer-events:none}
+  .rt-line{position:absolute;left:50%;top:20px;bottom:34px;width:2px;transform:translateX(-50%);
+    background:repeating-linear-gradient(var(--gold),var(--gold) 4px,transparent 4px,transparent 8px)}
+  .rt-dot{position:absolute;left:50%;top:84px;width:16px;height:16px;border-radius:50%;background:var(--gold);
+    border:3px solid #fff;box-shadow:0 0 0 2px var(--gold),0 2px 7px rgba(0,0,0,.22);transform:translate(-50%,-4px)}
+  .rt-lab{position:absolute;left:50%;top:2px;transform:translateX(-50%);font-size:10.5px;font-weight:800;
+    color:var(--gold);letter-spacing:.07em;background:var(--card);padding:0 5px;white-space:nowrap}
+  /* milestone marks: dot centered on the line, label above (up) or below (down) */
+  .rail-mark{position:absolute;top:88px;transform:translate(-50%,-50%);z-index:4;width:104px;
+    display:flex;flex-direction:column;align-items:center}
+  .rail-mark .dot{width:13px;height:13px;border-radius:50%;background:#fff;border:3px solid var(--blue);flex:0 0 auto}
+  .rail-mark.passed .dot{background:var(--blue)}
+  .rail-mark.first .dot{border-color:var(--navy)} .rail-mark.first.passed .dot{background:var(--navy)}
+  .rail-mark.goal .dot{border-color:var(--gold)} .rail-mark.goal.passed .dot{background:var(--gold)}
+  .rail-mark .lab{font-size:11px;font-weight:700;color:var(--navy);line-height:1.22;text-align:center}
+  .rail-mark .dte{font-size:10px;color:var(--grey);margin-top:1px}
+  .rail-mark.up{flex-direction:column-reverse}
+  .rail-mark.up .lab{margin-bottom:8px;margin-top:0} .rail-mark.up .dte{margin-top:0;margin-bottom:0;order:-1}
+  .rail-mark.up{justify-content:flex-end;transform:translate(-50%,calc(-100% + 6px))}
+  .rail-mark.down{transform:translate(-50%,-7px)}
+  .rail-mark.down .lab{margin-top:8px}
+  @media(max-width:760px){.rail-mark{width:72px}.rail-mark .lab{font-size:9.5px}.rail-mark .dte{font-size:9px}}
+  /* mountain climb */
+  .mtn-wrap{width:100%;overflow-x:auto;border-radius:14px;background:#FFF8FB}
+  #mountain{width:100%;min-width:700px;height:auto;display:block;border-radius:14px}
+  #mountain path,#mountain line,#mountain rect,#mountain text,#mountain ellipse,#mountain circle{pointer-events:none}
+  #mountain [data-key]{cursor:pointer}
+  #mountain [data-key] circle{pointer-events:auto}
+  #mountain [data-key]:hover .node{stroke-width:3.4}
+  .mtn-legend{display:flex;flex-wrap:wrap;gap:9px 16px;margin-top:14px;justify-content:center}
+  .mtn-legend span{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--grey)}
+  .mtn-legend i{width:11px;height:11px;border-radius:50%;display:inline-block}
+  /* tabs */
+  .tabs{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 22px;position:sticky;top:0;z-index:5;
+    background:var(--bg);padding:14px 0 10px}
+  .tab{border:1px solid var(--line);background:var(--card);color:var(--grey);padding:9px 16px;border-radius:999px;
+    font-size:13.5px;font-weight:600;cursor:pointer;transition:.15s}
+  .tab:hover{border-color:var(--blue);color:var(--blue)}
+  .tab.active{background:var(--navy);color:#fff;border-color:var(--navy)}
+  .panel{display:none;animation:fade .2s ease}
+  .panel.active{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+  /* cards */
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);
+    padding:22px 24px;margin-bottom:18px}
+  .card h2{margin:0 0 4px;font-size:19px;color:var(--navy)}
+  .card .hint{margin:0 0 16px;color:var(--grey);font-size:13.5px}
+  h3.q{font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:var(--blue);margin:18px 0 10px;font-weight:700}
+  /* progress overview */
+  .ov{display:grid;grid-template-columns:1.3fr 1fr;gap:18px}
+  @media(max-width:760px){.ov{grid-template-columns:1fr}.counts{grid-template-columns:repeat(2,1fr)}}
+  .ring-wrap{display:flex;align-items:center;gap:18px}
+  .ring{--p:0}
+  .bigp{font-size:34px;font-weight:800;color:var(--navy)}
+  .bars div{margin-bottom:12px}
+  .bars .lab{display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px;color:var(--ink)}
+  .bars .lab b{color:var(--grey);font-weight:600}
+  .track{height:9px;background:var(--soft);border-radius:6px;overflow:hidden}
+  .fill{height:100%;background:linear-gradient(90deg,var(--teal),var(--blue));border-radius:6px;transition:width .5s}
+  /* checklist */
+  .phase{margin-bottom:8px}
+  .phase-h{display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px 4px;user-select:none}
+  .phase-h .ttl{font-weight:700;color:var(--navy);font-size:15px}
+  .phase-h .pct{margin-left:auto;font-size:12.5px;color:var(--grey);font-weight:600}
+  .chev{transition:.2s;color:var(--grey)}
+  .phase.collapsed .items{display:none}
+  .phase.collapsed .chev{transform:rotate(-90deg)}
+  .items{padding:2px 0 12px}
+  .item{display:flex;align-items:flex-start;gap:11px;padding:8px 10px;border-radius:10px}
+  .item:hover{background:var(--soft)}
+  .item input{margin-top:2px;width:18px;height:18px;accent-color:var(--teal);cursor:pointer;flex:0 0 auto}
+  .item label{font-size:14px;cursor:pointer}
+  .item .tag{font-size:10.5px;font-weight:700;padding:1px 7px;border-radius:999px;margin-right:7px;
+    text-transform:uppercase;letter-spacing:.03em;vertical-align:middle}
+  .t-algo{background:#FFE6EC;color:#C45E7C}
+  .t-port{background:#F0ECFB;color:#7A5AC2}
+  .t-intern{background:#FFF1DA;color:#9A6B06}
+  .t-school{background:#EAF1E6;color:#5E7A4E}
+  .t-visa{background:#FBE3EA;color:#B23150}
+  .done label{text-decoration:line-through;color:var(--grey)}
+  /* leetcode */
+  .lc{display:grid;grid-template-columns:auto 1fr;gap:24px;align-items:center}
+  @media(max-width:620px){.lc{grid-template-columns:1fr}}
+  .lc .big{font-size:52px;font-weight:800;color:var(--navy);line-height:1}
+  .lc .of{color:var(--grey);font-size:15px}
+  .counter-btns{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+  button.b{border:0;border-radius:10px;padding:9px 15px;font-weight:700;font-size:13.5px;cursor:pointer;transition:.15s}
+  .b-add{background:var(--teal);color:#fff}
+  .b-add:hover{filter:brightness(1.05)}
+  .b-sub{background:var(--soft);color:var(--grey)}
+  .b-ghost{background:#fff;border:1px solid var(--line);color:var(--grey)}
+  .miles{display:flex;gap:7px;flex-wrap:wrap;margin-top:6px}
+  .mile{flex:1;min-width:70px;text-align:center;background:var(--soft);border-radius:10px;padding:9px 4px;font-size:12px;color:var(--grey)}
+  .mile.hit{background:var(--navy);color:#fff}
+  .mile b{display:block;font-size:16px}
+  /* table */
+  table{width:100%;border-collapse:collapse;font-size:13.5px}
+  th{text-align:left;color:var(--grey);font-weight:600;font-size:11.5px;text-transform:uppercase;letter-spacing:.04em;
+    padding:8px 10px;border-bottom:2px solid var(--line)}
+  td{padding:7px 10px;border-bottom:1px solid var(--line);vertical-align:middle}
+  td input,td select{width:100%;border:1px solid transparent;background:transparent;font:inherit;color:var(--ink);
+    padding:5px 6px;border-radius:7px}
+  td input:focus,td select:focus{outline:none;border-color:var(--blue);background:#fff}
+  .st{padding:3px 9px;border-radius:999px;font-size:11.5px;font-weight:700;border:0}
+  .st-applied{background:#FFE6EC;color:#C45E7C}.st-oa{background:#FFF1DA;color:#9a6b06}
+  .st-interview{background:#e6f6f4;color:#0c7d74}.st-offer{background:#dff5e1;color:#1d8a3a}
+  .st-rejected{background:#f3e6e9;color:#9b3b53}
+  .rm{color:#c2cdd8;cursor:pointer;font-weight:700;border:0;background:0;font-size:16px}
+  .rm:hover{color:#b23150}
+  .add-row{margin-top:12px}
+  /* star */
+  .star{border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:12px;background:#fcfdfe}
+  .star input.title{font-weight:700;font-size:15px;border:0;width:100%;background:0;color:var(--navy);margin-bottom:8px}
+  .star textarea{width:100%;border:1px solid var(--line);border-radius:8px;padding:8px 10px;font:inherit;font-size:13px;
+    resize:vertical;min-height:42px;margin-bottom:7px;color:var(--ink)}
+  .star .row4{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  @media(max-width:620px){.star .row4{grid-template-columns:1fr}}
+  .pill{font-size:10.5px;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:.05em}
+  footer{text-align:center;color:var(--grey);font-size:12.5px;margin-top:30px}
+  .save-note{position:fixed;bottom:18px;right:18px;background:var(--navy);color:#fff;padding:9px 16px;border-radius:999px;
+    font-size:12.5px;opacity:0;transition:.3s;box-shadow:var(--shadow);z-index:20}
+  .save-note.show{opacity:1}
+  .reset{font-size:11.5px;color:#c2cdd8;cursor:pointer;background:0;border:0;text-decoration:underline}
+  .sync-chip{display:inline-block;margin-left:8px;padding:2px 10px;border-radius:999px;background:#fff;
+    border:1px solid var(--line);font-size:11px;font-weight:700;color:#9A878C;vertical-align:middle}
+</style>
+</head>
+<body class="locked">
+<!-- ===== PRIVATE ACCESS GATE ===== -->
+<div id="gate">
+  <div class="gate-card">
+    <div class="gate-lock"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="4.5" y="10.5" width="15" height="10" rx="2.4" fill="#FFD9E3" stroke="#E08DA0" stroke-width="1.6"/><path d="M8 10.5V7.8a4 4 0 0 1 8 0v2.7" stroke="#E08DA0" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="15" r="1.6" fill="#E08DA0"/><rect x="11.2" y="15.4" width="1.6" height="3.1" rx=".8" fill="#E08DA0"/></svg></div>
+    <h2>Private tracker</h2>
+    <p>This page is shared with a small group. Enter the password to continue.</p>
+    <form id="gateForm" autocomplete="off">
+      <input id="gatePw" type="password" placeholder="Password" autocomplete="current-password" aria-label="Password">
+      <label class="gate-remember"><input type="checkbox" id="gateRemember" checked> Remember me on this device</label>
+      <button type="submit">Unlock</button>
+      <div id="gateErr" class="gate-err"></div>
+    </form>
+    <p class="gate-foot">Han Han Vu Nguyen · Roadmap to FAANG</p>
+  </div>
+</div>
+<script>
+/* ===== Private access gate =====
+   Password is stored as a SHA-256 hash (not plain text).
+   To CHANGE the password: open this page, open the browser console (F12),
+   run:  await (async s=>{const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')})('YOUR-NEW-PASSWORD')
+   then paste the printed hash in place of GATE_HASH below. Current password: HanHan2029 */
+(function(){
+  const GATE_HASH='e6046c0a1f436808d3fff0f26c9b470f6a54a29efa611ab14c9fa30aeddf3e57';
+  const KEY='hanhan_gate_ok_v1';
+  const gate=document.getElementById('gate');
+  function unlock(){document.body.classList.remove('locked');gate.classList.add('hidden')}
+  if(localStorage.getItem(KEY)==='1'){unlock();}
+  async function sha256(s){
+    const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));
+    return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('');
+  }
+  const form=document.getElementById('gateForm'), err=document.getElementById('gateErr'), pw=document.getElementById('gatePw');
+  form.addEventListener('submit',async e=>{
+    e.preventDefault();
+    const h=await sha256(pw.value);
+    if(h===GATE_HASH){
+      if(document.getElementById('gateRemember').checked) localStorage.setItem(KEY,'1');
+      unlock();
+    }else{
+      err.textContent='Incorrect password. Try again.';
+      pw.value=''; pw.focus();
+    }
+  });
+  if(document.body.classList.contains('locked')) setTimeout(()=>pw.focus(),60);
+})();
+</script>
+<header>
+  <div class="wrap">
+    <p class="eyebrow">Roadmap to FAANG · Accountability Tracker</p>
+    <h1>Han Han Vu Nguyen</h1>
+    <p class="sub">SWE / SD + AI role on the West Coast · six figures · by Summer 2029</p>
+    <div class="who">Shared with <b>Han Han</b>, <b>Trang</b> &amp; <b>Khan</b> · update weekly (Sun) · review monthly <span id="syncChip" class="sync-chip">● On this device</span></div>
+    <div class="counts" id="counts"></div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="tabs" id="tabs">
+    <div class="tab active" data-p="overview">Overview</div>
+    <div class="tab" data-p="checklist">Milestones</div>
+    <div class="tab" data-p="leetcode">LeetCode</div>
+    <div class="tab" data-p="apps">Applications</div>
+    <div class="tab" data-p="star">STAR Bank</div>
+    <div class="tab" data-p="timeline">Timeline</div>
+  </div>
+
+  <!-- OVERVIEW -->
+  <div class="panel active" id="overview">
+    <div class="card">
+      <h2>The journey at a glance</h2>
+      <p class="hint">Today against the dates that matter. The marker moves as time passes.</p>
+      <div class="rail-scroll">
+        <div class="rail-wrap">
+          <div class="rail"><div class="rail-done" id="railDone"></div></div>
+          <div class="rail-today" id="railToday"><div class="rt-line"></div><div class="rt-dot"></div><div class="rt-lab">TODAY</div></div>
+          <div id="railMarks"></div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>The climb to FAANG</h2>
+      <p class="hint">Every milestone Han Han checks moves her up the mountain. Tap a waypoint to tick it off. The summit is a signed FAANG offer.</p>
+      <div class="mtn-wrap"><svg id="mountain" viewBox="0 0 1000 560" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Mountain climb progress"></svg></div>
+      <div class="mtn-legend" id="mtnLegend"></div>
+    </div>
+    <div class="card">
+      <h2>Where things stand</h2>
+      <p class="hint">Auto-calculated from your milestones and LeetCode counter. Everything saves in this browser.</p>
+      <div class="ov">
+        <div class="ring-wrap">
+          <svg class="ring" width="132" height="132" viewBox="0 0 132 132">
+            <circle cx="66" cy="66" r="56" fill="none" stroke="#FFEEF2" stroke-width="13"/>
+            <circle id="ringFill" cx="66" cy="66" r="56" fill="none" stroke="#E08DA0" stroke-width="13"
+              stroke-linecap="round" stroke-dasharray="351.9" stroke-dashoffset="351.9"
+              transform="rotate(-90 66 66)"/>
+            <text id="ringPct" x="66" y="72" text-anchor="middle" font-size="26" font-weight="800" fill="#1F2A1B">0%</text>
+          </svg>
+          <div>
+            <div style="font-size:13px;color:var(--grey)">Overall milestones complete</div>
+            <div class="bigp"><span id="ovDone">0</span><span style="font-size:18px;color:var(--grey)"> / <span id="ovTotal">0</span></span></div>
+            <div style="font-size:12.5px;color:var(--grey);margin-top:4px">Keep the weekly cadence and this number takes care of itself.</div>
+          </div>
+        </div>
+        <div class="bars" id="pillarBars"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>The one thing that matters most</h2>
+      <p class="hint" style="margin:0">FAANG hiring runs ~2 years ahead of graduation. The internship that converts to a full-time offer is <b>Summer 2028</b> — and its applications open <b>July–October 2027</b>. Everything here points at being interview-ready by then: transfer done, ~250 LeetCode solved, a deployed AI portfolio, and ideally a Summer 2027 internship already on the resume.</p>
+    </div>
+  </div>
+
+  <!-- CHECKLIST -->
+  <div class="panel" id="checklist">
+    <div class="card">
+      <h2>Milestones — June 2026 to graduation</h2>
+      <p class="hint">Tick items as you finish them. Tap a phase header to collapse it. <button class="reset" onclick="resetChecks()">reset all checks</button></p>
+      <div id="phases"></div>
+    </div>
+  </div>
+
+  <!-- LEETCODE -->
+  <div class="panel" id="leetcode">
+    <div class="card">
+      <h2>LeetCode counter</h2>
+      <p class="hint">Target: ~250–300 quality problems (each reviewed) by June 2027. Consistency beats cramming.</p>
+      <div class="lc">
+        <div>
+          <div class="big"><span id="lcNum">0</span></div>
+          <div class="of">of 250 goal solved</div>
+          <div class="counter-btns">
+            <button class="b b-add" onclick="lc(1)">+1</button>
+            <button class="b b-add" onclick="lc(5)">+5</button>
+            <button class="b b-sub" onclick="lc(-1)">−1</button>
+            <button class="b b-ghost" onclick="lcSet()">set total…</button>
+          </div>
+        </div>
+        <div>
+          <div class="track" style="height:12px"><div class="fill" id="lcBar" style="width:0%"></div></div>
+          <div class="miles" id="lcMiles"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- APPLICATIONS -->
+  <div class="panel" id="apps">
+    <div class="card">
+      <h2>Internship / job applications</h2>
+      <p class="hint">Apply the week each posting opens — most use rolling review. Log every one.</p>
+      <table>
+        <thead><tr><th style="width:24%">Company</th><th style="width:26%">Role</th><th style="width:16%">Applied</th><th style="width:22%">Status</th><th style="width:8%">Next</th><th></th></tr></thead>
+        <tbody id="appBody"></tbody>
+      </table>
+      <button class="b b-add add-row" onclick="addApp()">+ Add application</button>
+    </div>
+  </div>
+
+  <!-- STAR -->
+  <div class="panel" id="star">
+    <div class="card">
+      <h2>STAR story bank</h2>
+      <p class="hint">Build 8–10 reusable stories. Situation → Task → Action (the bulk) → Result. Keep each under 2 minutes.</p>
+      <div id="starList"></div>
+      <button class="b b-add add-row" onclick="addStar()">+ Add story</button>
+    </div>
+  </div>
+
+  <!-- TIMELINE -->
+  <div class="panel" id="timeline">
+    <div class="card">
+      <h2>Master timeline</h2>
+      <p class="hint">The spine of the plan. The recruiting cycle always precedes the summer it serves.</p>
+      <table>
+        <thead><tr><th>Period</th><th>Academic</th><th>Career / Skills</th><th>Key milestone</th></tr></thead>
+        <tbody id="tlBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <footer>Built as a coaching tool · progress saved locally in this browser · re-share the file anytime</footer>
+</div>
+<div class="save-note" id="saveNote">Saved ✓</div>
+
+<script>
+const KEY='hanhan_faang_v1';
+let state=load();
+function load(){try{return JSON.parse(localStorage.getItem(KEY))||{}}catch(e){return {}}}
+/* the slice of state that is SHARED in the cloud (UI prefs like 'collapsed' stay local) */
+function cloudState(){return {checks:state.checks,lc:state.lc,apps:state.apps,star:state.star}}
+function save(){
+  localStorage.setItem(KEY,JSON.stringify(state));
+  if(window.CloudSync && window.CloudSync.save) window.CloudSync.save(cloudState());
+  flash();
+}
+/* called by the Firebase layer when another device changes the shared data */
+window.__getCloudState=cloudState;
+window.applyRemoteState=function(d){
+  if(!d) return;
+  if(d.checks) state.checks=d.checks;
+  if(typeof d.lc==='number') state.lc=d.lc;
+  if(Array.isArray(d.apps)) state.apps=d.apps;
+  if(Array.isArray(d.star)) state.star=d.star;
+  localStorage.setItem(KEY,JSON.stringify(state));
+  renderPhases();renderLC();renderApps();renderStar();
+};
+window.addEventListener('cloud-status',e=>{
+  const c=document.getElementById('syncChip'); if(!c) return;
+  const s=e.detail;
+  const map={connected:['☁ Synced','#13A89E'],local:['● On this device','#9A878C'],error:['⚠ Sync error — using this device','#C0395A'],connecting:['☁ Connecting…','#9A878C']};
+  const [t,col]=map[s]||map.local; c.textContent=t; c.style.color=col;
+});
+let flashT;function flash(){const n=document.getElementById('saveNote');n.classList.add('show');clearTimeout(flashT);flashT=setTimeout(()=>n.classList.remove('show'),900)}
+
+/* ---------- DATA ---------- */
+const phases=[
+ {id:'q1',name:'Q1 · Summer 2026 — Foundation + Transfer',items:[
+   ['school','Submit UT Dallas transfer application'],
+   ['school','Meet UTD CS advisor; map transferable credits'],
+   ['algo','Pick ONE interview language (Python or Java) and commit'],
+   ['algo','Finish arrays / strings / hashing unit'],
+   ['algo','Solve 40–50 easy LeetCode'],
+   ['port','Rebuild 1-page resume in FAANG format'],
+   ['port','Clean GitHub: pin 100-AI-agents project with full README + demo'],
+   ['intern','Build target list of 40–60 Summer 2027 internships'],
+ ]},
+ {id:'q2',name:'Q2 · Fall 2026 — First UTD Semester + Apply',items:[
+   ['school','Start strong at UTD; protect first-semester GPA'],
+   ['school','Join a CS / AI student org (ACM, AI club)'],
+   ['algo','Linked lists, stacks/queues, trees, recursion'],
+   ['algo','Reach ~120 LeetCode total'],
+   ['port','Ship one new deployed AI project (LLM/agent) with writeup'],
+   ['intern','Apply early + in volume to Summer 2027 roles (Jul–Oct window)'],
+   ['intern','Apply to Google the week its short window opens'],
+ ]},
+ {id:'q3',name:'Q3 · Spring 2027 — Interviews + Land Internship',items:[
+   ['school','Take data-structures-heavy + intro ML course; GPA ≥ 3.7'],
+   ['algo','Graphs, dynamic programming, sorting/searching'],
+   ['algo','Reach ~200 LeetCode total'],
+   ['algo','Start weekly timed mock interviews'],
+   ['port','Polish 2 flagship projects; get a code review'],
+   ['port','Strong LinkedIn (and optional personal site)'],
+   ['intern','Interview + accept best Summer 2027 offer (or research/project)'],
+ ]},
+ {id:'q4',name:'Q4 · Summer 2027 (bridge) — Execute + Line Up FAANG',items:[
+   ['intern','★ Apply to Summer 2028 FAANG internships (Jul–Oct 2027)'],
+   ['intern','Do excellent internship work; get a strong reference'],
+   ['algo','Maintain 3–5 problems/week — don’t go cold'],
+   ['school','Plan Fall 2027 load: upper-div CS + AI electives'],
+   ['visa','Confirm CPT authorization through UTD ISSO before working'],
+ ]},
+ {id:'beyond',name:'Beyond the focus year — to graduation (May 2029)',items:[
+   ['intern','Fall 2027: FAANG interview loops + mocks'],
+   ['intern','Spring 2028: convert to Summer 2028 FAANG internship offer'],
+   ['intern','Summer 2028: perform for a return offer'],
+   ['intern','Fall 2028: accept return offer OR run new-grad recruiting'],
+   ['school','Spring 2029: finish capstone; graduate'],
+   ['visa','Spring 2029: file OPT (up to 90 days before grad) via ISSO'],
+   ['visa','~2030: file STEM OPT extension before initial OPT expires'],
+ ]},
+];
+const tagName={algo:'Algo',port:'Portfolio',intern:'Intern',school:'School',visa:'Visa'};
+const tagClass={algo:'t-algo',port:'t-port',intern:'t-intern',school:'t-school',visa:'t-visa'};
+
+const timeline=[
+ ['Summer 2026','Finish Dallas College; submit UTD transfer','Start DSA; rebuild resume + GitHub','UTD app submitted'],
+ ['Fall 2026','First semester at UT Dallas (junior)','100+ LeetCode; apply Summer 2027','Transfer complete'],
+ ['Spring 2027','UTD core CS; GPA ≥ 3.7','Land a Summer 2027 internship','First internship'],
+ ['Summer 2027','—','Intern #1; apply Summer 2028 FAANG','FAANG apps sent'],
+ ['Fall 2027','UTD upper-div CS + AI/ML','FAANG interview loops; mocks','FAANG interviews'],
+ ['Spring 2028','UTD AI/ML specialization','Convert → Summer 2028 FAANG intern','Internship offer'],
+ ['Summer 2028','—','FAANG internship — earn return offer','Return offer (goal)'],
+ ['Fall 2028','Senior year','Accept return offer / new-grad recruiting','Full-time offer'],
+ ['Spring 2029','Final semester; capstone','Sign FTE; plan OPT + move','Graduate + FTE'],
+];
+
+const keyDates=[
+ ['Summer 2027 apps open','2026-07-01'],
+ ['FAANG (S2028) apps open','2027-07-01'],
+ ['Target graduation','2029-05-15'],
+ ['West Coast start','2029-07-01'],
+];
+
+/* ---------- HORIZONTAL RAIL ---------- */
+const railStart=new Date('2026-05-01'), railEnd=new Date('2029-07-15');
+const railMs=[
+ {d:'2026-06-16',lab:'Focus year begins',cls:'first'},
+ {d:'2026-08-26',lab:'Transfer to UTD'},
+ {d:'2027-06-01',lab:'Internship #1'},
+ {d:'2027-08-01',lab:'★ FAANG apps open',cls:'goal'},
+ {d:'2028-06-01',lab:'FAANG internship'},
+ {d:'2029-05-15',lab:'Graduate'},
+ {d:'2029-07-01',lab:'West Coast start',cls:'goal'},
+];
+const RAIL_INSET=58; // px, matches .rail left/right
+function pos(d){const t=new Date(d);return Math.max(0,Math.min(100,(t-railStart)/(railEnd-railStart)*100))}
+function bandLeft(p){return `calc(${RAIL_INSET}px + ${p} * (100% - ${RAIL_INSET*2}px) / 100)`}
+function fmt(d){return new Date(d).toLocaleDateString('en-US',{month:'short',year:'2-digit'})}
+function renderRail(){
+ const now=new Date();
+ const tp=pos(now);
+ document.getElementById('railDone').style.width=tp+'%';
+ document.getElementById('railToday').style.left=bandLeft(tp);
+ document.getElementById('railMarks').innerHTML=railMs.map((m,i)=>{
+   const p=pos(m.d), passed=new Date(m.d)<=now, ud=i%2===0?'up':'down';
+   return `<div class="rail-mark ${ud} ${m.cls||''} ${passed?'passed':''}" style="left:${bandLeft(p)}">
+     <span class="lab">${m.lab}</span><span class="dte">${fmt(m.d)}</span><span class="dot"></span></div>`;
+ }).join('');
+}
+
+/* ---------- MOUNTAIN CLIMB ---------- */
+const tagHex={algo:'#E08DA0',port:'#7A5AC2',intern:'#E0A21C',school:'#6E9456',visa:'#C0395A'};
+function smoothPath(pts){
+  let d=`M ${pts[0][0]},${pts[0][1]}`;
+  for(let i=0;i<pts.length-1;i++){
+    const p0=pts[i-1]||pts[i],p1=pts[i],p2=pts[i+1],p3=pts[i+2]||p2;
+    const c1x=p1[0]+(p2[0]-p0[0])/6, c1y=p1[1]+(p2[1]-p0[1])/6;
+    const c2x=p2[0]-(p3[0]-p1[0])/6, c2y=p2[1]-(p3[1]-p1[1])/6;
+    d+=` C ${c1x.toFixed(1)},${c1y.toFixed(1)} ${c2x.toFixed(1)},${c2y.toFixed(1)} ${p2[0]},${p2[1]}`;
+  }
+  return d;
+}
+function heartPath(x,y,s){
+  return `M ${x},${(y+s*0.35).toFixed(1)} C ${(x-s).toFixed(1)},${(y-s*0.28).toFixed(1)} ${(x-s*0.5).toFixed(1)},${(y-s).toFixed(1)} ${x},${(y-s*0.38).toFixed(1)} C ${(x+s*0.5).toFixed(1)},${(y-s).toFixed(1)} ${(x+s).toFixed(1)},${(y-s*0.28).toFixed(1)} ${x},${(y+s*0.35).toFixed(1)} Z`;
+}
+function sparkle(x,y,r,fill,op){
+  return `<path d="M${x},${y-r} L${(x+r*0.26).toFixed(1)},${(y-r*0.26).toFixed(1)} L${x+r},${y} L${(x+r*0.26).toFixed(1)},${(y+r*0.26).toFixed(1)} L${x},${y+r} L${(x-r*0.26).toFixed(1)},${(y+r*0.26).toFixed(1)} L${x-r},${y} L${(x-r*0.26).toFixed(1)},${(y-r*0.26).toFixed(1)} Z" fill="${fill}" opacity="${op||1}"/>`;
+}
+function cloudG(x,y,s,face){
+  return `<g transform="translate(${x},${y}) scale(${s})">
+    <path d="M-34,12 C-47,12 -47,-5 -32,-6 C-31,-21 -7,-23 -1,-10 C5,-23 27,-21 26,-5 C41,-5 41,12 28,12 Z" fill="#fff" stroke="#EFCBD9" stroke-width="2"/>
+    ${face?`<circle cx="-6" cy="-2" r="1.7" fill="#C99AA6"/><circle cx="7" cy="-2" r="1.7" fill="#C99AA6"/><circle cx="-13" cy="2" r="2.4" fill="#FFC2D2"/><circle cx="14" cy="2" r="2.4" fill="#FFC2D2"/><path d="M-4,3 q5,4 10,0" fill="none" stroke="#D49AAE" stroke-width="1.5" stroke-linecap="round"/>`:''}
+  </g>`;
+}
+function renderMountain(){
+  const svg=document.getElementById('mountain'); if(!svg) return;
+  const items=[]; phases.forEach((ph,pi)=>ph.items.forEach((it,ii)=>items.push({key:ph.id+'_'+ii,tag:it[0],text:it[1],pi})));
+  const N=items.length;
+  const done=items.filter(x=>state.checks[x.key]).length;
+  const pct=Math.round(done/N*100);
+  const anchors=[[92,508],[300,452],[166,392],[372,330],[236,274],[458,222],[346,176],[600,150],[772,96]];
+  const trailD=smoothPath(anchors);
+  const OUT='#D79CAE';
+  svg.innerHTML=`
+   <defs>
+     <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFF9FC"/><stop offset="1" stop-color="#FFE9F1"/></linearGradient>
+     <linearGradient id="prog" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#FFC2D0"/><stop offset="1" stop-color="#E991A6"/></linearGradient>
+   </defs>
+   <rect x="0" y="0" width="1000" height="560" fill="url(#sky)"/>
+   ${sparkle(470,58,5,'#FFD98A')}${sparkle(556,108,4,'#FFC2D2')}${sparkle(636,52,3.4,'#C9A7E8',.9)}${sparkle(872,150,5,'#FFD98A')}${sparkle(214,250,3.4,'#FFC2D2',.9)}
+   <!-- smiling sun -->
+   <g><circle cx="140" cy="98" r="50" fill="#FFF1C6" opacity="0.55"/>
+     <circle cx="140" cy="98" r="33" fill="#FFE7A6" stroke="#F1C873" stroke-width="2.4"/>
+     <circle cx="131" cy="94" r="3" fill="#7A5B57"/><circle cx="149" cy="94" r="3" fill="#7A5B57"/>
+     <circle cx="123" cy="102" r="4.3" fill="#FFB7C5" opacity="0.85"/><circle cx="157" cy="102" r="4.3" fill="#FFB7C5" opacity="0.85"/>
+     <path d="M132,104 q8,7 16,0" fill="none" stroke="#7A5B57" stroke-width="2.2" stroke-linecap="round"/></g>
+   <!-- soft back hills -->
+   <path d="M0,560 L0,372 Q160,262 330,338 Q520,424 700,308 Q860,224 1000,308 L1000,560 Z" fill="#F7DEE8"/>
+   <path d="M0,560 L0,430 Q190,338 372,406 Q548,312 726,366 Q884,312 1000,366 L1000,560 Z" fill="#F0CEDC"/>
+   <!-- main mountain (line-art) -->
+   <path d="M338,560 Q406,372 556,256 Q664,118 772,94 Q888,250 962,402 Q996,470 1000,560 Z" fill="#EBBDCB" stroke="${OUT}" stroke-width="2.6" stroke-linejoin="round"/>
+   <!-- snow cap, scalloped -->
+   <path d="M772,96 Q726,156 706,188 q11,-7 21,3 q10,-10 22,-1 q10,-9 21,2 q11,-8 21,3 Q812,156 772,96 Z" fill="#FFFFFF" stroke="${OUT}" stroke-width="1.8" stroke-linejoin="round"/>
+   <!-- shy mountain face (off the trail) -->
+   <g><circle cx="884" cy="372" r="2.4" fill="#9B6B72"/><circle cx="906" cy="372" r="2.4" fill="#9B6B72"/>
+     <circle cx="876" cy="380" r="4" fill="#F4A9BC" opacity="0.8"/><circle cx="914" cy="380" r="4" fill="#F4A9BC" opacity="0.8"/>
+     <path d="M888,380 q7,6 14,0" fill="none" stroke="#9B6B72" stroke-width="1.8" stroke-linecap="round"/></g>
+   <!-- meadow with tiny flowers -->
+   <path d="M0,560 L0,476 Q120,446 262,476 Q384,500 520,484 L520,560 Z" fill="#E4EFDC" stroke="#D2E2C7" stroke-width="2"/>
+   ${heartFlower(70,498)}${heartFlower(150,512)}${heartFlower(430,500)}
+   ${cloudG(372,86,1,true)}${cloudG(708,120,0.82,false)}${cloudG(250,150,0.6,false)}
+   <path id="trailBase" d="${trailD}" fill="none" stroke="#CE93A6" stroke-width="3.4" stroke-linecap="round" stroke-dasharray="1.5 10" opacity="0.9"/>
+  `;
+  const base=svg.querySelector('#trailBase'); const len=base.getTotalLength();
+  const pt=f=>{const p=base.getPointAtLength(len*Math.max(0,Math.min(1,f)));return [p.x,p.y]};
+  const frac=i=>0.05+(i/(N-1))*0.88;
+  const climberFrac=Math.max(0.04,Math.min(0.97,0.05+(done/N)*0.88));
+  let g='';
+  // candy progress trail
+  g+=`<path d="${trailD}" fill="none" stroke="url(#prog)" stroke-width="6" stroke-linecap="round"
+        stroke-dasharray="${len}" stroke-dashoffset="${(len*(1-climberFrac)).toFixed(1)}"/>`;
+  // summit: bow flag + badge + sparkles
+  g+=`<g><line x1="772" y1="94" x2="772" y2="50" stroke="#C45E7C" stroke-width="2.4"/>
+        <path d="M772,52 L800,60 L772,68 Z" fill="#FFB7C5" stroke="#C45E7C" stroke-width="1.3"/>
+        <path d="M772,48 l-7,-5 l0,10 Z" fill="#E08DA0"/><path d="M772,48 l7,-5 l0,10 Z" fill="#E08DA0"/><circle cx="772" cy="48" r="2.5" fill="#C45E7C"/>
+        ${sparkle(806,40,6,'#FFD98A')}${sparkle(748,58,4,'#FFC2D2')}
+        <rect x="784" y="58" width="124" height="40" rx="13" fill="#fff" stroke="#EFCBD9" stroke-width="2"/>
+        <text x="840" y="75" text-anchor="middle" font-size="13.5" font-weight="800" fill="#C45E7C">FAANG offer</text>
+        <path d="${heartPath(896,72,4)}" fill="#E08DA0"/>
+        <text x="846" y="91" text-anchor="middle" font-size="11" font-weight="600" fill="#8A7B80">2029 · the summit</text></g>`;
+  // base camp little tent + tag
+  const [bx,by]=pt(0.012);
+  g+=`<g><path d="M${bx+8},${by+14} L${bx+22},${by-8} L${bx+36},${by+14} Z" fill="#FFD9E3" stroke="${OUT}" stroke-width="1.8" stroke-linejoin="round"/>
+        <path d="M${bx+22},${by-8} L${bx+22},${by+14}" stroke="${OUT}" stroke-width="1.6"/>
+        <rect x="${bx-2}" y="${by+18} " width="118" height="21" rx="10.5" fill="#fff" stroke="#EFCBD9" stroke-width="1.6"/>
+        <text x="${bx+57}" y="${by+32}" text-anchor="middle" font-size="11" font-weight="700" fill="#8A7B80">START · Jun 2026</text></g>`;
+  // camp pennants at each phase start
+  const campNames=['Camp I','Camp II','Camp III','Camp IV','High camp'];
+  phases.forEach((ph,pi)=>{
+    const first=items.findIndex(x=>x.pi===pi); if(first<0)return;
+    const [x,y]=pt(frac(first));
+    g+=`<g><line x1="${x}" y1="${y-3}" x2="${x}" y2="${y-23}" stroke="#C45E7C" stroke-width="1.7"/>
+         <path d="M${x},${y-23} L${x+15},${y-19} L${x},${y-15} Z" fill="#FFB7C5" stroke="#C45E7C" stroke-width="1"/>
+         <text x="${x}" y="${y-27}" font-size="10" font-weight="700" fill="#9A7B83" text-anchor="middle" paint-order="stroke" stroke="#fff" stroke-width="2.6">${campNames[pi]||''}</text></g>`;
+  });
+  // milestone nodes: done = heart, pending = dashed bubble
+  items.forEach((it,i)=>{
+    const [x,y]=pt(frac(i)); const c=tagHex[it.tag]||'#E08DA0'; const dn=!!state.checks[it.key];
+    const safe=(it.text||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+    g+=`<g data-key="${it.key}"><title>${safe}${dn?'  (done)':''}</title><circle cx="${x}" cy="${y}" r="15" fill="transparent"/>`;
+    if(dn){
+      g+=`<path class="node" d="${heartPath(x,y+1.5,9.5)}" fill="${c}" stroke="#fff" stroke-width="2" stroke-linejoin="round"/>
+          <circle cx="${x-3}" cy="${y-2}" r="1.7" fill="#fff" opacity="0.85"/></g>`;
+    }else{
+      g+=`<circle class="node" cx="${x}" cy="${y}" r="8.6" fill="#FFFDFE" stroke="${c}" stroke-width="2.4" stroke-dasharray="2.6 2.6"/>
+          <circle cx="${x}" cy="${y}" r="2.2" fill="${c}" opacity="0.4"/></g>`;
+    }
+  });
+  // kawaii climber buddy + speech-bubble badge
+  const [cx,cy]=pt(climberFrac);
+  g+=`<g>
+        <ellipse cx="${cx-4}" cy="${cy-1}" rx="3" ry="2.3" fill="#fff" stroke="#E7C3D0" stroke-width="1.3"/>
+        <ellipse cx="${cx+4}" cy="${cy-1}" rx="3" ry="2.3" fill="#fff" stroke="#E7C3D0" stroke-width="1.3"/>
+        <circle cx="${cx}" cy="${cy-13}" r="12.5" fill="#fff" stroke="#E7C3D0" stroke-width="2"/>
+        <path d="M${cx-9},${cy-21} q3,-7 7,-3" fill="#fff" stroke="#E7C3D0" stroke-width="1.6"/>
+        <path d="M${cx+9},${cy-21} q-3,-7 -7,-3" fill="#fff" stroke="#E7C3D0" stroke-width="1.6"/>
+        <circle cx="${cx-4.4}" cy="${cy-14}" r="1.9" fill="#5C4A4A"/><circle cx="${cx+4.4}" cy="${cy-14}" r="1.9" fill="#5C4A4A"/>
+        <circle cx="${cx-7.2}" cy="${cy-10}" r="2.5" fill="#FFB7C5"/><circle cx="${cx+7.2}" cy="${cy-10}" r="2.5" fill="#FFB7C5"/>
+        <path d="M${cx-3},${cy-9.5} q3,3 6,0" fill="none" stroke="#5C4A4A" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="${cx+12}" y1="${cy-18}" x2="${cx+12}" y2="${cy-31}" stroke="#C45E7C" stroke-width="1.6"/>
+        <path d="M${cx+12},${cy-31} L${cx+23},${cy-28} L${cx+12},${cy-25} Z" fill="#FFD98A" stroke="#C45E7C" stroke-width="0.9"/></g>`;
+  const bxx=Math.max(60,Math.min(940,cx));
+  g+=`<g><rect x="${bxx-46}" y="${cy-70}" width="92" height="27" rx="13.5" fill="#fff" stroke="#E7C3D0" stroke-width="2"/>
+        <text x="${bxx}" y="${cy-51}" font-size="13" font-weight="800" fill="#C45E7C" text-anchor="middle">${pct}% · ${done}/${N}</text>
+        <path d="M${bxx-5},${cy-44} L${bxx+5},${cy-44} L${bxx},${cy-37} Z" fill="#fff"/></g>`;
+  base.insertAdjacentHTML('afterend',g);
+  // click to toggle
+  svg.querySelectorAll('[data-key]').forEach(el=>el.addEventListener('click',()=>toggle(el.getAttribute('data-key'))));
+  // legend
+  const lg=document.getElementById('mtnLegend');
+  if(lg) lg.innerHTML=Object.keys(tagHex).map(k=>`<span><i style="background:${tagHex[k]}"></i>${tagName[k]}</span>`).join('')
+    +`<span><i style="background:#fff;border:2px solid #E7C3D0"></i>Han Han (you are here)</span>`;
+}
+function heartFlower(x,y){
+  return `<g><path d="${heartPath(x,y,4.5)}" fill="#FFB7C5" stroke="#E08DA0" stroke-width="1"/><circle cx="${x}" cy="${(y-1).toFixed(1)}" r="1.3" fill="#FFE7A6"/></g>`;
+}
+
+/* ---------- COUNTDOWNS ---------- */
+function renderCounts(){
+ const el=document.getElementById('counts');const now=new Date();
+ el.innerHTML=keyDates.map(([l,d])=>{
+   const days=Math.ceil((new Date(d)-now)/864e5);
+   const txt=days>0?days+' days':'now';
+   return `<div class="count"><div class="n">${txt}</div><div class="l">${l}</div></div>`;
+ }).join('');
+}
+
+/* ---------- CHECKLIST ---------- */
+state.checks=state.checks||{};
+state.collapsed=state.collapsed||{};
+function renderPhases(){
+ const host=document.getElementById('phases');host.innerHTML='';
+ phases.forEach(ph=>{
+   const total=ph.items.length;
+   let done=ph.items.filter((_,i)=>state.checks[ph.id+'_'+i]).length;
+   const pct=Math.round(done/total*100);
+   const div=document.createElement('div');
+   div.className='phase'+(state.collapsed[ph.id]?' collapsed':'');
+   div.innerHTML=`<div class="phase-h"><span class="chev">▼</span><span class="ttl">${ph.name}</span><span class="pct">${done}/${total} · ${pct}%</span></div>
+   <div class="items">${ph.items.map((it,i)=>{
+     const k=ph.id+'_'+i,ck=state.checks[k];
+     return `<div class="item ${ck?'done':''}"><input type="checkbox" ${ck?'checked':''} data-k="${k}">
+       <label data-k="${k}"><span class="tag ${tagClass[it[0]]}">${tagName[it[0]]}</span>${it[1]}</label></div>`;
+   }).join('')}</div>`;
+   div.querySelector('.phase-h').onclick=()=>{state.collapsed[ph.id]=!state.collapsed[ph.id];save();renderPhases()};
+   div.querySelectorAll('input,label').forEach(x=>x.onclick=(e)=>{
+     if(e.target.tagName==='LABEL'){const cb=div.querySelector(`input[data-k="${e.target.dataset.k}"]`);cb.checked=!cb.checked;toggle(cb.dataset.k,cb.checked);return}
+     if(e.target.tagName==='INPUT'){e.stopPropagation();toggle(e.target.dataset.k,e.target.checked)}
+   });
+   host.appendChild(div);
+ });
+ renderOverview();
+ renderMountain();
+}
+function toggle(k,v){state.checks[k]=(v===undefined?!state.checks[k]:v);save();renderPhases()}
+function resetChecks(){if(confirm('Clear all milestone checkmarks?')){state.checks={};save();renderPhases()}}
+
+/* ---------- OVERVIEW ---------- */
+function renderOverview(){
+ let total=0,done=0;const byTag={algo:[0,0],port:[0,0],intern:[0,0],school:[0,0],visa:[0,0]};
+ phases.forEach(ph=>ph.items.forEach((it,i)=>{
+   total++;byTag[it[0]][1]++;
+   if(state.checks[ph.id+'_'+i]){done++;byTag[it[0]][0]++}
+ }));
+ const pct=total?Math.round(done/total*100):0;
+ document.getElementById('ovDone').textContent=done;
+ document.getElementById('ovTotal').textContent=total;
+ document.getElementById('ringPct').textContent=pct+'%';
+ const C=351.9;document.getElementById('ringFill').style.strokeDashoffset=C-(C*pct/100);
+ const labels={algo:'Algorithms',port:'Portfolio',intern:'Internships',school:'School / Transfer',visa:'Visa'};
+ document.getElementById('pillarBars').innerHTML=Object.keys(byTag).map(k=>{
+   const [d,t]=byTag[k],p=t?Math.round(d/t*100):0;
+   return `<div><div class="lab">${labels[k]} <b>${d}/${t}</b></div><div class="track"><div class="fill" style="width:${p}%"></div></div></div>`;
+ }).join('');
+}
+
+/* ---------- LEETCODE ---------- */
+state.lc=state.lc||0;
+const lcMiles=[50,120,200,250];
+function renderLC(){
+ document.getElementById('lcNum').textContent=state.lc;
+ document.getElementById('lcBar').style.width=Math.min(100,state.lc/250*100)+'%';
+ document.getElementById('lcMiles').innerHTML=lcMiles.map(m=>
+   `<div class="mile ${state.lc>=m?'hit':''}"><b>${m}</b>${state.lc>=m?'done':'goal'}</div>`).join('');
+}
+function lc(n){state.lc=Math.max(0,state.lc+n);save();renderLC()}
+function lcSet(){const v=prompt('Set total problems solved:',state.lc);if(v!==null&&!isNaN(v)){state.lc=Math.max(0,parseInt(v)||0);save();renderLC()}}
+
+/* ---------- APPLICATIONS ---------- */
+state.apps=state.apps||[];
+const statuses=['Applied','OA','Interview','Offer','Rejected'];
+function renderApps(){
+ const b=document.getElementById('appBody');b.innerHTML='';
+ if(!state.apps.length){b.innerHTML='<tr><td colspan="6" style="color:#9fb0bf;padding:16px 10px">No applications yet — add your first when the Summer 2027 cycle opens.</td></tr>'}
+ state.apps.forEach((a,i)=>{
+   const tr=document.createElement('tr');
+   tr.innerHTML=`<td><input value="${esc(a.co||'')}" data-i="${i}" data-f="co" placeholder="Company"></td>
+   <td><input value="${esc(a.role||'')}" data-i="${i}" data-f="role" placeholder="SWE Intern"></td>
+   <td><input type="date" value="${a.date||''}" data-i="${i}" data-f="date"></td>
+   <td><select data-i="${i}" data-f="status" class="st st-${(a.status||'Applied').toLowerCase()}">${statuses.map(s=>`<option ${a.status===s?'selected':''}>${s}</option>`).join('')}</select></td>
+   <td><input value="${esc(a.next||'')}" data-i="${i}" data-f="next" placeholder="—"></td>
+   <td style="text-align:center"><button class="rm" data-rm="${i}">×</button></td>`;
+   b.appendChild(tr);
+ });
+ b.querySelectorAll('input,select').forEach(x=>x.onchange=e=>{
+   state.apps[e.target.dataset.i][e.target.dataset.f]=e.target.value;save();
+   if(e.target.dataset.f==='status'){e.target.className='st st-'+e.target.value.toLowerCase()}
+ });
+ b.querySelectorAll('[data-rm]').forEach(x=>x.onclick=e=>{state.apps.splice(e.target.dataset.rm,1);save();renderApps()});
+}
+function addApp(){state.apps.push({co:'',role:'',date:'',status:'Applied',next:''});save();renderApps()}
+
+/* ---------- STAR ---------- */
+state.star=state.star||[
+ {t:'The 100 AI Agents project',s:'',ta:'',a:'',r:''},
+ {t:'Adapting after moving from Vietnam',s:'',ta:'',a:'',r:''},
+];
+function renderStar(){
+ const host=document.getElementById('starList');host.innerHTML='';
+ state.star.forEach((st,i)=>{
+   const d=document.createElement('div');d.className='star';
+   d.innerHTML=`<div style="display:flex;align-items:center;gap:10px">
+     <input class="title" value="${esc(st.t||'')}" data-i="${i}" data-f="t" placeholder="Story title">
+     <button class="rm" data-rm="${i}">×</button></div>
+   <span class="pill">Situation</span><textarea data-i="${i}" data-f="s" placeholder="Context & challenge (1–2 sentences)">${esc(st.s||'')}</textarea>
+   <div class="row4"><div><span class="pill">Task</span><textarea data-i="${i}" data-f="ta" placeholder="Your responsibility">${esc(st.ta||'')}</textarea></div>
+   <div><span class="pill">Result</span><textarea data-i="${i}" data-f="r" placeholder="Outcome (quantified) + lesson">${esc(st.r||'')}</textarea></div></div>
+   <span class="pill">Action — the bulk of the answer</span><textarea data-i="${i}" data-f="a" placeholder="What YOU did, step by step. Use 'I'.">${esc(st.a||'')}</textarea>`;
+   host.appendChild(d);
+ });
+ host.querySelectorAll('input,textarea').forEach(x=>x.onchange=e=>{state.star[e.target.dataset.i][e.target.dataset.f]=e.target.value;save()});
+ host.querySelectorAll('[data-rm]').forEach(x=>x.onclick=e=>{state.star.splice(e.target.dataset.rm,1);save();renderStar()});
+}
+function addStar(){state.star.push({t:'',s:'',ta:'',a:'',r:''});save();renderStar()}
+
+/* ---------- TIMELINE ---------- */
+function renderTL(){
+ document.getElementById('tlBody').innerHTML=timeline.map(r=>
+  `<tr><td style="font-weight:700;color:var(--navy);white-space:nowrap">${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td style="color:var(--blue);font-weight:600">${r[3]}</td></tr>`).join('');
+}
+
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+
+/* ---------- TABS ---------- */
+document.getElementById('tabs').addEventListener('click',e=>{
+ if(!e.target.classList.contains('tab'))return;
+ document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+ document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+ e.target.classList.add('active');
+ document.getElementById(e.target.dataset.p).classList.add('active');
+});
+
+renderRail();renderCounts();renderPhases();renderLC();renderApps();renderStar();renderTL();
+window.addEventListener('resize',()=>{renderRail();renderMountain();});
+</script>
+
+<!-- ============================================================
+     SHARED CLOUD SYNC (Firebase Firestore)
+     Fill in firebaseConfig below with your project's web-app config.
+     Until you do, the tracker still works and saves on each device
+     (localStorage). Once filled, all viewers sync live.
+     Full steps: see FIREBASE_SETUP.md
+     ============================================================ -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+  import { getFirestore, doc, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+  import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+
+  /* ---- PASTE YOUR FIREBASE CONFIG HERE (from Firebase console → Project settings → Your apps) ---- */
+  const firebaseConfig = {
+    apiKey: "AIzaSyD2BBMzRdyarRZV0KHUVEYGFSXYb5-RBuI",
+    authDomain: "maintenance-tracker-bot.firebaseapp.com",
+    projectId: "maintenance-tracker-bot",
+    storageBucket: "maintenance-tracker-bot.firebasestorage.app",
+    messagingSenderId: "446356386047",
+    appId: "1:446356386047:web:8f2cd90f142254d5aa1cca",
+    measurementId: "G-NBBS1XCZZN"
+  };
+  /* ---- which shared document everyone reads/writes ---- */
+  const DOC_PATH = ["tracker", "shared"];
+
+  const emit = s => window.dispatchEvent(new CustomEvent('cloud-status',{detail:s}));
+  const CONFIGURED = !!(firebaseConfig.projectId && firebaseConfig.apiKey);
+  const clientId = Math.random().toString(36).slice(2) + Date.now().toString(36);
+  let docRef=null, ready=false;
+
+  // Expose the save hook the app calls inside its own save()
+  window.CloudSync = {
+    configured: CONFIGURED,
+    save(data){
+      if(!ready || !docRef) return;
+      setDoc(docRef, { data, lastClient: clientId, updatedAt: Date.now() }, { merge:true })
+        .catch(err=>{ console.error('cloud save', err); emit('error'); });
+    }
+  };
+
+  if(!CONFIGURED){
+    emit('local');   // no config yet → device-only mode
+  } else {
+    emit('connecting');
+    try{
+      const app = initializeApp(firebaseConfig);
+      const db = getFirestore(app);
+      const auth = getAuth(app);
+      docRef = doc(db, DOC_PATH[0], DOC_PATH[1]);
+      signInAnonymously(auth).then(()=>{
+        onSnapshot(docRef, snap=>{
+          ready = true; emit('connected');
+          if(!snap.exists()){
+            // first run: seed the shared doc from whatever this device has
+            const seed = window.__getCloudState ? window.__getCloudState() : {};
+            setDoc(docRef, { data: seed, lastClient: clientId, updatedAt: Date.now() });
+            return;
+          }
+          const d = snap.data() || {};
+          if(d.lastClient === clientId) return;          // ignore our own write echo
+          if(window.applyRemoteState) window.applyRemoteState(d.data || {});
+        }, err=>{ console.error('cloud snapshot', err); emit('error'); });
+      }).catch(err=>{ console.error('cloud auth', err); emit('error'); });
+    }catch(err){ console.error('cloud init', err); emit('error'); }
+  }
+</script>
+</body>
+</html>
