@@ -162,6 +162,22 @@
   .mile{flex:1;min-width:70px;text-align:center;background:var(--soft);border-radius:10px;padding:9px 4px;font-size:12px;color:var(--grey)}
   .mile.hit{background:var(--navy);color:#fff}
   .mile b{display:block;font-size:16px}
+  /* leetcode starter list */
+  .lc-strong{font-weight:700;color:var(--blue)}
+  #lcSetCount{font-weight:700;color:var(--navy)}
+  .lc-group{margin:14px 0 4px}
+  .lc-group-h{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;color:var(--blue);
+    text-transform:uppercase;letter-spacing:.04em;margin:0 0 6px}
+  .lc-group-h .gp{margin-left:auto;font-size:11px;color:var(--grey);font-weight:600;letter-spacing:0;text-transform:none}
+  .lc-item{display:flex;align-items:center;gap:11px;padding:7px 10px;border-radius:10px}
+  .lc-item:hover{background:var(--soft)}
+  .lc-item input{width:17px;height:17px;accent-color:var(--teal);cursor:pointer;flex:0 0 auto}
+  .lc-item a{font-size:13.5px;color:var(--ink);text-decoration:none;font-weight:500}
+  .lc-item a:hover{color:var(--blue);text-decoration:underline}
+  .lc-item .ext{font-size:11px;color:#C2A9B0}
+  .lc-item.done a{text-decoration:line-through;color:var(--grey)}
+  .lc-diff{font-size:10px;font-weight:700;padding:1px 7px;border-radius:999px;flex:0 0 auto}
+  .d-easy{background:#E1F1E6;color:#2F8F4E}.d-med{background:#FFF1DA;color:#9A6B06}.d-hard{background:#FBE3EA;color:#B23150}
   /* table */
   table{width:100%;border-collapse:collapse;font-size:13.5px}
   th{text-align:left;color:var(--grey);font-weight:600;font-size:11.5px;text-transform:uppercase;letter-spacing:.04em;
@@ -338,6 +354,13 @@
         </div>
       </div>
     </div>
+    <div class="card">
+      <h2>Starter problem set</h2>
+      <p class="hint">A NeetCode-style core, grouped by pattern. Work top to bottom — each link opens the problem on LeetCode. Check it off when solved <span class="lc-strong">and reviewed</span>. <span id="lcSetCount"></span></p>
+      <div class="track" style="height:9px;margin-bottom:6px"><div class="fill" id="lcSetBar" style="width:0%"></div></div>
+      <div id="lcList"></div>
+      <p class="hint" style="margin:14px 0 0">Tip: this list is your foundation (~45 problems). The counter above tracks your overall march to 250 — keep going past the list with mediums in the same patterns.</p>
+    </div>
   </div>
 
   <!-- APPLICATIONS -->
@@ -384,7 +407,7 @@ const KEY='hanhan_faang_v1';
 let state=load();
 function load(){try{return JSON.parse(localStorage.getItem(KEY))||{}}catch(e){return {}}}
 /* the slice of state that is SHARED in the cloud (UI prefs like 'collapsed' stay local) */
-function cloudState(){return {checks:state.checks,lc:state.lc,apps:state.apps,star:state.star}}
+function cloudState(){return {checks:state.checks,lc:state.lc,lcDone:state.lcDone,apps:state.apps,star:state.star}}
 function save(){
   localStorage.setItem(KEY,JSON.stringify(state));
   if(window.CloudSync && window.CloudSync.save) window.CloudSync.save(cloudState());
@@ -396,10 +419,11 @@ window.applyRemoteState=function(d){
   if(!d) return;
   if(d.checks) state.checks=d.checks;
   if(typeof d.lc==='number') state.lc=d.lc;
+  if(d.lcDone && typeof d.lcDone==='object') state.lcDone=d.lcDone;
   if(Array.isArray(d.apps)) state.apps=d.apps;
   if(Array.isArray(d.star)) state.star=d.star;
   localStorage.setItem(KEY,JSON.stringify(state));
-  renderPhases();renderLC();renderApps();renderStar();
+  renderPhases();renderLC();renderLCList();renderApps();renderStar();
 };
 window.addEventListener('cloud-status',e=>{
   const c=document.getElementById('syncChip'); if(!c) return;
@@ -713,6 +737,103 @@ function renderLC(){
 function lc(n){state.lc=Math.max(0,state.lc+n);save();renderLC()}
 function lcSet(){const v=prompt('Set total problems solved:',state.lc);if(v!==null&&!isNaN(v)){state.lc=Math.max(0,parseInt(v)||0);save();renderLC()}}
 
+/* curated NeetCode-style starter set, grouped by pattern */
+const lcProblems=[
+ ['Arrays & Hashing',[
+   ['Two Sum','easy','two-sum'],
+   ['Contains Duplicate','easy','contains-duplicate'],
+   ['Valid Anagram','easy','valid-anagram'],
+   ['Group Anagrams','med','group-anagrams'],
+   ['Top K Frequent Elements','med','top-k-frequent-elements'],
+   ['Product of Array Except Self','med','product-of-array-except-self'],
+ ]],
+ ['Two Pointers',[
+   ['Valid Palindrome','easy','valid-palindrome'],
+   ['Two Sum II','med','two-sum-ii-input-array-is-sorted'],
+   ['3Sum','med','3sum'],
+   ['Container With Most Water','med','container-with-most-water'],
+ ]],
+ ['Sliding Window',[
+   ['Best Time to Buy and Sell Stock','easy','best-time-to-buy-and-sell-stock'],
+   ['Longest Substring Without Repeating Characters','med','longest-substring-without-repeating-characters'],
+   ['Longest Repeating Character Replacement','med','longest-repeating-character-replacement'],
+ ]],
+ ['Stack',[
+   ['Valid Parentheses','easy','valid-parentheses'],
+   ['Min Stack','med','min-stack'],
+   ['Daily Temperatures','med','daily-temperatures'],
+ ]],
+ ['Binary Search',[
+   ['Binary Search','easy','binary-search'],
+   ['Search a 2D Matrix','med','search-a-2d-matrix'],
+   ['Koko Eating Bananas','med','koko-eating-bananas'],
+   ['Find Minimum in Rotated Sorted Array','med','find-minimum-in-rotated-sorted-array'],
+   ['Search in Rotated Sorted Array','med','search-in-rotated-sorted-array'],
+ ]],
+ ['Linked List',[
+   ['Reverse Linked List','easy','reverse-linked-list'],
+   ['Merge Two Sorted Lists','easy','merge-two-sorted-lists'],
+   ['Linked List Cycle','easy','linked-list-cycle'],
+   ['Reorder List','med','reorder-list'],
+   ['Remove Nth Node From End of List','med','remove-nth-node-from-end-of-list'],
+ ]],
+ ['Trees',[
+   ['Invert Binary Tree','easy','invert-binary-tree'],
+   ['Maximum Depth of Binary Tree','easy','maximum-depth-of-binary-tree'],
+   ['Same Tree','easy','same-tree'],
+   ['Subtree of Another Tree','easy','subtree-of-another-tree'],
+   ['Lowest Common Ancestor of a BST','med','lowest-common-ancestor-of-a-binary-search-tree'],
+   ['Binary Tree Level Order Traversal','med','binary-tree-level-order-traversal'],
+   ['Validate Binary Search Tree','med','validate-binary-search-tree'],
+ ]],
+ ['Heap / Priority Queue',[
+   ['Kth Largest Element in a Stream','easy','kth-largest-element-in-a-stream'],
+   ['Last Stone Weight','easy','last-stone-weight'],
+ ]],
+ ['Backtracking',[
+   ['Subsets','med','subsets'],
+   ['Combination Sum','med','combination-sum'],
+   ['Permutations','med','permutations'],
+ ]],
+ ['Graphs',[
+   ['Number of Islands','med','number-of-islands'],
+   ['Clone Graph','med','clone-graph'],
+   ['Course Schedule','med','course-schedule'],
+ ]],
+ ['Dynamic Programming',[
+   ['Climbing Stairs','easy','climbing-stairs'],
+   ['House Robber','med','house-robber'],
+   ['Coin Change','med','coin-change'],
+   ['Longest Increasing Subsequence','med','longest-increasing-subsequence'],
+ ]],
+];
+const lcDiffClass={easy:'d-easy',med:'d-med',hard:'d-hard'};
+const lcDiffLabel={easy:'Easy',med:'Med',hard:'Hard'};
+state.lcDone=state.lcDone||{};
+function lcTotal(){return lcProblems.reduce((a,g)=>a+g[1].length,0)}
+function lcDoneCount(){return Object.values(state.lcDone).filter(Boolean).length}
+function renderLCList(){
+ const host=document.getElementById('lcList'); if(!host) return;
+ host.innerHTML=lcProblems.map(([group,items])=>{
+   const gd=items.filter(it=>state.lcDone[it[2]]).length;
+   return `<div class="lc-group"><div class="lc-group-h">${group}<span class="gp">${gd}/${items.length}</span></div>`+
+     items.map(([name,diff,slug])=>{
+       const dn=!!state.lcDone[slug];
+       return `<div class="lc-item ${dn?'done':''}">
+         <input type="checkbox" ${dn?'checked':''} data-slug="${slug}" aria-label="${name}">
+         <span class="lc-diff ${lcDiffClass[diff]}">${lcDiffLabel[diff]}</span>
+         <a href="https://leetcode.com/problems/${slug}/" target="_blank" rel="noopener">${name}</a>
+         <span class="ext">↗</span></div>`;
+     }).join('')+`</div>`;
+ }).join('');
+ host.querySelectorAll('input[type=checkbox]').forEach(cb=>cb.onchange=()=>{
+   state.lcDone[cb.dataset.slug]=cb.checked; save(); renderLCList();
+ });
+ const done=lcDoneCount(), total=lcTotal();
+ const cnt=document.getElementById('lcSetCount'); if(cnt) cnt.textContent=`${done} / ${total} done`;
+ const bar=document.getElementById('lcSetBar'); if(bar) bar.style.width=(total?done/total*100:0)+'%';
+}
+
 /* ---------- APPLICATIONS ---------- */
 state.apps=state.apps||[];
 const statuses=['Applied','OA','Interview','Offer','Rejected'];
@@ -777,7 +898,7 @@ document.getElementById('tabs').addEventListener('click',e=>{
  document.getElementById(e.target.dataset.p).classList.add('active');
 });
 
-renderRail();renderCounts();renderPhases();renderLC();renderApps();renderStar();renderTL();
+renderRail();renderCounts();renderPhases();renderLC();renderLCList();renderApps();renderStar();renderTL();
 window.addEventListener('resize',()=>{renderRail();renderMountain();});
 </script>
 
