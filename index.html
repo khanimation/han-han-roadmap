@@ -240,6 +240,14 @@
   .star .row4{display:grid;grid-template-columns:1fr 1fr;gap:8px}
   @media(max-width:620px){.star .row4{grid-template-columns:1fr}}
   .pill{font-size:10.5px;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:.05em}
+  .star-q{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px}
+  .star-q .qtext{flex:1;font-weight:700;color:var(--navy);font-size:14.5px;line-height:1.3}
+  .flab{display:flex;align-items:center;gap:8px;margin-top:2px;margin-bottom:2px}
+  .mic{border:0;background:var(--soft);color:#9A878C;width:24px;height:22px;border-radius:7px;cursor:pointer;
+    display:inline-flex;align-items:center;justify-content:center;transition:.15s;flex:0 0 auto}
+  .mic:hover{color:var(--blue)}
+  .mic.rec{background:#FBE3EA;color:#C0395A;box-shadow:0 0 0 1px #E08CA0;animation:micpulse 1s infinite}
+  @keyframes micpulse{0%,100%{opacity:1}50%{opacity:.45}}
   footer{text-align:center;color:var(--grey);font-size:12.5px;margin-top:30px}
   .save-note{position:fixed;bottom:18px;right:18px;background:var(--navy);color:#fff;padding:9px 16px;border-radius:999px;
     font-size:12.5px;opacity:0;transition:.3s;box-shadow:var(--shadow);z-index:20}
@@ -425,7 +433,7 @@
   <div class="panel" id="star">
     <div class="card">
       <h2>STAR story bank</h2>
-      <p class="hint">Build 8–10 reusable stories. Situation → Task → Action (the bulk) → Result. Keep each under 2 minutes.</p>
+      <p class="hint">Answer each behavioral prompt in STAR form — <span class="lc-strong">type</span> or tap the <span class="lc-strong">mic</span> to dictate by voice (Chrome/Edge, allow microphone). Situation → Task → Action (the bulk) → Result; keep each under 2 minutes. Add your own questions at the bottom.</p>
       <div id="starList"></div>
       <button class="b b-add add-row" onclick="addStar()">+ Add story</button>
     </div>
@@ -917,21 +925,25 @@ const INTERN_RE=/intern(ship)?\b/i;
 /* token -> undefined (loading) | null (failed) | {roles, interns} */
 let autoCounts={};
 async function fetchTitles(src){
+ const ctrl = new AbortController();
+ const timer = setTimeout(()=>ctrl.abort(), 8000);   // don't let one slow board hang the UI
  try{
    const url = src.type==='greenhouse'
      ? `https://boards-api.greenhouse.io/v1/boards/${src.token}/jobs`
      : `https://api.ashbyhq.com/posting-api/job-board/${src.token}`;
-   const r = await fetch(url,{cache:'no-store'}); if(!r.ok) return null;
+   const r = await fetch(url,{cache:'no-store',signal:ctrl.signal}); if(!r.ok) return null;
    const d = await r.json();
    return (d.jobs||[]).map(j=>j.title||'');
  }catch(e){ return null; }
+ finally{ clearTimeout(timer); }
 }
 async function loadAutoCounts(){
  await Promise.all(Object.entries(autoSources).map(async([tok,src])=>{
    const titles = await fetchTitles(src);
-   if(!titles){ autoCounts[tok]=null; return; }
-   const swe = titles.filter(t=>SWE_RE.test(t));
-   autoCounts[tok] = { roles: swe.length, interns: swe.filter(t=>INTERN_RE.test(t)).length };
+   if(!titles){ autoCounts[tok]=null; }
+   else { const swe = titles.filter(t=>SWE_RE.test(t));
+     autoCounts[tok] = { roles: swe.length, interns: swe.filter(t=>INTERN_RE.test(t)).length }; }
+   renderTiles();   // update each tile as soon as its board responds
  }));
  renderTiles();
 }
@@ -997,25 +1009,70 @@ function renderApps(){
 function addApp(){state.apps.push({co:'',role:'',date:'',status:'Applied',next:''});save();renderApps()}
 
 /* ---------- STAR ---------- */
-state.star=state.star||[
- {t:'The 100 AI Agents project',s:'',ta:'',a:'',r:''},
- {t:'Adapting after moving from Vietnam',s:'',ta:'',a:'',r:''},
+/* real-world behavioral interview prompts (added once, kept in sync) */
+const starPrompts=[
+ {pid:'p1',q:'Tell me about a time you faced a difficult technical problem. How did you approach and solve it?'},
+ {pid:'p2',q:'Describe a time you failed or made a mistake. What did you do, and what did you learn?'},
+ {pid:'p3',q:'Tell me about a time you had a conflict or disagreement with a teammate. How did you resolve it?'},
+ {pid:'p4',q:'Describe a time you took initiative or went beyond what was expected of you.'},
+ {pid:'p5',q:'Tell me about a time you had to learn a new skill or technology quickly, under pressure.'},
+ {pid:'p6',q:'Tell me about a time you received critical feedback. How did you respond?'},
+ {pid:'p7',q:'Describe a time you juggled multiple priorities or a tight deadline. How did you manage it?'},
+ {pid:'p8',q:'Tell me about a time you led or influenced others to reach a goal.'},
 ];
+state.star=state.star||[
+ {t:'Walk me through the project you are most proud of (e.g. the 100 AI agents).',s:'',ta:'',a:'',r:''},
+ {t:'Tell me about adapting to a big change or unfamiliar environment (e.g. moving from Vietnam).',s:'',ta:'',a:'',r:''},
+];
+function ensurePrompts(){
+ let added=false;
+ starPrompts.forEach(p=>{ if(!state.star.some(s=>s.pid===p.pid)){ state.star.push({pid:p.pid,t:p.q,s:'',ta:'',a:'',r:''}); added=true; } });
+ if(added) save();
+}
+const SR_OK=!!(window.SpeechRecognition||window.webkitSpeechRecognition);
+let activeMic=null;
+function dictate(btn,ta,i,f){
+ if(activeMic){ const same=activeMic.btn===btn; activeMic.rec.stop(); if(same) return; }
+ if(!SR_OK){ alert('Voice typing needs Chrome or Edge (and microphone permission). You can still type your answer.'); return; }
+ const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+ const rec=new SR(); rec.lang='en-US'; rec.interimResults=true; rec.continuous=true;
+ let base=(ta.value||'').trim();
+ rec.onresult=(e)=>{
+   let interim='',final='';
+   for(let k=e.resultIndex;k<e.results.length;k++){ const t=e.results[k][0].transcript; if(e.results[k].isFinal) final+=t+' '; else interim+=t; }
+   if(final) base=(base?base+' ':'')+final.trim();
+   ta.value=(base?base+' ':'')+interim;
+ };
+ const stop=()=>{ btn.classList.remove('rec'); if(activeMic&&activeMic.rec===rec) activeMic=null; ta.value=base; if(state.star[i]) state.star[i][f]=base; save(); };
+ rec.onend=stop; rec.onerror=stop;
+ btn.classList.add('rec'); activeMic={rec,btn}; rec.start();
+}
+function micBtn(i,f){ return `<button class="mic" data-mic="${i}" data-micf="${f}" title="${SR_OK?'Dictate by voice':'Voice not supported in this browser'}" aria-label="Dictate"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/></svg></button>`; }
+function flab(text,i,f){ return `<div class="flab"><span class="pill">${text}</span>${micBtn(i,f)}</div>`; }
 function renderStar(){
+ ensurePrompts();
  const host=document.getElementById('starList');host.innerHTML='';
  state.star.forEach((st,i)=>{
    const d=document.createElement('div');d.className='star';
-   d.innerHTML=`<div style="display:flex;align-items:center;gap:10px">
-     <input class="title" value="${esc(st.t||'')}" data-i="${i}" data-f="t" placeholder="Story title">
-     <button class="rm" data-rm="${i}">×</button></div>
-   <span class="pill">Situation</span><textarea data-i="${i}" data-f="s" placeholder="Context & challenge (1–2 sentences)">${esc(st.s||'')}</textarea>
-   <div class="row4"><div><span class="pill">Task</span><textarea data-i="${i}" data-f="ta" placeholder="Your responsibility">${esc(st.ta||'')}</textarea></div>
-   <div><span class="pill">Result</span><textarea data-i="${i}" data-f="r" placeholder="Outcome (quantified) + lesson">${esc(st.r||'')}</textarea></div></div>
-   <span class="pill">Action — the bulk of the answer</span><textarea data-i="${i}" data-f="a" placeholder="What YOU did, step by step. Use 'I'.">${esc(st.a||'')}</textarea>`;
+   const isPrompt=!!st.pid;
+   d.innerHTML=`<div class="star-q">
+     ${isPrompt?`<div class="qtext">${esc(st.t||'')}</div>`:`<input class="title" value="${esc(st.t||'')}" data-i="${i}" data-f="t" placeholder="Your own question / story title">`}
+     ${isPrompt?'':`<button class="rm" data-rm="${i}" title="Remove">×</button>`}</div>
+   ${flab('Situation',i,'s')}<textarea data-i="${i}" data-f="s" placeholder="Context & challenge (1–2 sentences)">${esc(st.s||'')}</textarea>
+   <div class="row4">
+     <div>${flab('Task',i,'ta')}<textarea data-i="${i}" data-f="ta" placeholder="Your responsibility">${esc(st.ta||'')}</textarea></div>
+     <div>${flab('Result',i,'r')}<textarea data-i="${i}" data-f="r" placeholder="Outcome (quantified) + lesson">${esc(st.r||'')}</textarea></div>
+   </div>
+   ${flab('Action — the bulk of the answer',i,'a')}<textarea data-i="${i}" data-f="a" placeholder="What YOU did, step by step. Use 'I'.">${esc(st.a||'')}</textarea>`;
    host.appendChild(d);
  });
  host.querySelectorAll('input,textarea').forEach(x=>x.onchange=e=>{state.star[e.target.dataset.i][e.target.dataset.f]=e.target.value;save()});
- host.querySelectorAll('[data-rm]').forEach(x=>x.onclick=e=>{state.star.splice(e.target.dataset.rm,1);save();renderStar()});
+ host.querySelectorAll('[data-rm]').forEach(x=>x.onclick=e=>{state.star.splice(+e.target.dataset.rm,1);save();renderStar()});
+ host.querySelectorAll('[data-mic]').forEach(b=>b.onclick=()=>{
+   const i=+b.dataset.mic, f=b.dataset.micf;
+   const ta=host.querySelector(`textarea[data-i="${i}"][data-f="${f}"]`);
+   if(ta) dictate(b,ta,i,f);
+ });
 }
 function addStar(){state.star.push({t:'',s:'',ta:'',a:'',r:''});save();renderStar()}
 
