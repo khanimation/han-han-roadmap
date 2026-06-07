@@ -178,6 +178,17 @@
   .lc-item.done a{text-decoration:line-through;color:var(--grey)}
   .lc-diff{font-size:10px;font-weight:700;padding:1px 7px;border-radius:999px;flex:0 0 auto}
   .d-easy{background:#E1F1E6;color:#2F8F4E}.d-med{background:#FFF1DA;color:#9A6B06}.d-hard{background:#FBE3EA;color:#B23150}
+  /* company tiles */
+  .tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+  .tile{display:flex;align-items:center;gap:11px;padding:12px 13px;border:1px solid var(--line);border-radius:14px;
+    background:#fff;text-decoration:none;transition:.15s;box-shadow:0 1px 2px rgba(224,141,160,.06)}
+  .tile:hover{border-color:var(--rose);box-shadow:0 6px 18px rgba(224,141,160,.16);transform:translateY(-1px)}
+  .tile .badge{width:38px;height:38px;border-radius:11px;flex:0 0 auto;display:flex;align-items:center;justify-content:center;
+    color:#fff;font-weight:800;font-size:16px;letter-spacing:-.5px}
+  .tile .meta{min-width:0;display:flex;flex-direction:column}
+  .tile .nm{font-weight:700;color:var(--navy);font-size:14px;line-height:1.15}
+  .tile .rl{font-size:11px;color:var(--grey);margin-top:2px;white-space:nowrap}
+  .tile .go{margin-left:auto;color:#C2A9B0;font-size:13px;flex:0 0 auto}
   /* table */
   table{width:100%;border-collapse:collapse;font-size:13.5px}
   th{text-align:left;color:var(--grey);font-weight:600;font-size:11.5px;text-transform:uppercase;letter-spacing:.04em;
@@ -365,6 +376,11 @@
 
   <!-- APPLICATIONS -->
   <div class="panel" id="apps">
+    <div class="card">
+      <h2>Where to apply — FAANG + top tech (SWE + AI)</h2>
+      <p class="hint">Tap a tile to open that company's careers page in a new tab. Most West Coast roles; all hire SWE and AI/ML. Apply early when summer postings open (Jul–Oct).</p>
+      <div class="tiles" id="companyTiles"></div>
+    </div>
     <div class="card">
       <h2>Internship / job applications</h2>
       <p class="hint">Apply the week each posting opens — most use rolling review. Log every one.</p>
@@ -834,6 +850,33 @@ function renderLCList(){
  const bar=document.getElementById('lcSetBar'); if(bar) bar.style.width=(total?done/total*100:0)+'%';
 }
 
+/* ---------- COMPANY TILES ---------- */
+/* name, brand color, monogram, careers URL, role tag. (Trademarks belong to their owners; no logos reproduced.) */
+const companies=[
+ ['Google','#4285F4','G','https://careers.google.com/','SWE · AI/ML'],
+ ['Meta','#0866FF','M','https://www.metacareers.com/','SWE · AI'],
+ ['Apple','#1A1A1A','','https://jobs.apple.com/','SWE · ML'],
+ ['Amazon','#FF9900','a','https://www.amazon.jobs/','SWE · AI'],
+ ['Netflix','#E50914','N','https://jobs.netflix.com/','SWE · ML'],
+ ['Microsoft','#0078D4','MS','https://careers.microsoft.com/','SWE · AI'],
+ ['NVIDIA','#76B900','nV','https://www.nvidia.com/en-us/about-nvidia/careers/','AI · SWE'],
+ ['OpenAI','#10A37F','Oai','https://openai.com/careers/','AI · SWE'],
+ ['Anthropic','#CC785C','An','https://www.anthropic.com/careers','AI · SWE'],
+ ['Tesla','#E82127','T','https://www.tesla.com/careers/search/','AI · SWE'],
+ ['Databricks','#FF3621','db','https://www.databricks.com/company/careers','Data · AI'],
+ ['Stripe','#635BFF','S','https://stripe.com/jobs','SWE'],
+ ['Uber','#111111','U','https://www.uber.com/us/en/careers/','SWE · ML'],
+ ['Salesforce','#00A1E0','sf','https://careers.salesforce.com/','SWE · AI'],
+];
+function renderTiles(){
+ const host=document.getElementById('companyTiles'); if(!host) return;
+ host.innerHTML=companies.map(([nm,color,mono,url,role])=>
+  `<a class="tile" href="${url}" target="_blank" rel="noopener" title="Open ${nm} careers">
+     <span class="badge" style="background:${color}">${mono}</span>
+     <span class="meta"><span class="nm">${nm}</span><span class="rl">${role}</span></span>
+     <span class="go">↗</span></a>`).join('');
+}
+
 /* ---------- APPLICATIONS ---------- */
 state.apps=state.apps||[];
 const statuses=['Applied','OA','Interview','Offer','Rejected'];
@@ -898,7 +941,7 @@ document.getElementById('tabs').addEventListener('click',e=>{
  document.getElementById(e.target.dataset.p).classList.add('active');
 });
 
-renderRail();renderCounts();renderPhases();renderLC();renderLCList();renderApps();renderStar();renderTL();
+renderRail();renderCounts();renderPhases();renderLC();renderLCList();renderTiles();renderApps();renderStar();renderTL();
 window.addEventListener('resize',()=>{renderRail();renderMountain();});
 </script>
 
