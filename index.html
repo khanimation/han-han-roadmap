@@ -204,6 +204,12 @@
   .srch{margin-left:auto;display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:700;color:var(--rose);
     text-decoration:none;padding:5px 7px;border-radius:8px}
   .srch:hover{background:var(--soft);text-decoration:underline}
+  .cnt-live{background:var(--blue);color:#fff}
+  .cnt-live small{font-weight:600;opacity:.85}
+  .cnt-live:hover{background:var(--navy);text-decoration:none}
+  .cnt-load{margin-left:auto;color:var(--grey);font-weight:800;padding:5px 9px}
+  .ibell{display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:800;color:#E0A21C;
+    background:#FFF3D6;border:1px solid #F0C766;border-radius:8px;padding:4px 7px}
   .counts-banner{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:#FFF6E6;border:1px solid #F0D9A6;
     border-radius:12px;padding:10px 14px;margin-bottom:14px;font-size:13px;color:#7A5B11}
   .counts-banner b{color:#9A6B06}
@@ -400,7 +406,7 @@
   <div class="panel" id="apps">
     <div class="card">
       <h2>Where to apply — FAANG + top tech (SWE + AI)</h2>
-      <p class="hint">Tap a company name to open its careers page. Tap the <span class="lc-strong">number</span> to record how many SWE/AI intern roles you found, after checking its live search (<span class="lc-strong">↗</span>). Tap the <span class="lc-strong">bell</span> when intern roles are open there.</p>
+      <p class="hint">Counts are pulled <span class="lc-strong">live</span> from each company's public job board where one exists — no manual entry. The number is open SWE/AI roles; a <span class="lc-strong">bell</span> means intern roles are open right now. Companies without a public count just link to their search.</p>
       <div id="countsBanner"></div>
       <div class="tiles" id="companyTiles"></div>
     </div>
@@ -446,7 +452,7 @@ const KEY='hanhan_faang_v1';
 let state=load();
 function load(){try{return JSON.parse(localStorage.getItem(KEY))||{}}catch(e){return {}}}
 /* the slice of state that is SHARED in the cloud (UI prefs like 'collapsed' stay local) */
-function cloudState(){return {checks:state.checks,lc:state.lc,lcDone:state.lcDone,apps:state.apps,star:state.star,roleCounts:state.roleCounts,roleAlerts:state.roleAlerts,countsMonth:state.countsMonth}}
+function cloudState(){return {checks:state.checks,lc:state.lc,lcDone:state.lcDone,apps:state.apps,star:state.star}}
 function save(){
   localStorage.setItem(KEY,JSON.stringify(state));
   if(window.CloudSync && window.CloudSync.save) window.CloudSync.save(cloudState());
@@ -459,9 +465,6 @@ window.applyRemoteState=function(d){
   if(d.checks) state.checks=d.checks;
   if(typeof d.lc==='number') state.lc=d.lc;
   if(d.lcDone && typeof d.lcDone==='object') state.lcDone=d.lcDone;
-  if(d.roleCounts && typeof d.roleCounts==='object') state.roleCounts=d.roleCounts;
-  if(d.roleAlerts && typeof d.roleAlerts==='object') state.roleAlerts=d.roleAlerts;
-  if(typeof d.countsMonth==='string') state.countsMonth=d.countsMonth;
   if(Array.isArray(d.apps)) state.apps=d.apps;
   if(Array.isArray(d.star)) state.star=d.star;
   localStorage.setItem(KEY,JSON.stringify(state));
@@ -900,50 +903,73 @@ const companies=[
  ['snowflake','Snowflake','#29B5E8','Sn','https://careers.snowflake.com/','Data · AI','https://careers.snowflake.com/us/en/search-results?keywords=intern'],
  ['pinterest','Pinterest','#E60023','P','https://www.pinterestcareers.com/','SWE · ML','https://www.pinterestcareers.com/jobs/?search=intern'],
 ];
-state.roleCounts=state.roleCounts||{};
-state.roleAlerts=state.roleAlerts||{};
-state.countsMonth=state.countsMonth||'';
-function thisMonth(){return new Date().toISOString().slice(0,7)}
-function monthName(){return new Date().toLocaleDateString('en-US',{month:'long',year:'numeric'})}
+/* companies whose public job boards we can read live from the browser (CORS-open APIs) */
+const autoSources={
+ anthropic:{type:'greenhouse',token:'anthropic'},
+ databricks:{type:'greenhouse',token:'databricks'},
+ airbnb:{type:'greenhouse',token:'airbnb'},
+ pinterest:{type:'greenhouse',token:'pinterest'},
+ stripe:{type:'greenhouse',token:'stripe'},
+ openai:{type:'ashby',token:'openai'},
+};
+const SWE_RE=/(software|\bswe\b|engineer|developer|machine learning|\bml\b|\bai\b|deep learning|data scien|applied scien|research scien|computer vision|\bnlp\b)/i;
+const INTERN_RE=/intern(ship)?\b/i;
+/* token -> undefined (loading) | null (failed) | {roles, interns} */
+let autoCounts={};
+async function fetchTitles(src){
+ try{
+   const url = src.type==='greenhouse'
+     ? `https://boards-api.greenhouse.io/v1/boards/${src.token}/jobs`
+     : `https://api.ashbyhq.com/posting-api/job-board/${src.token}`;
+   const r = await fetch(url,{cache:'no-store'}); if(!r.ok) return null;
+   const d = await r.json();
+   return (d.jobs||[]).map(j=>j.title||'');
+ }catch(e){ return null; }
+}
+async function loadAutoCounts(){
+ await Promise.all(Object.entries(autoSources).map(async([tok,src])=>{
+   const titles = await fetchTitles(src);
+   if(!titles){ autoCounts[tok]=null; return; }
+   const swe = titles.filter(t=>SWE_RE.test(t));
+   autoCounts[tok] = { roles: swe.length, interns: swe.filter(t=>INTERN_RE.test(t)).length };
+ }));
+ renderTiles();
+}
+const bellSvg=`<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>`;
 function renderTiles(){
  const host=document.getElementById('companyTiles'); if(!host) return;
  host.innerHTML=companies.map(([tok,nm,color,mono,url,role,search])=>{
-   const c=state.roleCounts[tok], hasC=(typeof c==='number'), on=!!state.roleAlerts[tok];
-   return `<div class="tile ${on?'hiring':''}">
+   const isAuto = tok in autoSources;
+   const data = autoCounts[tok];               // undefined=loading, null=failed, obj=ok
+   const loading = isAuto && data===undefined;
+   const interns = (data && data.interns) || 0;
+   let chip;
+   if(data){
+     chip = `<a class="srch cnt-live" href="${search}" target="_blank" rel="noopener" title="${data.roles} SWE/AI roles open — open live search">${data.roles} <small>roles</small> ↗</a>`;
+   } else if(loading){
+     chip = `<span class="srch cnt-load">…</span>`;
+   } else {
+     chip = `<a class="srch" href="${search}" target="_blank" rel="noopener" title="Open ${nm} live search">search ↗</a>`;
+   }
+   const bell = (data && interns>0)
+     ? `<span class="ibell on" title="${interns} intern role${interns>1?'s':''} open now">${bellSvg}${interns}</span>` : '';
+   return `<div class="tile ${interns>0?'hiring':''}">
      <a class="tmain" href="${url}" target="_blank" rel="noopener" title="Open ${nm} careers">
        <span class="badge" style="background:${color}">${mono}</span>
        <span class="meta"><span class="nm">${nm}</span><span class="rl">${role}</span></span>
      </a>
-     <div class="trow">
-       <button class="bell ${on?'on':''}" data-bell="${tok}" title="${on?'Intern roles are open — tap to clear':'Mark when intern roles open'}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg></button>
-       <button class="cnt ${hasC?'set':''}" data-cnt="${tok}" title="Set how many SWE/AI intern roles you found">${hasC?c:'+'}<small>${hasC?'roles':'add'}</small></button>
-       <a class="srch" href="${search}" target="_blank" rel="noopener" title="Open ${nm} live intern search">search ↗</a>
-     </div>
+     <div class="trow">${bell}${chip}</div>
    </div>`;
  }).join('');
- host.querySelectorAll('[data-bell]').forEach(b=>b.onclick=()=>{const t=b.dataset.bell;state.roleAlerts[t]=!state.roleAlerts[t];save();renderTiles();});
- host.querySelectorAll('[data-cnt]').forEach(b=>b.onclick=()=>{
-   const t=b.dataset.cnt, cur=state.roleCounts[t];
-   const v=prompt(`How many SWE/AI intern roles are open at ${companies.find(c=>c[0]===t)[1]}? (blank to clear)`, cur==null?'':cur);
-   if(v===null) return;
-   if(v.trim()==='') delete state.roleCounts[t]; else state.roleCounts[t]=Math.max(0,parseInt(v)||0);
-   if(!state.countsMonth) state.countsMonth=thisMonth();
-   save();renderTiles();
- });
  renderCountsBanner();
 }
 function renderCountsBanner(){
  const el=document.getElementById('countsBanner'); if(!el) return;
- const hiring=companies.filter(c=>state.roleAlerts[c[0]]).length;
- const total=Object.values(state.roleCounts).reduce((a,n)=>a+(n||0),0);
- const stale=state.countsMonth && state.countsMonth!==thisMonth();
- let html=`<p class="counts-summary"><b>${hiring}</b> ${hiring===1?'company':'companies'} hiring interns now · <b>${total}</b> related roles logged${state.countsMonth?` · reviewed <b>${state.countsMonth}</b>`:''}</p>`;
- if(stale || !state.countsMonth){
-   html+=`<div class="counts-banner">⟳ It's a new month (<b>${monthName()}</b>). Listings change monthly — recheck each company's live search and update the counts.<button id="markRefreshed">Mark refreshed</button></div>`;
- }
- el.innerHTML=html;
- const btn=document.getElementById('markRefreshed');
- if(btn) btn.onclick=()=>{state.countsMonth=thisMonth();save();renderTiles();};
+ const done = Object.values(autoCounts).filter(v=>v).length;
+ const loading = Object.keys(autoSources).some(t=>autoCounts[t]===undefined);
+ const hiring = Object.values(autoCounts).filter(v=>v&&v.interns>0).length;
+ const totalRoles = Object.values(autoCounts).reduce((a,v)=>a+(v?v.roles:0),0);
+ el.innerHTML=`<p class="counts-summary">${loading?'Loading live counts…':`Live counts from ${done} public job boards · <b>${totalRoles}</b> SWE/AI roles open · <b>${hiring}</b> with intern roles now`}. Other companies link to their search (no public count). Refreshes every visit.</p>`;
 }
 
 /* ---------- APPLICATIONS ---------- */
@@ -1011,6 +1037,7 @@ document.getElementById('tabs').addEventListener('click',e=>{
 });
 
 renderRail();renderCounts();renderPhases();renderLC();renderLCList();renderTiles();renderApps();renderStar();renderTL();
+loadAutoCounts();
 window.addEventListener('resize',()=>{renderRail();renderMountain();});
 </script>
 
