@@ -176,6 +176,24 @@
   .lc-item a:hover{color:var(--blue);text-decoration:underline}
   .lc-item .ext{font-size:11px;color:#C2A9B0}
   .lc-item.done a{text-decoration:line-through;color:var(--grey)}
+  .lc-item .mli{font-size:13.5px;color:var(--ink)}
+  .lc-item.done .mli{text-decoration:line-through;color:var(--grey)}
+  /* networking status pills */
+  .st-net0{background:var(--soft);color:var(--grey)}
+  .st-net1{background:#E7F0FA;color:#1B6CA8}
+  .st-net2{background:#FFF1DA;color:#9A6B06}
+  .st-net3{background:#E6F6F4;color:#0C7D74}
+  .st-net4{background:#DFF5E1;color:#1D8A3A}
+  /* visa stages */
+  .vstages{display:flex;flex-direction:column;gap:8px}
+  .vstage{display:flex;align-items:center;gap:12px;padding:10px 13px;border:1px solid var(--line);border-radius:12px;background:#fff}
+  .vstage .vnum{width:26px;height:26px;border-radius:50%;background:var(--blue);color:#fff;font-weight:800;font-size:13px;
+    display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+  .vstage .vmeta{min-width:0;flex:1}
+  .vstage .vname{font-weight:700;color:var(--navy);font-size:14px}
+  .vstage .vdesc{font-size:12px;color:var(--grey);margin-top:1px;line-height:1.35}
+  .vstage .vwhen{margin-left:auto;font-size:11.5px;font-weight:700;color:var(--rose);white-space:nowrap;text-align:right;flex:0 0 auto}
+  @media(max-width:560px){.vstage{flex-wrap:wrap}.vstage .vwhen{margin-left:38px;text-align:left}}
   .lc-diff{font-size:10px;font-weight:700;padding:1px 7px;border-radius:999px;flex:0 0 auto}
   .d-easy{background:#E1F1E6;color:#2F8F4E}.d-med{background:#FFF1DA;color:#9A6B06}.d-hard{background:#FBE3EA;color:#B23150}
   /* company tiles */
@@ -331,6 +349,9 @@
     <div class="tab" data-p="leetcode">LeetCode</div>
     <div class="tab" data-p="apps">Applications</div>
     <div class="tab" data-p="star">STAR Bank</div>
+    <div class="tab" data-p="mlpath">AI/ML Path</div>
+    <div class="tab" data-p="network">Network</div>
+    <div class="tab" data-p="visa">Visa</div>
     <div class="tab" data-p="timeline">Timeline</div>
   </div>
 
@@ -449,6 +470,53 @@
     </div>
   </div>
 
+  <!-- AI/ML PATH -->
+  <div class="panel" id="mlpath">
+    <div class="card">
+      <h2>AI/ML specialization path</h2>
+      <p class="hint">AI/ML is her edge — it's the most sponsorship-friendly specialty (scarce talent, more willingness to sponsor). Work through these stages alongside her CS degree. Check items off; links open free resources. <span id="mlSetCount"></span></p>
+      <div class="track" style="height:9px;margin-bottom:6px"><div class="fill" id="mlBar" style="width:0%"></div></div>
+      <div id="mlList"></div>
+    </div>
+  </div>
+
+  <!-- NETWORK -->
+  <div class="panel" id="network">
+    <div class="card">
+      <h2>Networking & referrals</h2>
+      <p class="hint">For an international candidate, one warm referral that gets her resume read beats fifty cold applications. Track every recruiter, engineer, alum, and mentor here. Aim for a few new contacts each month.</p>
+      <table>
+        <thead><tr><th style="width:20%">Name</th><th style="width:20%">Company</th><th style="width:22%">Role / how you know them</th><th style="width:20%">Status</th><th style="width:14%">Next step</th><th></th></tr></thead>
+        <tbody id="netBody"></tbody>
+      </table>
+      <button class="b b-add add-row" onclick="addContact()">+ Add contact</button>
+    </div>
+  </div>
+
+  <!-- VISA -->
+  <div class="panel" id="visa">
+    <div class="card">
+      <h2>Visa &amp; sponsorship strategy</h2>
+      <p class="hint">Han Han's status path and how to maximize the odds of long-term success. This is a plan, not legal advice — UTD's international office (ISSO) and an immigration attorney are the authorities.</p>
+      <div id="visaStages"></div>
+    </div>
+    <div class="card">
+      <h2>Her edge: the green-card math</h2>
+      <p class="hint" style="margin:0">Because she was born in <b>Vietnam</b>, her employment-based green card has <b>essentially no backlog</b> — unlike classmates from India or China who wait 10+ years. If a FAANG employer sponsors her green card (most do), she can reach permanent residency in a few years and stop depending on the H-1B lottery entirely. This makes her <i>easier</i> to sponsor — lead with it when employers raise visa questions.</p>
+    </div>
+    <div class="card">
+      <h2>O-1 evidence builder (lottery-proof backup)</h2>
+      <p class="hint">An O-1 "extraordinary ability" visa skips the H-1B lottery. She's already generating the raw material — make it visible and documented. Each item checked strengthens an eventual O-1 case (and her resume). <span id="visaSetCount"></span></p>
+      <div class="track" style="height:9px;margin-bottom:6px"><div class="fill" id="visaBar" style="width:0%"></div></div>
+      <div id="visaList"></div>
+    </div>
+    <div class="card">
+      <h2>Apply smart + key links</h2>
+      <p class="hint" style="margin:0 0 10px">Target companies with strong sponsorship track records, mind the deadlines, and keep status clean (no gaps — work with ISSO).</p>
+      <div class="tiles" id="visaLinks"></div>
+    </div>
+  </div>
+
   <!-- TIMELINE -->
   <div class="panel" id="timeline">
     <div class="card">
@@ -470,7 +538,7 @@ const KEY='hanhan_faang_v1';
 let state=load();
 function load(){try{return JSON.parse(localStorage.getItem(KEY))||{}}catch(e){return {}}}
 /* the slice of state that is SHARED in the cloud (UI prefs like 'collapsed' stay local) */
-function cloudState(){return {checks:state.checks,lc:state.lc,lcDone:state.lcDone,apps:state.apps,star:state.star}}
+function cloudState(){return {checks:state.checks,lc:state.lc,lcDone:state.lcDone,apps:state.apps,star:state.star,mlDone:state.mlDone,contacts:state.contacts,visaDone:state.visaDone}}
 function save(){
   localStorage.setItem(KEY,JSON.stringify(state));
   if(window.CloudSync && window.CloudSync.save) window.CloudSync.save(cloudState());
@@ -483,10 +551,13 @@ window.applyRemoteState=function(d){
   if(d.checks) state.checks=d.checks;
   if(typeof d.lc==='number') state.lc=d.lc;
   if(d.lcDone && typeof d.lcDone==='object') state.lcDone=d.lcDone;
+  if(d.mlDone && typeof d.mlDone==='object') state.mlDone=d.mlDone;
+  if(d.visaDone && typeof d.visaDone==='object') state.visaDone=d.visaDone;
+  if(Array.isArray(d.contacts)) state.contacts=d.contacts;
   if(Array.isArray(d.apps)) state.apps=d.apps;
   if(Array.isArray(d.star)) state.star=d.star;
   localStorage.setItem(KEY,JSON.stringify(state));
-  renderPhases();renderLC();renderLCList();renderTiles();renderApps();renderStar();
+  renderPhases();renderLC();renderLCList();renderTiles();renderApps();renderStar();renderMlPath();renderNet();renderVisa();
 };
 window.addEventListener('cloud-status',e=>{
   const c=document.getElementById('syncChip'); if(!c) return;
@@ -1107,7 +1178,128 @@ document.getElementById('tabs').addEventListener('click',e=>{
  document.getElementById(e.target.dataset.p).classList.add('active');
 });
 
-renderRail();renderCounts();renderPhases();renderLC();renderLCList();renderTiles();renderApps();renderStar();renderTL();
+/* ---------- AI/ML PATH ---------- */
+const mlPath=[
+ ['Foundations',[
+   ['Python for data — NumPy & Pandas (Kaggle)','https://www.kaggle.com/learn/pandas'],
+   ['Linear algebra intuition (3Blue1Brown)','https://www.3blue1brown.com/topics/linear-algebra'],
+   ['Probability & statistics basics (Khan Academy)','https://www.khanacademy.org/math/statistics-probability'],
+ ]],
+ ['Core machine learning',[
+   ['Andrew Ng — Machine Learning Specialization','https://www.coursera.org/specializations/machine-learning-introduction'],
+   ['scikit-learn: supervised & unsupervised','https://scikit-learn.org/stable/'],
+   ['Build one classifier end-to-end on a real dataset',''],
+   ['Enter a Kaggle competition','https://www.kaggle.com/competitions'],
+ ]],
+ ['Deep learning',[
+   ['Deep Learning Specialization (DeepLearning.AI)','https://www.coursera.org/specializations/deep-learning'],
+   ['PyTorch fundamentals (official tutorials)','https://pytorch.org/tutorials/'],
+   ['fast.ai — Practical Deep Learning','https://course.fast.ai/'],
+   ['Build a CNN (vision) and a sequence model',''],
+ ]],
+ ['LLMs & generative AI (her edge)',[
+   ['Transformers & attention (Illustrated Transformer)','https://jalammar.github.io/illustrated-transformer/'],
+   ['Hugging Face course','https://huggingface.co/learn'],
+   ['Learn fine-tuning, embeddings & RAG',''],
+   ['Ship a deployed LLM/agent app (extend the 120 agents)',''],
+ ]],
+ ['MLOps & deployment',[
+   ['Serve a model behind an API (FastAPI)','https://fastapi.tiangolo.com/'],
+   ['Containerize & deploy to the cloud (GCP/AWS)',''],
+   ['Experiment tracking (Weights & Biases)','https://wandb.ai/'],
+ ]],
+ ['Proof of work',[
+   ['Ship 2–3 deployed AI projects with writeups',''],
+   ['One open-source contribution to an ML library',''],
+   ['Write a technical blog post or short paper',''],
+   ['Apply to ML/AI internships specifically',''],
+ ]],
+];
+state.mlDone=state.mlDone||{};
+function mlTotal(){return mlPath.reduce((a,g)=>a+g[1].length,0)}
+function renderMlPath(){
+ const host=document.getElementById('mlList'); if(!host) return;
+ host.innerHTML=mlPath.map(([group,items])=>{
+   const gd=items.filter((it,i)=>state.mlDone[group+'_'+i]).length;
+   return `<div class="lc-group"><div class="lc-group-h">${group}<span class="gp">${gd}/${items.length}</span></div>`+
+    items.map((it,i)=>{const key=group+'_'+i,dn=!!state.mlDone[key];
+      const label=it[1]?`<a href="${it[1]}" target="_blank" rel="noopener">${it[0]}</a><span class="ext">↗</span>`:`<span class="mli">${it[0]}</span>`;
+      return `<div class="lc-item ${dn?'done':''}"><input type="checkbox" ${dn?'checked':''} data-mlkey="${esc(key)}">${label}</div>`;
+    }).join('')+`</div>`;
+ }).join('');
+ host.querySelectorAll('input[type=checkbox]').forEach(cb=>cb.onchange=()=>{state.mlDone[cb.dataset.mlkey]=cb.checked;save();renderMlPath();});
+ const done=Object.values(state.mlDone).filter(Boolean).length,total=mlTotal();
+ const c=document.getElementById('mlSetCount'); if(c)c.textContent=`${done} / ${total} done`;
+ const bar=document.getElementById('mlBar'); if(bar)bar.style.width=(total?done/total*100:0)+'%';
+}
+
+/* ---------- NETWORKING ---------- */
+state.contacts=state.contacts||[];
+const netStatuses=['To reach out','Reached out','Replied','Call done','Referral!'];
+function renderNet(){
+ const b=document.getElementById('netBody'); if(!b) return; b.innerHTML='';
+ if(!state.contacts.length){b.innerHTML='<tr><td colspan="6" style="color:#9fb0bf;padding:16px 10px">No contacts yet — start with UTD alumni at target companies on LinkedIn, plus recruiters and engineers you meet at career fairs.</td></tr>';}
+ state.contacts.forEach((a,i)=>{
+   const si=Math.max(0,netStatuses.indexOf(a.status||'To reach out'));
+   const tr=document.createElement('tr');
+   tr.innerHTML=`<td><input value="${esc(a.name||'')}" data-i="${i}" data-f="name" placeholder="Name"></td>
+   <td><input value="${esc(a.co||'')}" data-i="${i}" data-f="co" placeholder="Company"></td>
+   <td><input value="${esc(a.rel||'')}" data-i="${i}" data-f="rel" placeholder="Recruiter / alum / engineer"></td>
+   <td><select data-i="${i}" data-f="status" class="st st-net${si}">${netStatuses.map(s=>`<option ${a.status===s?'selected':''}>${s}</option>`).join('')}</select></td>
+   <td><input value="${esc(a.next||'')}" data-i="${i}" data-f="next" placeholder="—"></td>
+   <td style="text-align:center"><button class="rm" data-rm="${i}">×</button></td>`;
+   b.appendChild(tr);
+ });
+ b.querySelectorAll('input,select').forEach(x=>x.onchange=e=>{state.contacts[e.target.dataset.i][e.target.dataset.f]=e.target.value;save();if(e.target.dataset.f==='status'){e.target.className='st st-net'+Math.max(0,netStatuses.indexOf(e.target.value));}});
+ b.querySelectorAll('[data-rm]').forEach(x=>x.onclick=e=>{state.contacts.splice(+e.target.dataset.rm,1);save();renderNet();});
+}
+function addContact(){state.contacts.push({name:'',co:'',rel:'',status:'To reach out',next:''});save();renderNet();}
+
+/* ---------- VISA & SPONSORSHIP ---------- */
+const visaStages=[
+ ['CPT','Work legally on internships while enrolled at UTD — apply through ISSO before each one.','2027 & 2028 internships'],
+ ['OPT','12 months of post-grad work in your field. File up to 90 days before graduating.','Spring 2029'],
+ ['STEM OPT','24-month extension (CS qualifies) with an E-Verify employer → 3 years total runway.','~2030'],
+ ['H-1B','Long-term work visa by lottery; employer files in March. ~3 attempts during OPT/STEM-OPT.','Mar 2030 / 31 / 32'],
+ ['Green card','Employer-sponsored EB-2/EB-3. Vietnam has minimal backlog — your fastest durable path.','Start ASAP once hired'],
+];
+const visaItems=[
+ 'Deploy 2–3 AI projects with public writeups (proof of original work)',
+ 'Make open-source contributions to a recognized ML/AI project',
+ 'Publish a paper, preprint, or a strong technical blog series',
+ 'Earn a Kaggle medal or a competitive-programming ranking',
+ 'Give a talk or workshop (student org, meetup, or conference)',
+ 'Get press, a feature, or notable recognition of your work',
+ 'Line up 4–6 strong recommendation letters from experts/mentors',
+ 'Judge a hackathon or review for a competition/journal',
+ 'Keep an organized "O-1 evidence" folder of all of the above',
+];
+const visaLinks=[
+ ['MyVisaJobs','#1B6CA8','MV','https://www.myvisajobs.com/','Top H-1B sponsors by company'],
+ ['H1B Grader','#13A89E','H1','https://www.h1bgrader.com/','Sponsorship data & approval rates'],
+ ['USCIS · OPT','#0B2545','US','https://www.uscis.gov/working-in-the-united-states/students-and-exchange-visitors/optional-practical-training-opt-for-f-1-students','Official OPT rules'],
+ ['USCIS · STEM','#0B2545','ST','https://www.uscis.gov/working-in-the-united-states/students-and-exchange-visitors/optional-practical-training-extension-for-stem-students-stem-opt','24-month STEM extension'],
+ ['UTD ISSO','#E87500','UT','https://isso.utdallas.edu/','Your international student office'],
+];
+state.visaDone=state.visaDone||{};
+function renderVisaList(){
+ const host=document.getElementById('visaList'); if(!host) return;
+ host.innerHTML=visaItems.map((t,i)=>{const dn=!!state.visaDone['o'+i];
+   return `<div class="lc-item ${dn?'done':''}"><input type="checkbox" ${dn?'checked':''} data-vkey="o${i}"><span class="mli">${t}</span></div>`;}).join('');
+ host.querySelectorAll('input[type=checkbox]').forEach(cb=>cb.onchange=()=>{state.visaDone[cb.dataset.vkey]=cb.checked;save();renderVisaList();});
+ const done=Object.values(state.visaDone).filter(Boolean).length,total=visaItems.length;
+ const c=document.getElementById('visaSetCount'); if(c)c.textContent=`${done} / ${total} done`;
+ const bar=document.getElementById('visaBar'); if(bar)bar.style.width=(total?done/total*100:0)+'%';
+}
+function renderVisa(){
+ const s=document.getElementById('visaStages');
+ if(s) s.innerHTML=`<div class="vstages">`+visaStages.map((v,i)=>`<div class="vstage"><div class="vnum">${i+1}</div><div class="vmeta"><div class="vname">${v[0]}</div><div class="vdesc">${v[1]}</div></div><div class="vwhen">${v[2]}</div></div>`).join('')+`</div>`;
+ const lg=document.getElementById('visaLinks');
+ if(lg) lg.innerHTML=visaLinks.map(([nm,color,mono,url,role])=>`<a class="tile" href="${url}" target="_blank" rel="noopener"><div class="tmain"><span class="badge" style="background:${color}">${mono}</span><span class="meta"><span class="nm">${nm}</span><span class="rl">${role}</span></span></div></a>`).join('');
+ renderVisaList();
+}
+
+renderRail();renderCounts();renderPhases();renderLC();renderLCList();renderTiles();renderApps();renderStar();renderMlPath();renderNet();renderVisa();renderTL();
 loadAutoCounts();
 window.addEventListener('resize',()=>{renderRail();renderMountain();});
 </script>
