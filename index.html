@@ -146,6 +146,23 @@
   .yearrow .ypct small{display:block;font-size:10.5px;font-weight:700;color:var(--grey)}
   .yearrow.hit .ypct small{color:#2FA36B}
   @media(max-width:560px){.yearrow{flex-wrap:wrap}.yearrow .ylabel{flex-basis:100%}.yearrow .ytrack{flex:1}}
+  /* expandable year/pillar rows */
+  .yearrow,.pillrow{cursor:pointer}
+  .yearrow:hover,.pillrow:hover{background:var(--soft)}
+  .ov-chev{flex:0 0 auto;color:var(--grey);font-size:12px;transition:transform .2s;margin-right:2px}
+  .yearrow.open .ov-chev,.pillrow.open .ov-chev{transform:rotate(90deg)}
+  .pillrow{display:flex;align-items:center;gap:10px;padding:8px 8px;border-radius:10px;margin-bottom:2px}
+  .pillrow .pill-main{flex:1;min-width:0}
+  .pillrow .lab{display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px;color:var(--ink)}
+  .pillrow .lab b{color:var(--grey);font-weight:600}
+  .ov-items{margin:0 0 12px 26px;border-left:2px solid var(--line);padding-left:12px}
+  .ov-item{display:flex;align-items:flex-start;gap:9px;padding:6px 8px;border-radius:9px}
+  .ov-item:hover{background:var(--soft)}
+  .ov-item input{margin-top:2px;width:16px;height:16px;accent-color:var(--teal);cursor:pointer;flex:0 0 auto}
+  .ov-item .ov-txt{font-size:13px;flex:1}
+  .ov-item.done .ov-txt{text-decoration:line-through;color:var(--grey)}
+  .ov-go{flex:0 0 auto;font-size:10.5px;font-weight:700;color:var(--rose);text-decoration:none;background:var(--soft);padding:3px 8px;border-radius:999px;white-space:nowrap}
+  .ov-go:hover{background:#FFE6EC;text-decoration:underline}
   /* grade status chip in header */
   .grade-status{display:block;margin-top:8px;font-size:11.5px;color:#9A878C}
   .grade-status b{color:var(--navy)}
@@ -641,13 +658,27 @@ const phases=[
  {id:'year2',year:2,name:'Year 2 · Fall 2027–Spring 2028 — Land the FAANG internship',items:[
    ['intern','Fall 2027: FAANG interview loops + mocks'],
    ['intern','Spring 2028: convert to a Summer 2028 FAANG internship offer'],
+   ['algo','Finish NeetCode 150 / reach ~250 LeetCode'],
+   ['algo','Ramp mock interviews hard 2–3 months before each loop'],
+   ['port','Build & deploy a real RAG system over your own data'],
+   ['port','Turn 2–3 agents into deep, documented flagships'],
+   ['school','Take an advanced ML/AI course; keep GPA ≥ 3.7'],
+   ['intern','Lock in 8–10 STAR stories + weekly mock interviews'],
+   ['intern','Get a referral at 3+ target companies'],
+   ['visa','Build O-1 evidence: a talk, an open-source PR, or a writeup'],
  ]},
  {id:'year3',year:3,name:'Year 3 · Summer 2028–May 2029 — The offer & graduation',items:[
-   ['intern','Summer 2028: perform for a return offer'],
-   ['intern','Fall 2028: accept return offer OR run new-grad recruiting'],
-   ['school','Spring 2029: finish capstone; graduate'],
+   ['intern','Summer 2028: perform hard for a return offer'],
+   ['intern','Fall 2028: convert the return offer (or run full new-grad recruiting)'],
+   ['intern','Negotiate the offer using the comp data'],
+   ['intern','Sign the FTE; confirm visa sponsorship + green-card start'],
+   ['port','Final portfolio polish + a public writeup of your best work'],
+   ['school','Complete degree requirements; strong final-year GPA'],
+   ['school','Spring 2029: finish capstone & graduate'],
    ['visa','Spring 2029: file OPT (up to 90 days before grad) via ISSO'],
+   ['visa','Line up recommendation letters for O-1 / green card'],
    ['visa','~2030: file STEM OPT extension before initial OPT expires'],
+   ['intern','Plan West Coast relocation + start-date logistics'],
  ]},
 ];
 const tagName={algo:'Algo',port:'Portfolio',intern:'Intern',school:'School',visa:'Visa'};
@@ -880,29 +911,59 @@ function toggle(k,v){state.checks[k]=(v===undefined?!state.checks[k]:v);save();r
 function resetChecks(){if(confirm('Clear all milestone checkmarks?')){state.checks={};save();renderPhases()}}
 
 /* ---------- OVERVIEW ---------- */
+let ovExp={};   // which year/pillar group is expanded (UI state)
+const tabFor={algo:'leetcode',port:'mlpath',intern:'apps',visa:'visa',school:'checklist'};
+const tabGoLabel={leetcode:'LeetCode',mlpath:'AI/ML Path',apps:'Applications',visa:'Visa',checklist:'Milestones'};
+function goTab(p){
+ document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.p===p));
+ document.querySelectorAll('.panel').forEach(x=>x.classList.toggle('active',x.id===p));
+ window.scrollTo({top:0,behavior:'smooth'});
+}
+function ovItemsHtml(items){
+ if(!items.length) return '';
+ return `<div class="ov-items">`+items.map(it=>{
+   const dn=!!state.checks[it.key], tab=tabFor[it.tag];
+   return `<div class="ov-item ${dn?'done':''}">
+     <input type="checkbox" ${dn?'checked':''} data-ovk="${it.key}">
+     <span class="tag ${tagClass[it.tag]}">${tagName[it.tag]}</span>
+     <span class="ov-txt">${it.text}</span>
+     ${tab?`<a class="ov-go" data-go="${tab}" title="Go to ${tabGoLabel[tab]}">${tabGoLabel[tab]} →</a>`:''}
+   </div>`;
+ }).join('')+`</div>`;
+}
 function renderOverview(){
  const byTag={algo:[0,0],port:[0,0],intern:[0,0],school:[0,0],visa:[0,0]};
  const yr={1:[0,0],2:[0,0],3:[0,0]};
+ const yearItems={1:[],2:[],3:[]}, tagItems={algo:[],port:[],intern:[],school:[],visa:[]};
  phases.forEach(ph=>ph.items.forEach((it,i)=>{
-   byTag[it[0]][1]++;
-   const y=ph.year||1; yr[y][1]++;
-   if(state.checks[ph.id+'_'+i]){byTag[it[0]][0]++; yr[y][0]++;}
+   const key=ph.id+'_'+i, dn=!!state.checks[key], y=ph.year||1;
+   byTag[it[0]][1]++; yr[y][1]++;
+   if(dn){byTag[it[0]][0]++; yr[y][0]++;}
+   yearItems[y].push({key,text:it[1],tag:it[0]});
+   tagItems[it[0]].push({key,text:it[1],tag:it[0]});
  }));
  const yMeta={1:['Year 1','Jun 2026 – Jun 2027 · the focus year'],2:['Year 2','Jun 2027 – Jun 2028 · land the FAANG internship'],3:['Year 3','Jun 2028 – Jun 2029 · the offer & graduation']};
  const yb=document.getElementById('yearBars');
  if(yb) yb.innerHTML=[1,2,3].map(y=>{
-   const [d,t]=yr[y], p=t?Math.round(d/t*100):0, hit=(p===100);
-   return `<div class="yearrow ${hit?'hit':''}">
+   const [d,t]=yr[y], p=t?Math.round(d/t*100):0, hit=(p===100), ex=!!ovExp['y'+y];
+   return `<div class="yearrow ${hit?'hit':''} ${ex?'open':''}" data-ovexp="y${y}">
+     <span class="ov-chev">▸</span>
      <div class="ylabel"><b>${yMeta[y][0]}</b><span>${yMeta[y][1]}</span></div>
      <div class="ytrack"><div class="yfill" style="width:${p}%"></div></div>
      <div class="ypct">${p}%<small>${d}/${t}${hit?' ✓':''}</small></div>
-   </div>`;
+   </div>${ex?ovItemsHtml(yearItems[y]):''}`;
  }).join('');
  const labels={algo:'Algorithms',port:'Portfolio',intern:'Internships',school:'School / Transfer',visa:'Visa'};
  document.getElementById('pillarBars').innerHTML=Object.keys(byTag).map(k=>{
-   const [d,t]=byTag[k],p=t?Math.round(d/t*100):0;
-   return `<div><div class="lab">${labels[k]} <b>${d}/${t}</b></div><div class="track"><div class="fill" style="width:${p}%"></div></div></div>`;
+   const [d,t]=byTag[k],p=t?Math.round(d/t*100):0, ex=!!ovExp[k];
+   return `<div class="pillrow ${ex?'open':''}" data-ovexp="${k}">
+     <span class="ov-chev">▸</span>
+     <div class="pill-main"><div class="lab">${labels[k]} <b>${d}/${t}</b></div><div class="track"><div class="fill" style="width:${p}%"></div></div></div>
+   </div>${ex?ovItemsHtml(tagItems[k]):''}`;
  }).join('');
+ document.querySelectorAll('#yearBars [data-ovexp],#pillarBars [data-ovexp]').forEach(el=>el.onclick=()=>{const k=el.dataset.ovexp;ovExp[k]=!ovExp[k];renderOverview();});
+ document.querySelectorAll('#yearBars [data-ovk],#pillarBars [data-ovk]').forEach(cb=>cb.onchange=(e)=>{e.stopPropagation();toggle(cb.dataset.ovk,cb.checked);});
+ document.querySelectorAll('#yearBars [data-go],#pillarBars [data-go]').forEach(a=>a.onclick=(e)=>{e.stopPropagation();e.preventDefault();goTab(a.dataset.go);});
 }
 
 /* ---------- LEETCODE ---------- */
