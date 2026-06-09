@@ -1305,6 +1305,9 @@ function proofHtml(key){
      ${gradeBadge(key)}
    </span>`;
  }
+ if(aiGrades[key]){   // Claude graded it (e.g. from her public GitHub) even without a pasted link
+   return `<span class="proof set">${gradeBadge(key)}<button class="proof add" data-proofadd="${esc(key)}" title="Add a proof link">+ link</button></span>`;
+ }
  return `<button class="proof add" data-proofadd="${esc(key)}" title="Attach a GitHub repo, deployed URL, or image link — Claude will grade it">+ proof</button>`;
 }
 function wireProof(host, rerender){

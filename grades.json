@@ -1,5 +1,25 @@
 {
-  "_about": "Published by Claude (the grader). Keys match proof items in the tracker (ml:, o1:, ms:). Each value: {grade, status, note}. status = verified | needs-work | pending. The tracker fetches this on load and shows the grade/verdict automatically — no manual flipping.",
+  "_about": "Published by Claude (the grader). Keys match proof items in the tracker (ml:, o1:, ms:). Each value: {grade, status, note}. status = verified | needs-work | pending. The tracker fetches this on load and shows the grade/verdict automatically.",
   "_lastReviewed": "2026-06-08",
-  "_example": {"grade": "A-", "status": "verified", "note": "Clean RAG pipeline, deployed with a working URL, solid README. Add eval metrics to reach A."}
+
+  "ml:LLMs & generative AI (her edge)_3": {
+    "grade": "A",
+    "status": "verified",
+    "note": "Done and then some — 120+ deployed Gemini-powered agents. Agent #99 (LLM/GenAI Roadmap) is a genuinely useful, polished tool with a real playground (prompt builder, token/cost estimator, embeddings, RAG-chunking demo)."
+  },
+  "ml:Proof of work_0": {
+    "grade": "A",
+    "status": "verified",
+    "note": "Far exceeds 2-3 deployed AI projects — 120+ are live. Next level: turn 2-3 of the strongest into deep, documented flagships rather than relying on volume."
+  },
+  "ml:★ In-demand builds (ship these — Meta-engineer picks)_0": {
+    "grade": "C+",
+    "status": "needs-work",
+    "note": "You've demoed RAG *concepts* (chunking) inside agent #99, but not built a real RAG system. To verify: embed your own notes/knowledge base, add retrieval, and deploy it as its own app."
+  },
+  "ms:q1_6": {
+    "grade": "B",
+    "status": "needs-work",
+    "note": "Portfolio (hhanng.github.io) is live and impressive. To fully hit this: pin the top repo on your GitHub profile and give it a real README — problem, architecture, a demo GIF, and the live link."
+  }
 }
