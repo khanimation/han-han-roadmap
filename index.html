@@ -216,6 +216,7 @@
   .tile .meta{min-width:0;display:flex;flex-direction:column}
   .tile .nm{font-weight:700;color:var(--navy);font-size:14px;line-height:1.15}
   .tile .rl{font-size:11px;color:var(--grey);margin-top:2px;white-space:nowrap}
+  .tile .comp{font-size:11px;font-weight:800;color:#1D8A3A;margin-top:2px;white-space:nowrap}
   .trow{display:flex;align-items:center;gap:6px;margin-top:9px;padding-top:8px;border-top:1px solid var(--line)}
   .bell{border:0;background:var(--soft);width:28px;height:26px;border-radius:8px;cursor:pointer;color:#A8979C;
     display:inline-flex;align-items:center;justify-content:center;transition:.15s;flex:0 0 auto}
@@ -452,7 +453,7 @@
   <div class="panel" id="apps">
     <div class="card">
       <h2>Where to apply — FAANG + top tech (SWE + AI)</h2>
-      <p class="hint">Counts are pulled <span class="lc-strong">live</span> from each company's public job board where one exists — no manual entry. The number is open SWE/AI roles; a <span class="lc-strong">bell</span> means intern roles are open right now. Companies without a public count just link to their search.</p>
+      <p class="hint">Counts are pulled <span class="lc-strong">live</span> from each company's public job board where one exists — no manual entry. The number is open SWE/AI roles; a <span class="lc-strong">bell</span> means intern roles are open right now. The <span style="color:#1D8A3A;font-weight:700">green figure</span> is an estimated <span class="lc-strong">new-grad total comp</span> (base + stock + bonus, US) in the levels.fyi range — rough, and it varies a lot by level, location, team, and year.</p>
       <div id="countsBanner"></div>
       <div class="tiles" id="companyTiles"></div>
     </div>
@@ -748,10 +749,11 @@ function renderMountain(){
         <path d="M772,52 L800,60 L772,68 Z" fill="#FFB7C5" stroke="#C45E7C" stroke-width="1.3"/>
         <path d="M772,48 l-7,-5 l0,10 Z" fill="#E08DA0"/><path d="M772,48 l7,-5 l0,10 Z" fill="#E08DA0"/><circle cx="772" cy="48" r="2.5" fill="#C45E7C"/>
         ${sparkle(806,40,6,'#FFD98A')}${sparkle(748,58,4,'#FFC2D2')}
-        <rect x="784" y="58" width="124" height="40" rx="13" fill="#fff" stroke="#EFCBD9" stroke-width="2"/>
-        <text x="840" y="75" text-anchor="middle" font-size="13.5" font-weight="800" fill="#C45E7C">FAANG offer</text>
-        <path d="${heartPath(896,72,4)}" fill="#E08DA0"/>
-        <text x="846" y="91" text-anchor="middle" font-size="11" font-weight="600" fill="#8A7B80">2029 · the summit</text></g>`;
+        <rect x="780" y="54" width="150" height="60" rx="13" fill="#fff" stroke="#EFCBD9" stroke-width="2"/>
+        <text x="845" y="71" text-anchor="middle" font-size="13" font-weight="800" fill="#C45E7C">FAANG offer</text>
+        <path d="${heartPath(901,68,3.4)}" fill="#E08DA0"/>
+        <text x="855" y="90" text-anchor="middle" font-size="15" font-weight="800" fill="#1D8A3A">~$190K/yr</text>
+        <text x="855" y="105" text-anchor="middle" font-size="9.5" font-weight="600" fill="#8A7B80">est. new-grad total comp</text></g>`;
   // base camp little tent + tag
   const [bx,by]=pt(0.012);
   g+=`<g><path d="M${bx+8},${by+14} L${bx+22},${by-8} L${bx+36},${by+14} Z" fill="#FFD9E3" stroke="${OUT}" stroke-width="1.8" stroke-linejoin="round"/>
@@ -981,25 +983,25 @@ function renderLCList(){
 /* token, name, brand color, monogram, careers URL, role tag, live intern-search URL.
    (Trademarks belong to their owners; no logos reproduced — colored initials only.) */
 const companies=[
- ['google','Google','#4285F4','G','https://careers.google.com/','SWE · AI/ML','https://www.google.com/about/careers/applications/jobs/results/?q=software%20engineering%20intern'],
- ['meta','Meta','#0866FF','M','https://www.metacareers.com/','SWE · AI','https://www.metacareers.com/jobs?q=software%20engineer%20intern'],
- ['apple','Apple','#1A1A1A','','https://jobs.apple.com/','SWE · ML','https://jobs.apple.com/en-us/search?search=software%20engineer%20intern'],
- ['amazon','Amazon','#FF9900','a','https://www.amazon.jobs/','SWE · AI','https://www.amazon.jobs/en/search?base_query=software%20engineer%20intern'],
- ['netflix','Netflix','#E50914','N','https://jobs.netflix.com/','SWE · ML','https://explore.jobs.netflix.net/careers?query=intern'],
- ['microsoft','Microsoft','#0078D4','MS','https://careers.microsoft.com/','SWE · AI','https://jobs.careers.microsoft.com/global/en/search?q=software%20engineer%20intern'],
- ['nvidia','NVIDIA','#76B900','nV','https://www.nvidia.com/en-us/about-nvidia/careers/','AI · SWE','https://nvidia.wd5.myworkdayjobs.com/en-US/NVIDIAExternalCareerSite?q=intern'],
- ['openai','OpenAI','#10A37F','Oai','https://openai.com/careers/','AI · SWE','https://openai.com/careers/search/'],
- ['anthropic','Anthropic','#CC785C','An','https://www.anthropic.com/careers','AI · SWE','https://www.anthropic.com/jobs'],
- ['tesla','Tesla','#E82127','T','https://www.tesla.com/careers/','AI · SWE','https://www.tesla.com/careers/search/?query=intern'],
- ['databricks','Databricks','#FF3621','db','https://www.databricks.com/company/careers','Data · AI','https://www.databricks.com/company/careers/open-positions?search=intern'],
- ['stripe','Stripe','#635BFF','S','https://stripe.com/jobs','SWE','https://stripe.com/jobs/search?q=intern'],
- ['uber','Uber','#111111','U','https://www.uber.com/us/en/careers/','SWE · ML','https://www.uber.com/us/en/careers/list/?query=intern'],
- ['salesforce','Salesforce','#00A1E0','sf','https://careers.salesforce.com/','SWE · AI','https://careers.salesforce.com/en/jobs/?search=intern'],
- ['linkedin','LinkedIn','#0A66C2','in','https://careers.linkedin.com/','SWE · AI','https://www.linkedin.com/jobs/search/?keywords=software%20engineer%20intern'],
- ['adobe','Adobe','#FA0F00','Ad','https://careers.adobe.com/','SWE · AI','https://careers.adobe.com/us/en/search-results?keywords=software%20engineer%20intern'],
- ['airbnb','Airbnb','#FF5A5F','Ab','https://careers.airbnb.com/','SWE · ML','https://careers.airbnb.com/positions/?_search=intern'],
- ['snowflake','Snowflake','#29B5E8','Sn','https://careers.snowflake.com/','Data · AI','https://careers.snowflake.com/us/en/search-results?keywords=intern'],
- ['pinterest','Pinterest','#E60023','P','https://www.pinterestcareers.com/','SWE · ML','https://www.pinterestcareers.com/jobs/?search=intern'],
+ ['google','Google','#4285F4','G','https://careers.google.com/','SWE · AI/ML','https://www.google.com/about/careers/applications/jobs/results/?q=software%20engineering%20intern','~$190K'],
+ ['meta','Meta','#0866FF','M','https://www.metacareers.com/','SWE · AI','https://www.metacareers.com/jobs?q=software%20engineer%20intern','~$190K'],
+ ['apple','Apple','#1A1A1A','','https://jobs.apple.com/','SWE · ML','https://jobs.apple.com/en-us/search?search=software%20engineer%20intern','~$175K'],
+ ['amazon','Amazon','#FF9900','a','https://www.amazon.jobs/','SWE · AI','https://www.amazon.jobs/en/search?base_query=software%20engineer%20intern','~$165K'],
+ ['netflix','Netflix','#E50914','N','https://jobs.netflix.com/','SWE · ML','https://explore.jobs.netflix.net/careers?query=intern','~$300K'],
+ ['microsoft','Microsoft','#0078D4','MS','https://careers.microsoft.com/','SWE · AI','https://jobs.careers.microsoft.com/global/en/search?q=software%20engineer%20intern','~$170K'],
+ ['nvidia','NVIDIA','#76B900','nV','https://www.nvidia.com/en-us/about-nvidia/careers/','AI · SWE','https://nvidia.wd5.myworkdayjobs.com/en-US/NVIDIAExternalCareerSite?q=intern','~$200K'],
+ ['openai','OpenAI','#10A37F','Oai','https://openai.com/careers/','AI · SWE','https://openai.com/careers/search/','~$300K+'],
+ ['anthropic','Anthropic','#CC785C','An','https://www.anthropic.com/careers','AI · SWE','https://www.anthropic.com/jobs','~$300K+'],
+ ['tesla','Tesla','#E82127','T','https://www.tesla.com/careers/','AI · SWE','https://www.tesla.com/careers/search/?query=intern','~$150K'],
+ ['databricks','Databricks','#FF3621','db','https://www.databricks.com/company/careers','Data · AI','https://www.databricks.com/company/careers/open-positions?search=intern','~$200K'],
+ ['stripe','Stripe','#635BFF','S','https://stripe.com/jobs','SWE','https://stripe.com/jobs/search?q=intern','~$210K'],
+ ['uber','Uber','#111111','U','https://www.uber.com/us/en/careers/','SWE · ML','https://www.uber.com/us/en/careers/list/?query=intern','~$190K'],
+ ['salesforce','Salesforce','#00A1E0','sf','https://careers.salesforce.com/','SWE · AI','https://careers.salesforce.com/en/jobs/?search=intern','~$170K'],
+ ['linkedin','LinkedIn','#0A66C2','in','https://careers.linkedin.com/','SWE · AI','https://www.linkedin.com/jobs/search/?keywords=software%20engineer%20intern','~$195K'],
+ ['adobe','Adobe','#FA0F00','Ad','https://careers.adobe.com/','SWE · AI','https://careers.adobe.com/us/en/search-results?keywords=software%20engineer%20intern','~$170K'],
+ ['airbnb','Airbnb','#FF5A5F','Ab','https://careers.airbnb.com/','SWE · ML','https://careers.airbnb.com/positions/?_search=intern','~$210K'],
+ ['snowflake','Snowflake','#29B5E8','Sn','https://careers.snowflake.com/','Data · AI','https://careers.snowflake.com/us/en/search-results?keywords=intern','~$200K'],
+ ['pinterest','Pinterest','#E60023','P','https://www.pinterestcareers.com/','SWE · ML','https://www.pinterestcareers.com/jobs/?search=intern','~$185K'],
 ];
 /* companies whose public job boards we can read live from the browser (CORS-open APIs) */
 const autoSources={
@@ -1040,7 +1042,7 @@ async function loadAutoCounts(){
 const bellSvg=`<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>`;
 function renderTiles(){
  const host=document.getElementById('companyTiles'); if(!host) return;
- host.innerHTML=companies.map(([tok,nm,color,mono,url,role,search])=>{
+ host.innerHTML=companies.map(([tok,nm,color,mono,url,role,search,comp])=>{
    const isAuto = tok in autoSources;
    const data = autoCounts[tok];               // undefined=loading, null=failed, obj=ok
    const loading = isAuto && data===undefined;
@@ -1058,7 +1060,7 @@ function renderTiles(){
    return `<div class="tile ${interns>0?'hiring':''}">
      <a class="tmain" href="${url}" target="_blank" rel="noopener" title="Open ${nm} careers">
        <span class="badge" style="background:${color}">${mono}</span>
-       <span class="meta"><span class="nm">${nm}</span><span class="rl">${role}</span></span>
+       <span class="meta"><span class="nm">${nm}</span><span class="rl">${role}</span>${comp?`<span class="comp">${comp} TC</span>`:''}</span>
      </a>
      <div class="trow">${bell}${chip}</div>
    </div>`;
