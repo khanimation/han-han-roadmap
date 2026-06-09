@@ -102,10 +102,17 @@
   /* tabs */
   .tabs{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 22px;position:sticky;top:0;z-index:5;
     background:var(--bg);padding:14px 0 10px}
-  .tab{border:1px solid var(--line);background:var(--card);color:var(--grey);padding:9px 16px;border-radius:999px;
+  .tab{position:relative;border:1px solid var(--line);background:var(--card);color:var(--grey);padding:9px 16px 13px;border-radius:999px;
     font-size:13.5px;font-weight:600;cursor:pointer;transition:.15s}
   .tab:hover{border-color:var(--blue);color:var(--blue)}
   .tab.active{background:var(--navy);color:#fff;border-color:var(--navy)}
+  .tprog{position:absolute;left:14px;right:14px;bottom:5px;height:3px;border-radius:2px;background:rgba(11,37,69,.08);overflow:hidden}
+  .tprog i{display:block;height:100%;width:0;background:var(--rose);border-radius:2px;transition:width .4s}
+  .tab.active .tprog{background:rgba(255,255,255,.28)}
+  .tab.active .tprog i{background:#FFD9E3}
+  .tcount{display:inline-block;margin-left:6px;min-width:16px;font-size:10px;font-weight:800;line-height:15px;text-align:center;
+    background:var(--soft);color:var(--grey);border-radius:999px;padding:0 5px;vertical-align:middle}
+  .tab.active .tcount{background:rgba(255,255,255,.22);color:#fff}
   .panel{display:none;animation:fade .2s ease}
   .panel.active{display:block}
   @keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
@@ -543,6 +550,7 @@ function save(){
   localStorage.setItem(KEY,JSON.stringify(state));
   if(window.CloudSync && window.CloudSync.save) window.CloudSync.save(cloudState());
   flash();
+  try{ updateTabIndicators(); }catch(e){}
 }
 /* called by the Firebase layer when another device changes the shared data */
 window.__getCloudState=cloudState;
@@ -558,6 +566,7 @@ window.applyRemoteState=function(d){
   if(Array.isArray(d.star)) state.star=d.star;
   localStorage.setItem(KEY,JSON.stringify(state));
   renderPhases();renderLC();renderLCList();renderTiles();renderApps();renderStar();renderMlPath();renderNet();renderVisa();
+  try{ updateTabIndicators(); }catch(e){}
 };
 window.addEventListener('cloud-status',e=>{
   const c=document.getElementById('syncChip'); if(!c) return;
@@ -1307,7 +1316,32 @@ function renderVisa(){
  renderVisaList();
 }
 
-renderRail();renderCounts();renderPhases();renderLC();renderLCList();renderTiles();renderApps();renderStar();renderMlPath();renderNet();renderVisa();renderTL();
+/* ---------- PER-TAB PROGRESS INDICATORS ---------- */
+function pctChecks(){let t=0,d=0;phases.forEach(ph=>ph.items.forEach((it,i)=>{t++;if(state.checks[ph.id+'_'+i])d++;}));return t?Math.round(d/t*100):0;}
+function pctLeet(){const t=lcTotal();return t?Math.round(lcDoneCount()/t*100):0;}
+function pctMlp(){const t=mlTotal();const d=Object.values(state.mlDone||{}).filter(Boolean).length;return t?Math.round(d/t*100):0;}
+function pctVisaO1(){const t=visaItems.length;const d=Object.values(state.visaDone||{}).filter(Boolean).length;return t?Math.round(d/t*100):0;}
+function pctStar(){const a=state.star||[];if(!a.length)return 0;const d=a.filter(s=>s.s&&s.ta&&s.a&&s.r).length;return Math.round(d/a.length*100);}
+const tabMeta={
+ checklist:{label:'Milestones',type:'bar',fn:pctChecks},
+ leetcode:{label:'LeetCode',type:'bar',fn:pctLeet},
+ apps:{label:'Applications',type:'count',fn:()=>(state.apps||[]).length},
+ star:{label:'STAR Bank',type:'bar',fn:pctStar},
+ mlpath:{label:'AI/ML Path',type:'bar',fn:pctMlp},
+ network:{label:'Network',type:'count',fn:()=>(state.contacts||[]).length},
+ visa:{label:'Visa',type:'bar',fn:pctVisaO1},
+};
+function updateTabIndicators(){
+ document.querySelectorAll('#tabs .tab').forEach(t=>{
+   const m=tabMeta[t.dataset.p]; if(!m) return;
+   const v=m.fn();
+   t.innerHTML = m.type==='bar'
+     ? `${m.label}<span class="tprog" title="${v}% complete"><i style="width:${v}%"></i></span>`
+     : `${m.label}${v?`<span class="tcount">${v}</span>`:''}`;
+ });
+}
+
+renderRail();renderCounts();renderPhases();renderLC();renderLCList();renderTiles();renderApps();renderStar();renderMlPath();renderNet();renderVisa();renderTL();updateTabIndicators();
 loadAutoCounts();
 window.addEventListener('resize',()=>{renderRail();renderMountain();});
 </script>
