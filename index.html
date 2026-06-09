@@ -185,6 +185,20 @@
   .lc-item.done a{text-decoration:line-through;color:var(--grey)}
   .lc-item .mli{font-size:13.5px;color:var(--ink)}
   .lc-item.done .mli{text-decoration:line-through;color:var(--grey)}
+  /* evidence / proof controls */
+  .proof{display:inline-flex;align-items:center;gap:5px;margin-left:auto;flex:0 0 auto;white-space:nowrap}
+  button.proof.add{border:1px dashed var(--line);background:transparent;color:#B9A7AE;font-size:10px;font-weight:700;
+    padding:2px 8px;border-radius:999px;cursor:pointer}
+  button.proof.add:hover{border-color:var(--rose);color:var(--rose)}
+  .proof.set a{font-size:10px;font-weight:700;color:var(--blue);text-decoration:none;background:var(--soft);padding:3px 8px;border-radius:999px}
+  .proof.set a:hover{text-decoration:underline}
+  .proof-edit{border:0;background:transparent;color:#C2A9B0;cursor:pointer;font-size:11px;padding:0 1px;line-height:1}
+  .proof-edit:hover{color:var(--blue)}
+  .proof-ver{border:0;background:var(--soft);color:var(--grey);font-size:9.5px;font-weight:800;padding:2px 7px;border-radius:999px;cursor:pointer}
+  .proof-ver.on{background:#DFF5E1;color:#1D8A3A}
+  .lc-prof{margin-top:12px;font-size:12px;color:var(--grey)}
+  .lc-prof a{color:var(--blue);font-weight:700;text-decoration:none}
+  .lc-prof a:hover{text-decoration:underline}
   /* networking status pills */
   .st-net0{background:var(--soft);color:var(--grey)}
   .st-net1{background:#E7F0FA;color:#1B6CA8}
@@ -439,6 +453,7 @@
           <div class="miles" id="lcMiles"></div>
         </div>
       </div>
+      <div class="lc-prof" id="lcProf"></div>
     </div>
     <div class="card">
       <h2>Starter problem set</h2>
@@ -546,7 +561,7 @@ const KEY='hanhan_faang_v1';
 let state=load();
 function load(){try{return JSON.parse(localStorage.getItem(KEY))||{}}catch(e){return {}}}
 /* the slice of state that is SHARED in the cloud (UI prefs like 'collapsed' stay local) */
-function cloudState(){return {checks:state.checks,lc:state.lc,lcDone:state.lcDone,apps:state.apps,star:state.star,mlDone:state.mlDone,contacts:state.contacts,visaDone:state.visaDone}}
+function cloudState(){return {checks:state.checks,lc:state.lc,lcDone:state.lcDone,apps:state.apps,star:state.star,mlDone:state.mlDone,contacts:state.contacts,visaDone:state.visaDone,proof:state.proof,lcProfile:state.lcProfile}}
 function save(){
   localStorage.setItem(KEY,JSON.stringify(state));
   if(window.CloudSync && window.CloudSync.save) window.CloudSync.save(cloudState());
@@ -562,11 +577,14 @@ window.applyRemoteState=function(d){
   if(d.lcDone && typeof d.lcDone==='object') state.lcDone=d.lcDone;
   if(d.mlDone && typeof d.mlDone==='object') state.mlDone=d.mlDone;
   if(d.visaDone && typeof d.visaDone==='object') state.visaDone=d.visaDone;
+  if(d.proof && typeof d.proof==='object') state.proof=d.proof;
+  if(typeof d.lcProfile==='string') state.lcProfile=d.lcProfile;
   if(Array.isArray(d.contacts)) state.contacts=d.contacts;
   if(Array.isArray(d.apps)) state.apps=d.apps;
   if(Array.isArray(d.star)) state.star=d.star;
   localStorage.setItem(KEY,JSON.stringify(state));
   renderPhases();renderLC();renderLCList();renderTiles();renderApps();renderStar();renderMlPath();renderNet();renderVisa();
+  try{ renderLcProfile(); }catch(e){}
   try{ updateTabIndicators(); }catch(e){}
 };
 window.addEventListener('cloud-status',e=>{
@@ -835,8 +853,9 @@ function renderPhases(){
    div.innerHTML=`<div class="phase-h"><span class="chev">▼</span><span class="ttl">${ph.name}</span><span class="pct">${done}/${total} · ${pct}%</span></div>
    <div class="items">${ph.items.map((it,i)=>{
      const k=ph.id+'_'+i,ck=state.checks[k];
+     const proof=(it[0]==='port'||it[0]==='intern')?proofHtml('ms:'+k):'';
      return `<div class="item ${ck?'done':''}"><input type="checkbox" ${ck?'checked':''} data-k="${k}">
-       <label data-k="${k}"><span class="tag ${tagClass[it[0]]}">${tagName[it[0]]}</span>${it[1]}</label></div>`;
+       <label data-k="${k}"><span class="tag ${tagClass[it[0]]}">${tagName[it[0]]}</span>${it[1]}</label>${proof}</div>`;
    }).join('')}</div>`;
    div.querySelector('.phase-h').onclick=()=>{state.collapsed[ph.id]=!state.collapsed[ph.id];save();renderPhases()};
    div.querySelectorAll('input,label').forEach(x=>x.onclick=(e)=>{
@@ -845,6 +864,7 @@ function renderPhases(){
    });
    host.appendChild(div);
  });
+ wireProof(host, renderPhases);
  renderOverview();
  renderMountain();
 }
@@ -1235,6 +1255,50 @@ const mlPath=[
  ]],
 ];
 state.mlDone=state.mlDone||{};
+/* ---------- EVIDENCE / PROOF (attach a link to validate a task) ---------- */
+state.proof=state.proof||{};   // key -> {url, verified}
+function proofHtml(key){
+ const p=state.proof[key]||{};
+ if(p.url){
+   return `<span class="proof set">
+     <a href="${esc(p.url)}" target="_blank" rel="noopener" title="${esc(p.url)}">proof ↗</a>
+     <button class="proof-edit" data-proofedit="${esc(key)}" title="Edit link">✎</button>
+     <button class="proof-ver ${p.verified?'on':''}" data-proofver="${esc(key)}" title="${p.verified?'Verified — tap to unverify':'Mark as verified'}">${p.verified?'✓':'verify'}</button>
+   </span>`;
+ }
+ return `<button class="proof add" data-proofadd="${esc(key)}" title="Attach a GitHub repo, deployed URL, or image link as proof">+ proof</button>`;
+}
+function wireProof(host, rerender){
+ host.querySelectorAll('[data-proofadd],[data-proofedit]').forEach(b=>b.onclick=(e)=>{
+   e.preventDefault(); e.stopPropagation();
+   const key=b.dataset.proofadd||b.dataset.proofedit;
+   const cur=(state.proof[key]||{}).url||'';
+   const v=prompt('Paste a link as proof — GitHub repo, deployed URL, or an image link. (Blank to remove.)', cur);
+   if(v===null) return;
+   if(!v.trim()) delete state.proof[key];
+   else state.proof[key]=Object.assign({},state.proof[key],{url:v.trim()});
+   save(); if(rerender) rerender();
+ });
+ host.querySelectorAll('[data-proofver]').forEach(b=>b.onclick=(e)=>{
+   e.preventDefault(); e.stopPropagation();
+   const key=b.dataset.proofver;
+   state.proof[key]=Object.assign({},state.proof[key]);
+   state.proof[key].verified=!state.proof[key].verified;
+   save(); if(rerender) rerender();
+ });
+}
+/* LeetCode profile link */
+state.lcProfile=state.lcProfile||'';
+function renderLcProfile(){
+ const el=document.getElementById('lcProf'); if(!el) return;
+ const u=state.lcProfile;
+ el.innerHTML = u
+   ? `LeetCode profile: <a href="${esc(u)}" target="_blank" rel="noopener">${esc(u.replace(/^https?:\/\//,''))}</a> <button class="proof-edit" id="lcProfEdit" title="Edit">✎</button>`
+   : `<button class="proof add" id="lcProfAdd">+ add your LeetCode profile link (so progress is verifiable)</button>`;
+ const setIt=()=>{ const v=prompt('Paste your LeetCode profile URL (e.g. https://leetcode.com/u/yourname/):', u||''); if(v===null) return; state.lcProfile=v.trim(); save(); renderLcProfile(); };
+ const a=document.getElementById('lcProfAdd'), e=document.getElementById('lcProfEdit');
+ if(a) a.onclick=setIt; if(e) e.onclick=setIt;
+}
 function mlTotal(){return mlPath.reduce((a,g)=>a+g[1].length,0)}
 function renderMlPath(){
  const host=document.getElementById('mlList'); if(!host) return;
@@ -1243,10 +1307,11 @@ function renderMlPath(){
    return `<div class="lc-group"><div class="lc-group-h">${group}<span class="gp">${gd}/${items.length}</span></div>`+
     items.map((it,i)=>{const key=group+'_'+i,dn=!!state.mlDone[key];
       const label=it[1]?`<a href="${it[1]}" target="_blank" rel="noopener">${it[0]}</a><span class="ext">↗</span>`:`<span class="mli">${it[0]}</span>`;
-      return `<div class="lc-item ${dn?'done':''}"><input type="checkbox" ${dn?'checked':''} data-mlkey="${esc(key)}">${label}</div>`;
+      return `<div class="lc-item ${dn?'done':''}"><input type="checkbox" ${dn?'checked':''} data-mlkey="${esc(key)}">${label}${proofHtml('ml:'+key)}</div>`;
     }).join('')+`</div>`;
  }).join('');
  host.querySelectorAll('input[type=checkbox]').forEach(cb=>cb.onchange=()=>{state.mlDone[cb.dataset.mlkey]=cb.checked;save();renderMlPath();});
+ wireProof(host, renderMlPath);
  const done=Object.values(state.mlDone).filter(Boolean).length,total=mlTotal();
  const c=document.getElementById('mlSetCount'); if(c)c.textContent=`${done} / ${total} done`;
  const bar=document.getElementById('mlBar'); if(bar)bar.style.width=(total?done/total*100:0)+'%';
@@ -1304,8 +1369,9 @@ state.visaDone=state.visaDone||{};
 function renderVisaList(){
  const host=document.getElementById('visaList'); if(!host) return;
  host.innerHTML=visaItems.map((t,i)=>{const dn=!!state.visaDone['o'+i];
-   return `<div class="lc-item ${dn?'done':''}"><input type="checkbox" ${dn?'checked':''} data-vkey="o${i}"><span class="mli">${t}</span></div>`;}).join('');
+   return `<div class="lc-item ${dn?'done':''}"><input type="checkbox" ${dn?'checked':''} data-vkey="o${i}"><span class="mli">${t}</span>${proofHtml('o1:o'+i)}</div>`;}).join('');
  host.querySelectorAll('input[type=checkbox]').forEach(cb=>cb.onchange=()=>{state.visaDone[cb.dataset.vkey]=cb.checked;save();renderVisaList();});
+ wireProof(host, renderVisaList);
  const done=Object.values(state.visaDone).filter(Boolean).length,total=visaItems.length;
  const c=document.getElementById('visaSetCount'); if(c)c.textContent=`${done} / ${total} done`;
  const bar=document.getElementById('visaBar'); if(bar)bar.style.width=(total?done/total*100:0)+'%';
@@ -1343,7 +1409,7 @@ function updateTabIndicators(){
  });
 }
 
-renderRail();renderCounts();renderPhases();renderLC();renderLCList();renderTiles();renderApps();renderStar();renderMlPath();renderNet();renderVisa();renderTL();updateTabIndicators();
+renderRail();renderCounts();renderPhases();renderLC();renderLcProfile();renderLCList();renderTiles();renderApps();renderStar();renderMlPath();renderNet();renderVisa();renderTL();updateTabIndicators();
 loadAutoCounts();
 window.addEventListener('resize',()=>{renderRail();renderMountain();});
 </script>
