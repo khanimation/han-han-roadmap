@@ -133,6 +133,22 @@
   .bars .lab b{color:var(--grey);font-weight:600}
   .track{height:9px;background:var(--soft);border-radius:6px;overflow:hidden}
   .fill{height:100%;background:linear-gradient(90deg,var(--teal),var(--blue));border-radius:6px;transition:width .5s}
+  /* year progress rows */
+  .yearrow{display:flex;align-items:center;gap:14px;padding:12px 14px;border:1px solid var(--line);border-radius:14px;margin-bottom:10px;background:#fff}
+  .yearrow.hit{border-color:#9BD3A6;background:#F3FBF4}
+  .yearrow .ylabel{flex:0 0 200px;min-width:0}
+  .yearrow .ylabel b{display:block;font-size:15px;color:var(--navy);font-weight:800}
+  .yearrow .ylabel span{font-size:11.5px;color:var(--grey)}
+  .yearrow .ytrack{flex:1;height:12px;background:var(--soft);border-radius:7px;overflow:hidden}
+  .yearrow .yfill{height:100%;width:0;background:linear-gradient(90deg,#FFB7C5,#E08DA0);border-radius:7px;transition:width .6s}
+  .yearrow.hit .yfill{background:linear-gradient(90deg,#7FD08C,#2FA36B)}
+  .yearrow .ypct{flex:0 0 auto;text-align:right;font-size:18px;font-weight:800;color:var(--navy);min-width:64px}
+  .yearrow .ypct small{display:block;font-size:10.5px;font-weight:700;color:var(--grey)}
+  .yearrow.hit .ypct small{color:#2FA36B}
+  @media(max-width:560px){.yearrow{flex-wrap:wrap}.yearrow .ylabel{flex-basis:100%}.yearrow .ytrack{flex:1}}
+  /* grade status chip in header */
+  .grade-status{display:block;margin-top:8px;font-size:11.5px;color:#9A878C}
+  .grade-status b{color:var(--navy)}
   /* checklist */
   .phase{margin-bottom:8px}
   .phase-h{display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px 4px;user-select:none}
@@ -363,7 +379,8 @@
     <p class="eyebrow">Roadmap to FAANG · Accountability Tracker</p>
     <h1>Han Han Vu Nguyen</h1>
     <p class="sub">SWE / SD + AI role on the West Coast · six figures · by Summer 2029</p>
-    <div class="who">Shared with <b>Han Han</b>, <b>Trang</b> &amp; <b>Khan</b> · update weekly (Sun) · review monthly <span id="syncChip" class="sync-chip">● On this device</span></div>
+    <div class="who">Shared with <b>Han Han</b>, <b>Trang</b> &amp; <b>Khan</b> · update weekly (Sun) <span id="syncChip" class="sync-chip">● On this device</span></div>
+    <div class="grade-status" id="gradeStatus"></div>
     <div class="counts" id="counts"></div>
   </div>
 </header>
@@ -402,24 +419,9 @@
     </div>
     <div class="card">
       <h2>Where things stand</h2>
-      <p class="hint">Auto-calculated from your milestones and LeetCode counter. Everything saves in this browser.</p>
-      <div class="ov">
-        <div class="ring-wrap">
-          <svg class="ring" width="132" height="132" viewBox="0 0 132 132">
-            <circle cx="66" cy="66" r="56" fill="none" stroke="#FFEEF2" stroke-width="13"/>
-            <circle id="ringFill" cx="66" cy="66" r="56" fill="none" stroke="#E08DA0" stroke-width="13"
-              stroke-linecap="round" stroke-dasharray="351.9" stroke-dashoffset="351.9"
-              transform="rotate(-90 66 66)"/>
-            <text id="ringPct" x="66" y="72" text-anchor="middle" font-size="26" font-weight="800" fill="#1F2A1B">0%</text>
-          </svg>
-          <div>
-            <div style="font-size:13px;color:var(--grey)">Overall milestones complete</div>
-            <div class="bigp"><span id="ovDone">0</span><span style="font-size:18px;color:var(--grey)"> / <span id="ovTotal">0</span></span></div>
-            <div style="font-size:12.5px;color:var(--grey);margin-top:4px">Keep the weekly cadence and this number takes care of itself.</div>
-          </div>
-        </div>
-        <div class="bars" id="pillarBars"></div>
-      </div>
+      <p class="hint">Three one-year pushes. The goal is to finish each year at <span class="lc-strong">100%</span> — then the FAANG offer takes care of itself.</p>
+      <div id="yearBars"></div>
+      <div class="bars" id="pillarBars" style="margin-top:18px"></div>
     </div>
     <div class="card">
       <h2>The one thing that matters most</h2>
@@ -601,7 +603,7 @@ let flashT;function flash(){const n=document.getElementById('saveNote');n.classL
 
 /* ---------- DATA ---------- */
 const phases=[
- {id:'q1',name:'Q1 · Summer 2026 — Foundation + Transfer',items:[
+ {id:'q1',year:1,name:'Q1 · Summer 2026 — Foundation + Transfer',items:[
    ['school','Submit UT Dallas transfer application'],
    ['school','Meet UTD CS advisor; map transferable credits'],
    ['algo','Pick ONE interview language (Python or Java) and commit'],
@@ -611,7 +613,7 @@ const phases=[
    ['port','Clean GitHub: pin 100-AI-agents project with full README + demo'],
    ['intern','Build target list of 40–60 Summer 2027 internships'],
  ]},
- {id:'q2',name:'Q2 · Fall 2026 — First UTD Semester + Apply',items:[
+ {id:'q2',year:1,name:'Q2 · Fall 2026 — First UTD Semester + Apply',items:[
    ['school','Start strong at UTD; protect first-semester GPA'],
    ['school','Join a CS / AI student org (ACM, AI club)'],
    ['algo','Linked lists, stacks/queues, trees, recursion'],
@@ -620,7 +622,7 @@ const phases=[
    ['intern','Apply early + in volume to Summer 2027 roles (Jul–Oct window)'],
    ['intern','Apply to Google the week its short window opens'],
  ]},
- {id:'q3',name:'Q3 · Spring 2027 — Interviews + Land Internship',items:[
+ {id:'q3',year:1,name:'Q3 · Spring 2027 — Interviews + Land Internship',items:[
    ['school','Take data-structures-heavy + intro ML course; GPA ≥ 3.7'],
    ['algo','Graphs, dynamic programming, sorting/searching'],
    ['algo','Reach ~200 LeetCode total'],
@@ -629,16 +631,18 @@ const phases=[
    ['port','Strong LinkedIn (and optional personal site)'],
    ['intern','Interview + accept best Summer 2027 offer (or research/project)'],
  ]},
- {id:'q4',name:'Q4 · Summer 2027 (bridge) — Execute + Line Up FAANG',items:[
+ {id:'q4',year:2,name:'Q4 · Summer 2027 (bridge) — Execute + Line Up FAANG',items:[
    ['intern','★ Apply to Summer 2028 FAANG internships (Jul–Oct 2027)'],
    ['intern','Do excellent internship work; get a strong reference'],
    ['algo','Maintain 3–5 problems/week — don’t go cold'],
    ['school','Plan Fall 2027 load: upper-div CS + AI electives'],
    ['visa','Confirm CPT authorization through UTD ISSO before working'],
  ]},
- {id:'beyond',name:'Beyond the focus year — to graduation (May 2029)',items:[
+ {id:'year2',year:2,name:'Year 2 · Fall 2027–Spring 2028 — Land the FAANG internship',items:[
    ['intern','Fall 2027: FAANG interview loops + mocks'],
-   ['intern','Spring 2028: convert to Summer 2028 FAANG internship offer'],
+   ['intern','Spring 2028: convert to a Summer 2028 FAANG internship offer'],
+ ]},
+ {id:'year3',year:3,name:'Year 3 · Summer 2028–May 2029 — The offer & graduation',items:[
    ['intern','Summer 2028: perform for a return offer'],
    ['intern','Fall 2028: accept return offer OR run new-grad recruiting'],
    ['school','Spring 2029: finish capstone; graduate'],
@@ -783,7 +787,7 @@ function renderMountain(){
         <rect x="${bx-2}" y="${by+18} " width="118" height="21" rx="10.5" fill="#fff" stroke="#EFCBD9" stroke-width="1.6"/>
         <text x="${bx+57}" y="${by+32}" text-anchor="middle" font-size="11" font-weight="700" fill="#8A7B80">START · Jun 2026</text></g>`;
   // camp pennants at each phase start
-  const campNames=['Camp I','Camp II','Camp III','Camp IV','High camp'];
+  const campNames=['Camp I','Camp II','Camp III','Camp IV','Camp V','High camp'];
   phases.forEach((ph,pi)=>{
     const first=items.findIndex(x=>x.pi===pi); if(first<0)return;
     const [x,y]=pt(frac(first));
@@ -877,16 +881,23 @@ function resetChecks(){if(confirm('Clear all milestone checkmarks?')){state.chec
 
 /* ---------- OVERVIEW ---------- */
 function renderOverview(){
- let total=0,done=0;const byTag={algo:[0,0],port:[0,0],intern:[0,0],school:[0,0],visa:[0,0]};
+ const byTag={algo:[0,0],port:[0,0],intern:[0,0],school:[0,0],visa:[0,0]};
+ const yr={1:[0,0],2:[0,0],3:[0,0]};
  phases.forEach(ph=>ph.items.forEach((it,i)=>{
-   total++;byTag[it[0]][1]++;
-   if(state.checks[ph.id+'_'+i]){done++;byTag[it[0]][0]++}
+   byTag[it[0]][1]++;
+   const y=ph.year||1; yr[y][1]++;
+   if(state.checks[ph.id+'_'+i]){byTag[it[0]][0]++; yr[y][0]++;}
  }));
- const pct=total?Math.round(done/total*100):0;
- document.getElementById('ovDone').textContent=done;
- document.getElementById('ovTotal').textContent=total;
- document.getElementById('ringPct').textContent=pct+'%';
- const C=351.9;document.getElementById('ringFill').style.strokeDashoffset=C-(C*pct/100);
+ const yMeta={1:['Year 1','Jun 2026 – Jun 2027 · the focus year'],2:['Year 2','Jun 2027 – Jun 2028 · land the FAANG internship'],3:['Year 3','Jun 2028 – Jun 2029 · the offer & graduation']};
+ const yb=document.getElementById('yearBars');
+ if(yb) yb.innerHTML=[1,2,3].map(y=>{
+   const [d,t]=yr[y], p=t?Math.round(d/t*100):0, hit=(p===100);
+   return `<div class="yearrow ${hit?'hit':''}">
+     <div class="ylabel"><b>${yMeta[y][0]}</b><span>${yMeta[y][1]}</span></div>
+     <div class="ytrack"><div class="yfill" style="width:${p}%"></div></div>
+     <div class="ypct">${p}%<small>${d}/${t}${hit?' ✓':''}</small></div>
+   </div>`;
+ }).join('');
  const labels={algo:'Algorithms',port:'Portfolio',intern:'Internships',school:'School / Transfer',visa:'Visa'};
  document.getElementById('pillarBars').innerHTML=Object.keys(byTag).map(k=>{
    const [d,t]=byTag[k],p=t?Math.round(d/t*100):0;
@@ -1265,8 +1276,18 @@ let aiGrades={};               // key -> {grade,status,note} — published by Cl
 function loadGrades(){
  fetch('grades.json',{cache:'no-store'}).then(r=>r.ok?r.json():{}).then(d=>{
    aiGrades=d&&typeof d==='object'?d:{};
-   try{renderPhases();renderMlPath();renderVisaList();}catch(e){}
+   try{renderPhases();renderMlPath();renderVisaList();renderGradeStatus();}catch(e){}
  }).catch(()=>{});
+}
+function nextGradeDate(){
+ const n=new Date(), y=n.getFullYear(), m=n.getMonth(), d=n.getDate();
+ return d<15 ? new Date(y,m,15) : new Date(y,m+1,1);   // grades run on the 1st & 15th
+}
+function renderGradeStatus(){
+ const el=document.getElementById('gradeStatus'); if(!el) return;
+ const fmt=dt=>new Date(dt).toLocaleDateString('en-US',{month:'short',day:'numeric'});
+ const last=aiGrades._lastReviewed;
+ el.innerHTML=`Graded by Claude (1st &amp; 15th) — last <b>${last?fmt(last+'T00:00:00'):'not yet'}</b> · next <b>${fmt(nextGradeDate())}</b>`;
 }
 function gradeBadge(key){
  const g=aiGrades[key];
@@ -1420,7 +1441,7 @@ function updateTabIndicators(){
  });
 }
 
-renderRail();renderCounts();renderPhases();renderLC();renderLcProfile();renderLCList();renderTiles();renderApps();renderStar();renderMlPath();renderNet();renderVisa();renderTL();updateTabIndicators();
+renderRail();renderCounts();renderPhases();renderLC();renderLcProfile();renderLCList();renderTiles();renderApps();renderStar();renderMlPath();renderNet();renderVisa();renderTL();updateTabIndicators();renderGradeStatus();
 loadAutoCounts();loadGrades();
 window.addEventListener('resize',()=>{renderRail();renderMountain();});
 </script>
