@@ -196,6 +196,10 @@
   .proof-edit:hover{color:var(--blue)}
   .proof-ver{border:0;background:var(--soft);color:var(--grey);font-size:9.5px;font-weight:800;padding:2px 7px;border-radius:999px;cursor:pointer}
   .proof-ver.on{background:#DFF5E1;color:#1D8A3A}
+  .g-badge{font-size:9.5px;font-weight:800;padding:2px 7px;border-radius:999px;cursor:help;white-space:nowrap}
+  .g-ok{background:#DFF5E1;color:#1D8A3A}
+  .g-warn{background:#FFF1DA;color:#9A6B06}
+  .g-pend{background:var(--soft);color:#9A878C}
   .lc-prof{margin-top:12px;font-size:12px;color:var(--grey)}
   .lc-prof a{color:var(--blue);font-weight:700;text-decoration:none}
   .lc-prof a:hover{text-decoration:underline}
@@ -1256,34 +1260,41 @@ const mlPath=[
 ];
 state.mlDone=state.mlDone||{};
 /* ---------- EVIDENCE / PROOF (attach a link to validate a task) ---------- */
-state.proof=state.proof||{};   // key -> {url, verified}
+state.proof=state.proof||{};   // key -> {url}
+let aiGrades={};               // key -> {grade,status,note} — published by Claude in grades.json
+function loadGrades(){
+ fetch('grades.json',{cache:'no-store'}).then(r=>r.ok?r.json():{}).then(d=>{
+   aiGrades=d&&typeof d==='object'?d:{};
+   try{renderPhases();renderMlPath();renderVisaList();}catch(e){}
+ }).catch(()=>{});
+}
+function gradeBadge(key){
+ const g=aiGrades[key];
+ if(!g) return `<span class="g-badge g-pend" title="Submitted — Claude will grade this on the next review pass">awaiting review</span>`;
+ const cls = g.status==='verified'?'g-ok':(g.status==='needs-work'?'g-warn':'g-pend');
+ const lab = g.grade ? `AI: ${esc(g.grade)}` : (g.status==='verified'?'AI ✓':(g.status==='needs-work'?'needs work':'reviewing'));
+ return `<span class="g-badge ${cls}" title="${esc(g.note||'Graded by Claude')}">${lab}</span>`;
+}
 function proofHtml(key){
  const p=state.proof[key]||{};
  if(p.url){
    return `<span class="proof set">
      <a href="${esc(p.url)}" target="_blank" rel="noopener" title="${esc(p.url)}">proof ↗</a>
      <button class="proof-edit" data-proofedit="${esc(key)}" title="Edit link">✎</button>
-     <button class="proof-ver ${p.verified?'on':''}" data-proofver="${esc(key)}" title="${p.verified?'Verified — tap to unverify':'Mark as verified'}">${p.verified?'✓':'verify'}</button>
+     ${gradeBadge(key)}
    </span>`;
  }
- return `<button class="proof add" data-proofadd="${esc(key)}" title="Attach a GitHub repo, deployed URL, or image link as proof">+ proof</button>`;
+ return `<button class="proof add" data-proofadd="${esc(key)}" title="Attach a GitHub repo, deployed URL, or image link — Claude will grade it">+ proof</button>`;
 }
 function wireProof(host, rerender){
  host.querySelectorAll('[data-proofadd],[data-proofedit]').forEach(b=>b.onclick=(e)=>{
    e.preventDefault(); e.stopPropagation();
    const key=b.dataset.proofadd||b.dataset.proofedit;
    const cur=(state.proof[key]||{}).url||'';
-   const v=prompt('Paste a link as proof — GitHub repo, deployed URL, or an image link. (Blank to remove.)', cur);
+   const v=prompt('Paste a link as proof — GitHub repo, deployed URL, or an image link. Claude grades it on the next review. (Blank to remove.)', cur);
    if(v===null) return;
    if(!v.trim()) delete state.proof[key];
    else state.proof[key]=Object.assign({},state.proof[key],{url:v.trim()});
-   save(); if(rerender) rerender();
- });
- host.querySelectorAll('[data-proofver]').forEach(b=>b.onclick=(e)=>{
-   e.preventDefault(); e.stopPropagation();
-   const key=b.dataset.proofver;
-   state.proof[key]=Object.assign({},state.proof[key]);
-   state.proof[key].verified=!state.proof[key].verified;
    save(); if(rerender) rerender();
  });
 }
@@ -1410,7 +1421,7 @@ function updateTabIndicators(){
 }
 
 renderRail();renderCounts();renderPhases();renderLC();renderLcProfile();renderLCList();renderTiles();renderApps();renderStar();renderMlPath();renderNet();renderVisa();renderTL();updateTabIndicators();
-loadAutoCounts();
+loadAutoCounts();loadGrades();
 window.addEventListener('resize',()=>{renderRail();renderMountain();});
 </script>
 

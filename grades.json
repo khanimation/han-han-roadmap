@@ -1,0 +1,5 @@
+{
+  "_about": "Published by Claude (the grader). Keys match proof items in the tracker (ml:, o1:, ms:). Each value: {grade, status, note}. status = verified | needs-work | pending. The tracker fetches this on load and shows the grade/verdict automatically — no manual flipping.",
+  "_lastReviewed": "2026-06-08",
+  "_example": {"grade": "A-", "status": "verified", "note": "Clean RAG pipeline, deployed with a working URL, solid README. Add eval metrics to reach A."}
+}
