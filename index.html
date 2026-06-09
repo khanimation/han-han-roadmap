@@ -414,7 +414,7 @@
   <div class="panel" id="leetcode">
     <div class="card">
       <h2>LeetCode counter</h2>
-      <p class="hint">Target: ~250–300 quality problems (each reviewed) by June 2027. Consistency beats cramming.</p>
+      <p class="hint">Rebalanced per a Meta engineer's 2026 advice: keep this to <span class="lc-strong">~10–15% of your time</span> while you build AI projects, then <span class="lc-strong">ramp hard in the ~2–3 months before each interview cycle</span>. FAANG still tests DSA, so don't drop it — just don't let it crowd out building. Aim for ~200+ reviewed problems by the time you interview.</p>
       <div class="lc">
         <div>
           <div class="big"><span id="lcNum">0</span></div>
@@ -451,7 +451,7 @@
     </div>
     <div class="card">
       <h2>Internship / job applications</h2>
-      <p class="hint">Apply the week each posting opens — most use rolling review. Log every one.</p>
+      <p class="hint">Apply the week each posting opens — most use rolling review. Log every one. <b>Don't sleep on startups</b> (Y Combinator's Work at a Startup, Wellfound) — they still hire entry-level, you learn faster, and it's a strong on-ramp. <span class="lc-strong">F1 caveat:</span> confirm a startup will handle CPT/OPT and (ideally) sponsor before counting on it long-term — many small ones won't, so treat those as experience while you target sponsoring employers.</p>
       <table>
         <thead><tr><th style="width:24%">Company</th><th style="width:26%">Role</th><th style="width:16%">Applied</th><th style="width:22%">Status</th><th style="width:8%">Next</th><th></th></tr></thead>
         <tbody id="appBody"></tbody>
@@ -474,7 +474,7 @@
   <div class="panel" id="mlpath">
     <div class="card">
       <h2>AI/ML specialization path</h2>
-      <p class="hint">AI/ML is her edge — it's the most sponsorship-friendly specialty (scarce talent, more willingness to sponsor). Work through these stages alongside her CS degree. Check items off; links open free resources. <span id="mlSetCount"></span></p>
+      <p class="hint">AI/ML is her edge — the most sponsorship-friendly specialty (scarce talent, more willingness to sponsor). A current Meta engineer's 2026 take: <span class="lc-strong">build AI-native products and ship them publicly</span> — that portfolio opens more doors than grinding LeetCode right now. Mantra: <span class="lc-strong">build → ship → repeat</span>. Work the stages alongside her CS degree; links open free resources. <span id="mlSetCount"></span></p>
       <div class="track" style="height:9px;margin-bottom:6px"><div class="fill" id="mlBar" style="width:0%"></div></div>
       <div id="mlList"></div>
     </div>
@@ -1202,6 +1202,14 @@ const mlPath=[
    ['Hugging Face course','https://huggingface.co/learn'],
    ['Learn fine-tuning, embeddings & RAG',''],
    ['Ship a deployed LLM/agent app (extend the 120 agents)',''],
+ ]],
+ ['★ In-demand builds (ship these — Meta-engineer picks)',[
+   ['RAG system: retrieval over your own notes/knowledge base','https://www.pinecone.io/learn/retrieval-augmented-generation/'],
+   ['Autonomous agent that does a real multi-step workflow in your life',''],
+   ['Eval harness: inspect, score & self-correct an agent in production',''],
+   ['Ship every project publicly: GitHub repo + a deployed live URL',''],
+   ['Post a build on LinkedIn / X and gather feedback',''],
+   ['Find ranked, real-pain-point startup ideas (IdeaBrowser)','https://ideabrowser.com/'],
  ]],
  ['MLOps & deployment',[
    ['Serve a model behind an API (FastAPI)','https://fastapi.tiangolo.com/'],
