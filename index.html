@@ -118,9 +118,7 @@
   .mtn-wrap{width:100%;overflow-x:auto;border-radius:14px;background:#FFF8FB}
   #mountain{width:70%;min-width:480px;max-width:720px;height:auto;display:block;margin:0 auto;border-radius:14px}
   #mountain path,#mountain line,#mountain rect,#mountain text,#mountain ellipse,#mountain circle{pointer-events:none}
-  #mountain [data-key]{cursor:pointer}
-  #mountain [data-key] circle{pointer-events:auto}
-  #mountain [data-key]:hover .node{stroke-width:3.4}
+  #mountain [data-key]{cursor:default}
   .mtn-legend{display:flex;flex-wrap:wrap;gap:9px 16px;margin-top:14px;justify-content:center}
   .mtn-legend span{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--grey)}
   .mtn-legend i{width:11px;height:11px;border-radius:50%;display:inline-block}
@@ -458,7 +456,7 @@
     </div>
     <div class="card">
       <h2>The climb to FAANG</h2>
-      <p class="hint">Every milestone Han Han checks moves her up the mountain. Tap a waypoint to tick it off. The summit is a signed FAANG offer.</p>
+      <p class="hint">The climber rises on her own as Han Han completes tasks anywhere in the tracker — milestones, LeetCode, the AI/ML path, and visa proof. No clicking needed; the summit is a signed FAANG offer.</p>
       <div class="mtn-wrap"><svg id="mountain" viewBox="0 0 1000 560" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Mountain climb progress"></svg></div>
       <div class="mtn-legend" id="mtnLegend"></div>
     </div>
@@ -774,6 +772,16 @@ function openRailDetail(mi){
 
 /* ---------- MOUNTAIN CLIMB ---------- */
 const tagHex={algo:'#E08DA0',port:'#7A5AC2',intern:'#E0A21C',school:'#6E9456',visa:'#C0395A'};
+/* total completion across every task type — drives the climber automatically */
+function overallProgress(){
+ const dv=(typeof derivedSet==='function')?derivedSet():new Set();
+ let done=0,total=0;
+ phases.forEach(ph=>ph.items.forEach((it,i)=>{const k=ph.id+'_'+i;total++;if(state.checks&&(state.checks[k]||dv.has(k)))done++;}));
+ if(typeof lcTotal==='function'){ total+=lcTotal(); done+=lcDoneCount(); }
+ if(typeof mlTotal==='function'){ total+=mlTotal(); done+=Object.values(state.mlDone||{}).filter(Boolean).length; }
+ if(typeof visaItems!=='undefined'){ total+=visaItems.length; done+=Object.values(state.visaDone||{}).filter(Boolean).length; }
+ return {done,total,pct: total?Math.round(done/total*100):0};
+}
 function smoothPath(pts){
   let d=`M ${pts[0][0]},${pts[0][1]}`;
   for(let i=0;i<pts.length-1;i++){
@@ -802,7 +810,8 @@ function renderMountain(){
   const items=[]; phases.forEach((ph,pi)=>ph.items.forEach((it,ii)=>items.push({key:ph.id+'_'+ii,tag:it[0],text:it[1],pi})));
   const N=items.length;
   const done=items.filter(x=>state.checks[x.key]||derived.has(x.key)).length;
-  const pct=Math.round(done/N*100);
+  const op=overallProgress();          // climber tracks ALL completed tasks, not just nodes
+  const pct=op.pct;
   const anchors=[[92,508],[300,452],[166,392],[372,330],[236,274],[458,222],[346,176],[600,150],[772,96]];
   const trailD=smoothPath(anchors);
   const OUT='#D79CAE';
@@ -839,7 +848,7 @@ function renderMountain(){
   const base=svg.querySelector('#trailBase'); const len=base.getTotalLength();
   const pt=f=>{const p=base.getPointAtLength(len*Math.max(0,Math.min(1,f)));return [p.x,p.y]};
   const frac=i=>0.05+(i/(N-1))*0.88;
-  const climberFrac=Math.max(0.04,Math.min(0.97,0.05+(done/N)*0.88));
+  const climberFrac=Math.max(0.04,Math.min(0.97,0.05+(op.pct/100)*0.92));
   let g='';
   // candy progress trail
   g+=`<path d="${trailD}" fill="none" stroke="url(#prog)" stroke-width="6" stroke-linecap="round"
@@ -896,12 +905,10 @@ function renderMountain(){
         <line x1="${cx+12}" y1="${cy-18}" x2="${cx+12}" y2="${cy-31}" stroke="#C45E7C" stroke-width="1.6"/>
         <path d="M${cx+12},${cy-31} L${cx+23},${cy-28} L${cx+12},${cy-25} Z" fill="#FFD98A" stroke="#C45E7C" stroke-width="0.9"/></g>`;
   const bxx=Math.max(60,Math.min(940,cx));
-  g+=`<g><rect x="${bxx-46}" y="${cy-70}" width="92" height="27" rx="13.5" fill="#fff" stroke="#E7C3D0" stroke-width="2"/>
-        <text x="${bxx}" y="${cy-51}" font-size="13" font-weight="800" fill="#C45E7C" text-anchor="middle">${pct}% · ${done}/${N}</text>
+  g+=`<g><rect x="${bxx-56}" y="${cy-70}" width="112" height="27" rx="13.5" fill="#fff" stroke="#E7C3D0" stroke-width="2"/>
+        <text x="${bxx}" y="${cy-51}" font-size="13" font-weight="800" fill="#C45E7C" text-anchor="middle">${op.pct}% · ${op.done}/${op.total}</text>
         <path d="M${bxx-5},${cy-44} L${bxx+5},${cy-44} L${bxx},${cy-37} Z" fill="#fff"/></g>`;
   base.insertAdjacentHTML('afterend',g);
-  // click to toggle
-  svg.querySelectorAll('[data-key]').forEach(el=>el.addEventListener('click',()=>toggle(el.getAttribute('data-key'))));
   // legend
   const lg=document.getElementById('mtnLegend');
   if(lg) lg.innerHTML=Object.keys(tagHex).map(k=>`<span><i style="background:${tagHex[k]}"></i>${tagName[k]}</span>`).join('')
@@ -1467,7 +1474,7 @@ function renderMlPath(){
       return `<div class="lc-item ${dn?'done':''}"><input type="checkbox" ${dn?'checked':''} data-mlkey="${esc(key)}">${label}${proofHtml('ml:'+key)}</div>`;
     }).join('')+`</div>`;
  }).join('');
- host.querySelectorAll('input[type=checkbox]').forEach(cb=>cb.onchange=()=>{state.mlDone[cb.dataset.mlkey]=cb.checked;save();renderMlPath();});
+ host.querySelectorAll('input[type=checkbox]').forEach(cb=>cb.onchange=()=>{state.mlDone[cb.dataset.mlkey]=cb.checked;save();renderMlPath();refreshLinked();});
  wireProof(host, renderMlPath);
  const done=Object.values(state.mlDone).filter(Boolean).length,total=mlTotal();
  const c=document.getElementById('mlSetCount'); if(c)c.textContent=`${done} / ${total} done`;
@@ -1527,7 +1534,7 @@ function renderVisaList(){
  const host=document.getElementById('visaList'); if(!host) return;
  host.innerHTML=visaItems.map((t,i)=>{const dn=!!state.visaDone['o'+i];
    return `<div class="lc-item ${dn?'done':''}"><input type="checkbox" ${dn?'checked':''} data-vkey="o${i}"><span class="mli">${t}</span>${proofHtml('o1:o'+i)}</div>`;}).join('');
- host.querySelectorAll('input[type=checkbox]').forEach(cb=>cb.onchange=()=>{state.visaDone[cb.dataset.vkey]=cb.checked;save();renderVisaList();});
+ host.querySelectorAll('input[type=checkbox]').forEach(cb=>cb.onchange=()=>{state.visaDone[cb.dataset.vkey]=cb.checked;save();renderVisaList();refreshLinked();});
  wireProof(host, renderVisaList);
  const done=Object.values(state.visaDone).filter(Boolean).length,total=visaItems.length;
  const c=document.getElementById('visaSetCount'); if(c)c.textContent=`${done} / ${total} done`;
