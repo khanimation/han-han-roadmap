@@ -89,6 +89,31 @@
   .rail-mark.down{transform:translate(-50%,-7px)}
   .rail-mark.down .lab{margin-top:8px}
   @media(max-width:760px){.rail-mark{width:72px}.rail-mark .lab{font-size:9.5px}.rail-mark .dte{font-size:9px}}
+  .rail-mark{cursor:pointer}
+  .rail-mark .dot{transition:box-shadow .15s,transform .15s}
+  .rail-mark:hover .dot{transform:scale(1.15)}
+  .rail-mark.sel .dot{box-shadow:0 0 0 3px #fff,0 0 0 5px var(--rose)}
+  /* rail detail overlay (folds in the old Timeline) */
+  .rail-pop{position:relative;margin:4px auto 0;max-width:580px;background:#fff;border:1px solid var(--line);border-radius:14px;
+    box-shadow:var(--shadow);padding:13px 16px 12px;animation:fade .2s ease}
+  .rail-pop[hidden]{display:none}
+  .rail-pop::before{content:'';position:absolute;top:-8px;left:var(--arrow,50%);transform:translateX(-50%) rotate(45deg);
+    width:14px;height:14px;background:#fff;border-left:1px solid var(--line);border-top:1px solid var(--line)}
+  .rd-head{display:flex;align-items:baseline;gap:10px;margin-bottom:6px;border-bottom:1px solid var(--line);padding-bottom:8px}
+  .rd-head b{color:var(--navy);font-size:15px}
+  .rd-head span{color:var(--grey);font-size:12px}
+  .rd-x{margin-left:auto;border:0;background:0;color:#C2A9B0;font-size:18px;cursor:pointer;line-height:1;padding:0 2px}
+  .rd-x:hover{color:var(--blue)}
+  .rd-row{display:flex;gap:14px;padding:8px 0}
+  .rd-row+.rd-row{border-top:1px dashed var(--line)}
+  .rd-when{flex:0 0 100px;font-weight:700;color:var(--blue);font-size:12.5px}
+  .rd-body{flex:1;min-width:0}
+  .rd-line{font-size:13px;margin:3px 0;color:var(--ink);line-height:1.45}
+  .rd-tag{display:inline-block;font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.03em;
+    border-radius:999px;padding:1px 7px;margin-right:7px;vertical-align:middle}
+  .rd-aca{background:#EAF1E6;color:#5E7A4E}.rd-car{background:#FFE6EC;color:#C45E7C}.rd-mil{background:#FFF1DA;color:#9A6B06}
+  .rd-goal{font-size:13.5px;color:var(--navy);font-weight:600}
+  @media(max-width:560px){.rd-row{flex-direction:column;gap:2px}.rd-when{flex-basis:auto}}
   /* mountain climb */
   .mtn-wrap{width:100%;overflow-x:auto;border-radius:14px;background:#FFF8FB}
   #mountain{width:100%;min-width:700px;height:auto;display:block;border-radius:14px}
@@ -415,14 +440,13 @@
     <div class="tab" data-p="mlpath">AI/ML Path</div>
     <div class="tab" data-p="network">Network</div>
     <div class="tab" data-p="visa">Visa</div>
-    <div class="tab" data-p="timeline">Timeline</div>
   </div>
 
   <!-- OVERVIEW -->
   <div class="panel active" id="overview">
     <div class="card">
       <h2>The journey at a glance</h2>
-      <p class="hint">Today against the dates that matter. The marker moves as time passes.</p>
+      <p class="hint">Today against the dates that matter — the marker moves as time passes. <b>Tap any point</b> to see what's happening that semester (academics, career moves, and the milestone).</p>
       <div class="rail-scroll">
         <div class="rail-wrap">
           <div class="rail"><div class="rail-done" id="railDone"></div></div>
@@ -430,6 +454,7 @@
           <div id="railMarks"></div>
         </div>
       </div>
+      <div class="rail-pop" id="railPop" hidden></div>
     </div>
     <div class="card">
       <h2>The climb to FAANG</h2>
@@ -555,18 +580,6 @@
       <h2>Apply smart + key links</h2>
       <p class="hint" style="margin:0 0 10px">Target companies with strong sponsorship track records, mind the deadlines, and keep status clean (no gaps — work with ISSO).</p>
       <div class="tiles" id="visaLinks"></div>
-    </div>
-  </div>
-
-  <!-- TIMELINE -->
-  <div class="panel" id="timeline">
-    <div class="card">
-      <h2>Master timeline</h2>
-      <p class="hint">The spine of the plan. The recruiting cycle always precedes the summer it serves.</p>
-      <table>
-        <thead><tr><th>Period</th><th>Academic</th><th>Career / Skills</th><th>Key milestone</th></tr></thead>
-        <tbody id="tlBody"></tbody>
-      </table>
     </div>
   </div>
 
@@ -701,13 +714,13 @@ const keyDates=[
 /* ---------- HORIZONTAL RAIL ---------- */
 const railStart=new Date('2026-05-01'), railEnd=new Date('2029-07-15');
 const railMs=[
- {d:'2026-06-16',lab:'Focus year begins',cls:'first'},
- {d:'2026-08-26',lab:'Transfer to UTD'},
- {d:'2027-06-01',lab:'Internship #1'},
- {d:'2027-08-01',lab:'★ FAANG apps open',cls:'goal'},
- {d:'2028-06-01',lab:'FAANG internship'},
- {d:'2029-05-15',lab:'Graduate'},
- {d:'2029-07-01',lab:'West Coast start',cls:'goal'},
+ {d:'2026-06-16',lab:'Focus year begins',cls:'first',rows:[0]},
+ {d:'2026-08-26',lab:'Transfer to UTD',rows:[1]},
+ {d:'2027-06-01',lab:'Internship #1',rows:[2,3]},
+ {d:'2027-08-01',lab:'★ FAANG apps open',cls:'goal',rows:[4,5]},
+ {d:'2028-06-01',lab:'FAANG internship',rows:[6]},
+ {d:'2029-05-15',lab:'Graduate',rows:[7,8]},
+ {d:'2029-07-01',lab:'West Coast start',cls:'goal',rows:[]},
 ];
 const RAIL_INSET=58; // px, matches .rail left/right
 function pos(d){const t=new Date(d);return Math.max(0,Math.min(100,(t-railStart)/(railEnd-railStart)*100))}
@@ -720,9 +733,43 @@ function renderRail(){
  document.getElementById('railToday').style.left=bandLeft(tp);
  document.getElementById('railMarks').innerHTML=railMs.map((m,i)=>{
    const p=pos(m.d), passed=new Date(m.d)<=now, ud=i%2===0?'up':'down';
-   return `<div class="rail-mark ${ud} ${m.cls||''} ${passed?'passed':''}" style="left:${bandLeft(p)}">
+   return `<div class="rail-mark ${ud} ${m.cls||''} ${passed?'passed':''}" data-mi="${i}" style="left:${bandLeft(p)}">
      <span class="lab">${m.lab}</span><span class="dte">${fmt(m.d)}</span><span class="dot"></span></div>`;
  }).join('');
+ document.querySelectorAll('#railMarks .rail-mark').forEach(el=>el.onclick=()=>openRailDetail(+el.dataset.mi));
+ if(railSel>=0){ const cur=railSel; railSel=-1; openRailDetail(cur); }   // restore open state after a re-render
+}
+let railSel=-1;
+function railDetail(mi){
+ const m=railMs[mi];
+ let inner;
+ if(!m.rows||!m.rows.length){
+   inner=`<div class="rd-row"><div class="rd-when">Jul 2029</div><div class="rd-body"><div class="rd-goal">Relocate to the West Coast and start your six-figure SWE + AI role. 🎉</div></div></div>`;
+ } else {
+   inner=m.rows.map(ri=>{const t=timeline[ri]; if(!t) return '';
+     return `<div class="rd-row">
+       <div class="rd-when">${t[0]}</div>
+       <div class="rd-body">
+         ${t[1]&&t[1]!=='—'?`<div class="rd-line"><span class="rd-tag rd-aca">Academic</span>${t[1]}</div>`:''}
+         ${t[2]&&t[2]!=='—'?`<div class="rd-line"><span class="rd-tag rd-car">Career &amp; skills</span>${t[2]}</div>`:''}
+         ${t[3]?`<div class="rd-line"><span class="rd-tag rd-mil">Milestone</span><b>${t[3]}</b></div>`:''}
+       </div></div>`;}).join('');
+ }
+ return `<div class="rd-head"><b>${m.lab}</b><span>${fmt(m.d)}</span><button class="rd-x" data-rdx aria-label="close">×</button></div>${inner}`;
+}
+function openRailDetail(mi){
+ const pop=document.getElementById('railPop'); if(!pop) return;
+ const marks=document.querySelectorAll('#railMarks .rail-mark');
+ if(railSel===mi){ railSel=-1; pop.hidden=true; marks.forEach(m=>m.classList.remove('sel')); return; }
+ railSel=mi;
+ marks.forEach((m,j)=>m.classList.toggle('sel',+m.dataset.mi===mi));
+ pop.innerHTML=railDetail(mi); pop.hidden=false;
+ // anchor the arrow under the selected marker
+ const mk=[...marks].find(m=>+m.dataset.mi===mi);
+ if(mk){ const mr=mk.getBoundingClientRect(), pr=pop.getBoundingClientRect();
+   let pct=((mr.left+mr.width/2)-pr.left)/pr.width*100; pct=Math.max(4,Math.min(96,pct));
+   pop.style.setProperty('--arrow',pct+'%'); }
+ const x=pop.querySelector('[data-rdx]'); if(x) x.onclick=()=>{railSel=-1;pop.hidden=true;marks.forEach(m=>m.classList.remove('sel'));};
 }
 
 /* ---------- MOUNTAIN CLIMB ---------- */
@@ -1288,12 +1335,6 @@ function renderStar(){
 }
 function addStar(){state.star.push({t:'',s:'',ta:'',a:'',r:''});save();renderStar()}
 
-/* ---------- TIMELINE ---------- */
-function renderTL(){
- document.getElementById('tlBody').innerHTML=timeline.map(r=>
-  `<tr><td style="font-weight:700;color:var(--navy);white-space:nowrap">${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td style="color:var(--blue);font-weight:600">${r[3]}</td></tr>`).join('');
-}
-
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
 
 /* ---------- TABS ---------- */
@@ -1524,7 +1565,7 @@ function updateTabIndicators(){
  });
 }
 
-renderRail();renderCounts();renderPhases();renderLC();renderLcProfile();renderLCList();renderTiles();renderApps();renderStar();renderMlPath();renderNet();renderVisa();renderTL();updateTabIndicators();renderGradeStatus();
+renderRail();renderCounts();renderPhases();renderLC();renderLcProfile();renderLCList();renderTiles();renderApps();renderStar();renderMlPath();renderNet();renderVisa();updateTabIndicators();renderGradeStatus();
 loadAutoCounts();loadGrades();
 window.addEventListener('resize',()=>{renderRail();renderMountain();});
 </script>
