@@ -163,6 +163,10 @@
   .ov-item.done .ov-txt{text-decoration:line-through;color:var(--grey)}
   .ov-go{flex:0 0 auto;font-size:10.5px;font-weight:700;color:var(--rose);text-decoration:none;background:var(--soft);padding:3px 8px;border-radius:999px;white-space:nowrap}
   .ov-go:hover{background:#FFE6EC;text-decoration:underline}
+  .ov-sub{font-size:11px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:.04em;margin:12px 0 4px 2px}
+  .ov-sub:first-child{margin-top:2px}
+  .auto-badge{font-size:9px;font-weight:800;color:#1D8A3A;background:#DFF5E1;border-radius:999px;padding:1px 6px;margin-left:6px;vertical-align:middle;text-transform:uppercase;letter-spacing:.03em}
+  .ov-item input:disabled{opacity:1;cursor:default}
   /* grade status chip in header */
   .grade-status{display:block;margin-top:8px;font-size:11.5px;color:#9A878C}
   .grade-status b{color:var(--navy)}
@@ -405,7 +409,6 @@
 <div class="wrap">
   <div class="tabs" id="tabs">
     <div class="tab active" data-p="overview">Overview</div>
-    <div class="tab" data-p="checklist">Milestones</div>
     <div class="tab" data-p="leetcode">LeetCode</div>
     <div class="tab" data-p="apps">Applications</div>
     <div class="tab" data-p="star">STAR Bank</div>
@@ -435,23 +438,15 @@
       <div class="mtn-legend" id="mtnLegend"></div>
     </div>
     <div class="card">
-      <h2>Where things stand</h2>
-      <p class="hint">Three one-year pushes. The goal is to finish each year at <span class="lc-strong">100%</span> — then the FAANG offer takes care of itself.</p>
+      <h2>Milestones — where things stand</h2>
+      <p class="hint">Every milestone lives here, grouped into three one-year pushes. <b>Click a year</b> to open its checklist and tick items as you finish them. The goal is to end each year at <span class="lc-strong">100%</span>. Logging problems in the <b>LeetCode</b> tab auto-ticks the matching milestones below. <button class="reset" onclick="resetChecks()">reset checks</button></p>
       <div id="yearBars"></div>
-      <div class="bars" id="pillarBars" style="margin-top:18px"></div>
+      <h3 class="q" style="margin-top:20px">By focus area</h3>
+      <div class="bars" id="pillarBars"></div>
     </div>
     <div class="card">
       <h2>The one thing that matters most</h2>
       <p class="hint" style="margin:0">FAANG hiring runs ~2 years ahead of graduation. The internship that converts to a full-time offer is <b>Summer 2028</b> — and its applications open <b>July–October 2027</b>. Everything here points at being interview-ready by then: transfer done, ~250 LeetCode solved, a deployed AI portfolio, and ideally a Summer 2027 internship already on the resume.</p>
-    </div>
-  </div>
-
-  <!-- CHECKLIST -->
-  <div class="panel" id="checklist">
-    <div class="card">
-      <h2>Milestones — June 2026 to graduation</h2>
-      <p class="hint">Tick items as you finish them. Tap a phase header to collapse it. <button class="reset" onclick="resetChecks()">reset all checks</button></p>
-      <div id="phases"></div>
     </div>
   </div>
 
@@ -756,9 +751,10 @@ function cloudG(x,y,s,face){
 }
 function renderMountain(){
   const svg=document.getElementById('mountain'); if(!svg) return;
+  const derived=derivedSet();
   const items=[]; phases.forEach((ph,pi)=>ph.items.forEach((it,ii)=>items.push({key:ph.id+'_'+ii,tag:it[0],text:it[1],pi})));
   const N=items.length;
-  const done=items.filter(x=>state.checks[x.key]).length;
+  const done=items.filter(x=>state.checks[x.key]||derived.has(x.key)).length;
   const pct=Math.round(done/N*100);
   const anchors=[[92,508],[300,452],[166,392],[372,330],[236,274],[458,222],[346,176],[600,150],[772,96]];
   const trailD=smoothPath(anchors);
@@ -828,7 +824,7 @@ function renderMountain(){
   });
   // milestone nodes: done = heart, pending = dashed bubble
   items.forEach((it,i)=>{
-    const [x,y]=pt(frac(i)); const c=tagHex[it.tag]||'#E08DA0'; const dn=!!state.checks[it.key];
+    const [x,y]=pt(frac(i)); const c=tagHex[it.tag]||'#E08DA0'; const dn=!!state.checks[it.key]||derived.has(it.key);
     const safe=(it.text||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
     g+=`<g data-key="${it.key}"><title>${safe}${dn?'  (done)':''}</title><circle cx="${x}" cy="${y}" r="15" fill="transparent"/>`;
     if(dn){
@@ -882,7 +878,9 @@ function renderCounts(){
 state.checks=state.checks||{};
 state.collapsed=state.collapsed||{};
 function renderPhases(){
- const host=document.getElementById('phases');host.innerHTML='';
+ const host=document.getElementById('phases');
+ if(!host){ renderOverview(); renderMountain(); return; }
+ host.innerHTML='';
  phases.forEach(ph=>{
    const total=ph.items.length;
    let done=ph.items.filter((_,i)=>state.checks[ph.id+'_'+i]).length;
@@ -912,35 +910,53 @@ function resetChecks(){if(confirm('Clear all milestone checkmarks?')){state.chec
 
 /* ---------- OVERVIEW ---------- */
 let ovExp={};   // which year/pillar group is expanded (UI state)
-const tabFor={algo:'leetcode',port:'mlpath',intern:'apps',visa:'visa',school:'checklist'};
-const tabGoLabel={leetcode:'LeetCode',mlpath:'AI/ML Path',apps:'Applications',visa:'Visa',checklist:'Milestones'};
+const tabFor={algo:'leetcode',port:'mlpath',intern:'apps',visa:'visa'};
+const tabGoLabel={leetcode:'LeetCode',mlpath:'AI/ML Path',apps:'Applications',visa:'Visa'};
+/* milestones that auto-complete from LeetCode progress (text → cumulative threshold) */
+const lcDerive=[['Solve 40–50 easy LeetCode',50],['Reach ~120 LeetCode total',120],['Reach ~200 LeetCode total',200],['Finish NeetCode 150 / reach ~250 LeetCode',250]];
+function effLc(){return Math.max(state.lc||0, (typeof lcDoneCount==='function'?lcDoneCount():0));}
+function derivedSet(){
+ const s=new Set(), e=effLc();
+ phases.forEach(ph=>ph.items.forEach((it,i)=>{
+   const m=lcDerive.find(d=>d[0]===it[1]);
+   if(m && e>=m[1]) s.add(ph.id+'_'+i);
+ }));
+ return s;
+}
+function refreshLinked(){try{renderOverview();}catch(e){}try{renderMountain();}catch(e){}try{updateTabIndicators();}catch(e){}}
 function goTab(p){
  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.p===p));
  document.querySelectorAll('.panel').forEach(x=>x.classList.toggle('active',x.id===p));
  window.scrollTo({top:0,behavior:'smooth'});
 }
-function ovItemsHtml(items){
+function ovItemsHtml(items, grouped, derived){
  if(!items.length) return '';
- return `<div class="ov-items">`+items.map(it=>{
-   const dn=!!state.checks[it.key], tab=tabFor[it.tag];
-   return `<div class="ov-item ${dn?'done':''}">
-     <input type="checkbox" ${dn?'checked':''} data-ovk="${it.key}">
+ let html='<div class="ov-items">', last=null;
+ items.forEach(it=>{
+   if(grouped && it.phase!==last){ html+=`<div class="ov-sub">${esc(it.phase)}</div>`; last=it.phase; }
+   const auto=derived.has(it.key), dn=!!state.checks[it.key]||auto, tab=tabFor[it.tag];
+   const proof=(it.tag==='port'||it.tag==='intern')?proofHtml('ms:'+it.key):'';
+   html+=`<div class="ov-item ${dn?'done':''}">
+     <input type="checkbox" ${dn?'checked':''} ${auto?'disabled':''} data-ovk="${it.key}" title="${auto?'Auto-completed from your LeetCode progress':''}">
      <span class="tag ${tagClass[it.tag]}">${tagName[it.tag]}</span>
-     <span class="ov-txt">${it.text}</span>
+     <span class="ov-txt">${it.text}${auto?' <span class="auto-badge" title="Auto-completed from your LeetCode progress">auto</span>':''}</span>
      ${tab?`<a class="ov-go" data-go="${tab}" title="Go to ${tabGoLabel[tab]}">${tabGoLabel[tab]} →</a>`:''}
+     ${proof}
    </div>`;
- }).join('')+`</div>`;
+ });
+ return html+'</div>';
 }
 function renderOverview(){
+ const derived=derivedSet();
  const byTag={algo:[0,0],port:[0,0],intern:[0,0],school:[0,0],visa:[0,0]};
  const yr={1:[0,0],2:[0,0],3:[0,0]};
  const yearItems={1:[],2:[],3:[]}, tagItems={algo:[],port:[],intern:[],school:[],visa:[]};
  phases.forEach(ph=>ph.items.forEach((it,i)=>{
-   const key=ph.id+'_'+i, dn=!!state.checks[key], y=ph.year||1;
+   const key=ph.id+'_'+i, dn=(!!state.checks[key]||derived.has(key)), y=ph.year||1;
    byTag[it[0]][1]++; yr[y][1]++;
    if(dn){byTag[it[0]][0]++; yr[y][0]++;}
-   yearItems[y].push({key,text:it[1],tag:it[0]});
-   tagItems[it[0]].push({key,text:it[1],tag:it[0]});
+   yearItems[y].push({key,text:it[1],tag:it[0],phase:ph.name});
+   tagItems[it[0]].push({key,text:it[1],tag:it[0],phase:ph.name});
  }));
  const yMeta={1:['Year 1','Jun 2026 – Jun 2027 · the focus year'],2:['Year 2','Jun 2027 – Jun 2028 · land the FAANG internship'],3:['Year 3','Jun 2028 – Jun 2029 · the offer & graduation']};
  const yb=document.getElementById('yearBars');
@@ -951,32 +967,36 @@ function renderOverview(){
      <div class="ylabel"><b>${yMeta[y][0]}</b><span>${yMeta[y][1]}</span></div>
      <div class="ytrack"><div class="yfill" style="width:${p}%"></div></div>
      <div class="ypct">${p}%<small>${d}/${t}${hit?' ✓':''}</small></div>
-   </div>${ex?ovItemsHtml(yearItems[y]):''}`;
+   </div>${ex?ovItemsHtml(yearItems[y],true,derived):''}`;
  }).join('');
  const labels={algo:'Algorithms',port:'Portfolio',intern:'Internships',school:'School / Transfer',visa:'Visa'};
- document.getElementById('pillarBars').innerHTML=Object.keys(byTag).map(k=>{
+ const pb=document.getElementById('pillarBars');
+ if(pb) pb.innerHTML=Object.keys(byTag).map(k=>{
    const [d,t]=byTag[k],p=t?Math.round(d/t*100):0, ex=!!ovExp[k];
    return `<div class="pillrow ${ex?'open':''}" data-ovexp="${k}">
      <span class="ov-chev">▸</span>
      <div class="pill-main"><div class="lab">${labels[k]} <b>${d}/${t}</b></div><div class="track"><div class="fill" style="width:${p}%"></div></div></div>
-   </div>${ex?ovItemsHtml(tagItems[k]):''}`;
+   </div>${ex?ovItemsHtml(tagItems[k],false,derived):''}`;
  }).join('');
  document.querySelectorAll('#yearBars [data-ovexp],#pillarBars [data-ovexp]').forEach(el=>el.onclick=()=>{const k=el.dataset.ovexp;ovExp[k]=!ovExp[k];renderOverview();});
- document.querySelectorAll('#yearBars [data-ovk],#pillarBars [data-ovk]').forEach(cb=>cb.onchange=(e)=>{e.stopPropagation();toggle(cb.dataset.ovk,cb.checked);});
+ document.querySelectorAll('#yearBars [data-ovk],#pillarBars [data-ovk]').forEach(cb=>cb.onchange=(e)=>{e.stopPropagation();if(!cb.disabled)toggle(cb.dataset.ovk,cb.checked);});
  document.querySelectorAll('#yearBars [data-go],#pillarBars [data-go]').forEach(a=>a.onclick=(e)=>{e.stopPropagation();e.preventDefault();goTab(a.dataset.go);});
+ wireProof(document.getElementById('yearBars'), renderOverview);
+ wireProof(document.getElementById('pillarBars'), renderOverview);
 }
 
 /* ---------- LEETCODE ---------- */
 state.lc=state.lc||0;
 const lcMiles=[50,120,200,250];
 function renderLC(){
- document.getElementById('lcNum').textContent=state.lc;
- document.getElementById('lcBar').style.width=Math.min(100,state.lc/250*100)+'%';
+ const n=effLc();
+ document.getElementById('lcNum').textContent=n;
+ document.getElementById('lcBar').style.width=Math.min(100,n/250*100)+'%';
  document.getElementById('lcMiles').innerHTML=lcMiles.map(m=>
-   `<div class="mile ${state.lc>=m?'hit':''}"><b>${m}</b>${state.lc>=m?'done':'goal'}</div>`).join('');
+   `<div class="mile ${n>=m?'hit':''}"><b>${m}</b>${n>=m?'done':'goal'}</div>`).join('');
 }
-function lc(n){state.lc=Math.max(0,state.lc+n);save();renderLC()}
-function lcSet(){const v=prompt('Set total problems solved:',state.lc);if(v!==null&&!isNaN(v)){state.lc=Math.max(0,parseInt(v)||0);save();renderLC()}}
+function lc(n){state.lc=Math.max(0,(state.lc||0)+n);save();renderLC();refreshLinked()}
+function lcSet(){const v=prompt('Set total problems solved:',state.lc||0);if(v!==null&&!isNaN(v)){state.lc=Math.max(0,parseInt(v)||0);save();renderLC();refreshLinked()}}
 
 /* curated NeetCode-style starter set, grouped by pattern */
 const lcProblems=[
@@ -1068,7 +1088,7 @@ function renderLCList(){
      }).join('')+`</div>`;
  }).join('');
  host.querySelectorAll('input[type=checkbox]').forEach(cb=>cb.onchange=()=>{
-   state.lcDone[cb.dataset.slug]=cb.checked; save(); renderLCList();
+   state.lcDone[cb.dataset.slug]=cb.checked; save(); renderLCList(); renderLC(); refreshLinked();
  });
  const done=lcDoneCount(), total=lcTotal();
  const cnt=document.getElementById('lcSetCount'); if(cnt) cnt.textContent=`${done} / ${total} done`;
@@ -1481,13 +1501,12 @@ function renderVisa(){
 }
 
 /* ---------- PER-TAB PROGRESS INDICATORS ---------- */
-function pctChecks(){let t=0,d=0;phases.forEach(ph=>ph.items.forEach((it,i)=>{t++;if(state.checks[ph.id+'_'+i])d++;}));return t?Math.round(d/t*100):0;}
+function pctChecks(){const dv=derivedSet();let t=0,d=0;phases.forEach(ph=>ph.items.forEach((it,i)=>{const k=ph.id+'_'+i;t++;if(state.checks[k]||dv.has(k))d++;}));return t?Math.round(d/t*100):0;}
 function pctLeet(){const t=lcTotal();return t?Math.round(lcDoneCount()/t*100):0;}
 function pctMlp(){const t=mlTotal();const d=Object.values(state.mlDone||{}).filter(Boolean).length;return t?Math.round(d/t*100):0;}
 function pctVisaO1(){const t=visaItems.length;const d=Object.values(state.visaDone||{}).filter(Boolean).length;return t?Math.round(d/t*100):0;}
 function pctStar(){const a=state.star||[];if(!a.length)return 0;const d=a.filter(s=>s.s&&s.ta&&s.a&&s.r).length;return Math.round(d/a.length*100);}
 const tabMeta={
- checklist:{label:'Milestones',type:'bar',fn:pctChecks},
  leetcode:{label:'LeetCode',type:'bar',fn:pctLeet},
  apps:{label:'Applications',type:'count',fn:()=>(state.apps||[]).length},
  star:{label:'STAR Bank',type:'bar',fn:pctStar},
