@@ -368,6 +368,8 @@
   .tip:hover::before,.tip:focus::before{content:'';position:absolute;left:6px;bottom:150%;
     border:6px solid transparent;border-top-color:var(--navy);transform:translateY(95%);z-index:40}
   .ta-action{min-height:64px}
+  .ta-star{min-height:160px}
+  .star textarea.ta-star::placeholder{color:#C2A9B0;line-height:1.7}
   footer{text-align:center;color:var(--grey);font-size:12.5px;margin-top:30px}
   .save-note{position:fixed;bottom:18px;right:18px;background:var(--navy);color:#fff;padding:9px 16px;border-radius:999px;
     font-size:12.5px;opacity:0;transition:.3s;box-shadow:var(--shadow);z-index:20}
@@ -534,7 +536,7 @@
   <div class="panel" id="star">
     <div class="card">
       <h2>STAR story bank</h2>
-      <p class="hint">Answer each behavioral prompt in STAR form — <span class="lc-strong">type</span> or tap the <span class="lc-strong">mic</span> to dictate by voice (Chrome/Edge, allow microphone). Situation → Task → Action (the bulk) → Result; keep each under 2 minutes. Add your own questions at the bottom.</p>
+      <p class="hint">Answer each behavioral prompt in <span class="lc-strong">one box</span>, in STAR order — <span class="lc-strong">type</span> or tap the <span class="lc-strong">mic</span> to dictate by voice (Chrome/Edge, allow microphone). Situation → Task → Action (the bulk) → Result; keep the whole answer under 2 minutes. Add your own questions at the bottom.</p>
       <div id="starList"></div>
       <button class="b b-add add-row" onclick="addStar()">+ Add story</button>
     </div>
@@ -1334,6 +1336,14 @@ const starTips={
  r:'RESULT — The outcome, quantified if possible (%, time saved, scale, grade). Finish with what you learned or would do differently.',
 };
 function flab(text,i,f){ return `<div class="flab"><span class="pill">${text}</span><span class="tip" data-tip="${esc(starTips[f]||'')}" tabindex="0" role="img" aria-label="tip">i</span>${micBtn(i,f)}</div>`; }
+/* one-box STAR: guidance + a migration that folds any old 4-field answers into one */
+const starGuide='Tell it in order in one answer: SITUATION (set the scene, 1–2 lines) → TASK (your goal & your role — say “I”) → ACTION (~60% of it — the concrete steps YOU took) → RESULT (the outcome, quantified, + what you learned). Keep the whole thing under 2 minutes.';
+const starPlaceholder='Situation — set the scene (1–2 sentences)…\nTask — your responsibility & the goal…\nAction — what YOU did, step by step (the bulk of the answer)…\nResult — the outcome, quantified, + what you learned';
+function starFull(st){
+ if(typeof st.full==='string') return st.full;          // already migrated / edited
+ const parts=[]; ['s','ta','a','r'].forEach(f=>{ if(st[f]&&st[f].trim()) parts.push(st[f].trim()); });
+ return parts.join('\n\n');                               // fold old 4 boxes into one
+}
 function renderStar(){
  ensurePrompts();
  const host=document.getElementById('starList');host.innerHTML='';
@@ -1343,10 +1353,8 @@ function renderStar(){
    d.innerHTML=`<div class="star-q">
      ${isPrompt?`<div class="qtext">${esc(st.t||'')}</div>`:`<input class="title" value="${esc(st.t||'')}" data-i="${i}" data-f="t" placeholder="Your own question / story title">`}
      ${isPrompt?'':`<button class="rm" data-rm="${i}" title="Remove">×</button>`}</div>
-   ${flab('1 · Situation',i,'s')}<textarea data-i="${i}" data-f="s" placeholder="Context & challenge (1–2 sentences)">${esc(st.s||'')}</textarea>
-   ${flab('2 · Task',i,'ta')}<textarea data-i="${i}" data-f="ta" placeholder="Your responsibility & the goal">${esc(st.ta||'')}</textarea>
-   ${flab('3 · Action — the bulk of the answer',i,'a')}<textarea class="ta-action" data-i="${i}" data-f="a" placeholder="What YOU did, step by step. Use 'I'.">${esc(st.a||'')}</textarea>
-   ${flab('4 · Result',i,'r')}<textarea data-i="${i}" data-f="r" placeholder="Outcome (quantified) + what you learned">${esc(st.r||'')}</textarea>`;
+   <div class="flab"><span class="pill">Situation · Task · Action · Result</span><span class="tip" data-tip="${esc(starGuide)}" tabindex="0" role="img" aria-label="tip">i</span>${micBtn(i,'full')}</div>
+   <textarea class="ta-star" data-i="${i}" data-f="full" placeholder="${esc(starPlaceholder)}">${esc(starFull(st))}</textarea>`;
    host.appendChild(d);
  });
  host.querySelectorAll('input,textarea').forEach(x=>x.onchange=e=>{state.star[e.target.dataset.i][e.target.dataset.f]=e.target.value;save()});
@@ -1584,7 +1592,7 @@ function pctChecks(){const dv=derivedSet();let t=0,d=0;phases.forEach(ph=>ph.ite
 function pctLeet(){const t=lcTotal();return t?Math.round(lcDoneCount()/t*100):0;}
 function pctMlp(){const t=mlTotal();const d=Object.values(state.mlDone||{}).filter(Boolean).length;return t?Math.round(d/t*100):0;}
 function pctVisaO1(){const t=visaItems.length;const d=Object.values(state.visaDone||{}).filter(Boolean).length;return t?Math.round(d/t*100):0;}
-function pctStar(){const a=state.star||[];if(!a.length)return 0;const d=a.filter(s=>s.s&&s.ta&&s.a&&s.r).length;return Math.round(d/a.length*100);}
+function pctStar(){const a=state.star||[];if(!a.length)return 0;const d=a.filter(s=>starFull(s).trim()).length;return Math.round(d/a.length*100);}
 const tabMeta={
  leetcode:{label:'LeetCode',type:'bar',fn:pctLeet},
  apps:{label:'Applications',type:'count',fn:()=>(state.apps||[]).length},
