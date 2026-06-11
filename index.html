@@ -269,6 +269,12 @@
   .st-net2{background:#FFF1DA;color:#9A6B06}
   .st-net3{background:#E6F6F4;color:#0C7D74}
   .st-net4{background:#DFF5E1;color:#1D8A3A}
+  /* networking how-to guide */
+  .netguide{background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:12px 16px 12px;margin:0 0 16px}
+  .netguide .ng-h{font-weight:800;color:var(--navy);font-size:13.5px;margin-bottom:6px}
+  .netguide ul{margin:0;padding-left:18px}
+  .netguide li{font-size:12.5px;color:var(--ink);margin:5px 0;line-height:1.5}
+  .netguide li b{color:var(--blue)}
   /* visa stages */
   .vstages{display:flex;flex-direction:column;gap:8px}
   .vstage{display:flex;align-items:center;gap:12px;padding:10px 13px;border:1px solid var(--line);border-radius:12px;background:#fff}
@@ -548,9 +554,20 @@
   <div class="panel" id="network">
     <div class="card">
       <h2>Networking & referrals</h2>
-      <p class="hint">For an international candidate, one warm referral that gets her resume read beats fifty cold applications. Track every recruiter, engineer, alum, and mentor here. Aim for a few new contacts each month.</p>
+      <p class="hint">For an international candidate, one warm referral that gets her resume read beats fifty cold applications. Track every recruiter, engineer, alum, and mentor here — and attach <b>proof</b> of each real connection (a LinkedIn message, an email, or a referral screenshot).</p>
+      <div class="netguide">
+        <div class="ng-h">How to network — the short version</div>
+        <ul>
+          <li><b>Start warm:</b> find UTD alumni at your target companies on LinkedIn (filter by school + company) and send a short, specific note.</li>
+          <li><b>Ask small:</b> request a 15-minute chat about their team and what they work on — not a referral up front.</li>
+          <li><b>Give first:</b> engage with their posts, share your own projects, be genuinely curious — be memorable for the right reasons.</li>
+          <li><b>Then ask:</b> after a good conversation, send your resume + GitHub and ask if they'd be comfortable referring you.</li>
+          <li><b>Go where engineers are:</b> career fairs, hackathons, ACM / AI club, and company Slack / Discord communities.</li>
+          <li><b>Always follow up</b> within 24 hours, and log it here with proof so nothing slips.</li>
+        </ul>
+      </div>
       <table>
-        <thead><tr><th style="width:20%">Name</th><th style="width:20%">Company</th><th style="width:22%">Role / how you know them</th><th style="width:20%">Status</th><th style="width:14%">Next step</th><th></th></tr></thead>
+        <thead><tr><th style="width:17%">Name</th><th style="width:16%">Company</th><th style="width:21%">Role / how you know them</th><th style="width:16%">Status</th><th style="width:14%">Next step</th><th style="width:12%">Proof</th><th></th></tr></thead>
         <tbody id="netBody"></tbody>
       </table>
       <button class="b b-add add-row" onclick="addContact()">+ Add contact</button>
@@ -1486,7 +1503,7 @@ state.contacts=state.contacts||[];
 const netStatuses=['To reach out','Reached out','Replied','Call done','Referral!'];
 function renderNet(){
  const b=document.getElementById('netBody'); if(!b) return; b.innerHTML='';
- if(!state.contacts.length){b.innerHTML='<tr><td colspan="6" style="color:#9fb0bf;padding:16px 10px">No contacts yet — start with UTD alumni at target companies on LinkedIn, plus recruiters and engineers you meet at career fairs.</td></tr>';}
+ if(!state.contacts.length){b.innerHTML='<tr><td colspan="7" style="color:#9fb0bf;padding:16px 10px">No contacts yet — start with UTD alumni at target companies on LinkedIn, plus recruiters and engineers you meet at career fairs.</td></tr>';}
  state.contacts.forEach((a,i)=>{
    const si=Math.max(0,netStatuses.indexOf(a.status||'To reach out'));
    const tr=document.createElement('tr');
@@ -1495,11 +1512,25 @@ function renderNet(){
    <td><input value="${esc(a.rel||'')}" data-i="${i}" data-f="rel" placeholder="Recruiter / alum / engineer"></td>
    <td><select data-i="${i}" data-f="status" class="st st-net${si}">${netStatuses.map(s=>`<option ${a.status===s?'selected':''}>${s}</option>`).join('')}</select></td>
    <td><input value="${esc(a.next||'')}" data-i="${i}" data-f="next" placeholder="—"></td>
+   <td>${netProof(a,i)}</td>
    <td style="text-align:center"><button class="rm" data-rm="${i}">×</button></td>`;
    b.appendChild(tr);
  });
  b.querySelectorAll('input,select').forEach(x=>x.onchange=e=>{state.contacts[e.target.dataset.i][e.target.dataset.f]=e.target.value;save();if(e.target.dataset.f==='status'){e.target.className='st st-net'+Math.max(0,netStatuses.indexOf(e.target.value));}});
+ b.querySelectorAll('[data-netproof]').forEach(btn=>btn.onclick=()=>{
+   const i=+btn.dataset.netproof, cur=(state.contacts[i]||{}).proof||'';
+   const v=prompt('Paste a link as proof of this connection — a LinkedIn message or profile, an email thread, a calendar invite, or a screenshot URL. (Blank to remove.)', cur);
+   if(v===null) return;
+   if(!v.trim()) delete state.contacts[i].proof; else state.contacts[i].proof=v.trim();
+   save(); renderNet();
+ });
  b.querySelectorAll('[data-rm]').forEach(x=>x.onclick=e=>{state.contacts.splice(+e.target.dataset.rm,1);save();renderNet();});
+}
+function netProof(a,i){
+ if(a.proof){
+   return `<span class="proof set"><a href="${esc(a.proof)}" target="_blank" rel="noopener" title="${esc(a.proof)}">proof ↗</a><button class="proof-edit" data-netproof="${i}" title="Edit link">✎</button></span>`;
+ }
+ return `<button class="proof add" data-netproof="${i}" title="Attach a LinkedIn message, email, or referral screenshot link">+ proof</button>`;
 }
 function addContact(){state.contacts.push({name:'',co:'',rel:'',status:'To reach out',next:''});save();renderNet();}
 
