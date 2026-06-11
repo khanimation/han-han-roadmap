@@ -377,6 +377,8 @@
   .reset{font-size:11.5px;color:#c2cdd8;cursor:pointer;background:0;border:0;text-decoration:underline}
   .sync-chip{display:inline-block;margin-left:8px;padding:2px 10px;border-radius:999px;background:#fff;
     border:1px solid var(--line);font-size:11px;font-weight:700;color:#9A878C;vertical-align:middle}
+  .proofs-link{font-weight:700;color:var(--blue);text-decoration:none}
+  .proofs-link:hover{text-decoration:underline}
 </style>
 </head>
 <body class="locked">
@@ -431,7 +433,7 @@
     <p class="eyebrow">Roadmap to FAANG · Accountability Tracker</p>
     <h1>Han Han Vu Nguyen</h1>
     <p class="sub">SWE / SD + AI role on the West Coast · six figures · by Summer 2029</p>
-    <div class="who">Shared with <b>Han Han</b>, <b>Trang</b> &amp; <b>Khan</b> · update weekly (Sun) <span id="syncChip" class="sync-chip">● On this device</span></div>
+    <div class="who">Shared with <b>Han Han</b>, <b>Trang</b> &amp; <b>Khan</b> · update weekly (Sun) · <a href="https://drive.google.com/drive/folders/1uwrB4xTUpSVYzNXPzNRP6h7cUGK4xFix" target="_blank" rel="noopener" class="proofs-link">📁 Proofs folder ↗</a> <span id="syncChip" class="sync-chip">● On this device</span></div>
     <div class="grade-status" id="gradeStatus"></div>
     <div class="counts" id="counts"></div>
   </div>
@@ -1289,7 +1291,7 @@ function renderApps(){
  });
  b.querySelectorAll('[data-appproof]').forEach(btn=>btn.onclick=()=>{
    const i=+btn.dataset.appproof, cur=(state.apps[i]||{}).proof||'';
-   const v=prompt('Paste a link to your confirmation screengrab or email — e.g. an image uploaded to Google Drive / Imgur, or the email thread URL. (Blank to remove.)', cur);
+   const v=prompt('Paste a link to your confirmation screengrab or email.\n\nBest: drop the screengrab in your Drive “Proofs — Han Han Roadmap” folder (link in the page header), then paste its share link here. Claude scans the folder on the 1st & 15th and tallies your confirmed applications. (Blank to remove.)', cur);
    if(v===null) return;
    if(!v.trim()) delete state.apps[i].proof; else state.apps[i].proof=v.trim();
    save(); renderApps();
@@ -1487,7 +1489,7 @@ function wireProof(host, rerender){
    e.preventDefault(); e.stopPropagation();
    const key=b.dataset.proofadd||b.dataset.proofedit;
    const cur=(state.proof[key]||{}).url||'';
-   const v=prompt('Paste a link as proof — GitHub repo, deployed URL, or an image link. Claude grades it on the next review. (Blank to remove.)', cur);
+   const v=prompt('Paste a link as proof — a GitHub repo, a deployed URL, or a screengrab.\n\nFor screengrabs: drop the image in your Google Drive “Proofs — Han Han Roadmap” folder (link in the page header), then paste its share link here. Claude scans the proofs folder on the 1st & 15th of each month and grades them. (Blank to remove.)', cur);
    if(v===null) return;
    if(!v.trim()) delete state.proof[key];
    else state.proof[key]=Object.assign({},state.proof[key],{url:v.trim()});
@@ -1545,7 +1547,7 @@ function renderNet(){
  b.querySelectorAll('input,select').forEach(x=>x.onchange=e=>{state.contacts[e.target.dataset.i][e.target.dataset.f]=e.target.value;save();if(e.target.dataset.f==='status'){e.target.className='st st-net'+Math.max(0,netStatuses.indexOf(e.target.value));}});
  b.querySelectorAll('[data-netproof]').forEach(btn=>btn.onclick=()=>{
    const i=+btn.dataset.netproof, cur=(state.contacts[i]||{}).proof||'';
-   const v=prompt('Paste a link as proof of this connection — a LinkedIn message or profile, an email thread, a calendar invite, or a screenshot URL. (Blank to remove.)', cur);
+   const v=prompt('Paste a link as proof of this connection — a LinkedIn message or profile, an email thread, a calendar invite, or a screenshot.\n\nFor screenshots: save the image in your Drive “Proofs — Han Han Roadmap” folder (link in the page header), then paste its share link. Claude reviews proofs on the 1st & 15th. (Blank to remove.)', cur);
    if(v===null) return;
    if(!v.trim()) delete state.contacts[i].proof; else state.contacts[i].proof=v.trim();
    save(); renderNet();
