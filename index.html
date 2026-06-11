@@ -523,11 +523,12 @@
     </div>
     <div class="card">
       <h2>Internship / job applications</h2>
-      <p class="hint">Apply the week each posting opens — most use rolling review. Log every one. <b>Don't sleep on startups</b> (Y Combinator's Work at a Startup, Wellfound) — they still hire entry-level, you learn faster, and it's a strong on-ramp. <span class="lc-strong">F1 caveat:</span> confirm a startup will handle CPT/OPT and (ideally) sponsor before counting on it long-term — many small ones won't, so treat those as experience while you target sponsoring employers.</p>
+      <p class="hint">Apply the week each posting opens — most use rolling review. Log every one, and attach a <b>screengrab of the confirmation email</b> as proof. <b>Don't sleep on startups</b> (Y Combinator's Work at a Startup, Wellfound) — they still hire entry-level, you learn faster, and it's a strong on-ramp. <span class="lc-strong">F1 caveat:</span> confirm a startup will handle CPT/OPT and (ideally) sponsor before counting on it long-term — many small ones won't, so treat those as experience while you target sponsoring employers.</p>
       <table>
-        <thead><tr><th style="width:24%">Company</th><th style="width:26%">Role</th><th style="width:16%">Applied</th><th style="width:22%">Status</th><th style="width:8%">Next</th><th></th></tr></thead>
+        <thead><tr><th style="width:22%">Company</th><th style="width:22%">Role</th><th style="width:14%">Applied</th><th style="width:16%">Status</th><th style="width:12%">Next</th><th style="width:10%">Proof</th><th></th></tr></thead>
         <tbody id="appBody"></tbody>
       </table>
+      <p class="counts-summary" id="appProofSummary" style="margin:10px 0 0"></p>
       <button class="b b-add add-row" onclick="addApp()">+ Add application</button>
     </div>
   </div>
@@ -1270,7 +1271,7 @@ state.apps=state.apps||[];
 const statuses=['Applied','OA','Interview','Offer','Rejected'];
 function renderApps(){
  const b=document.getElementById('appBody');b.innerHTML='';
- if(!state.apps.length){b.innerHTML='<tr><td colspan="6" style="color:#9fb0bf;padding:16px 10px">No applications yet — add your first when the Summer 2027 cycle opens.</td></tr>'}
+ if(!state.apps.length){b.innerHTML='<tr><td colspan="7" style="color:#9fb0bf;padding:16px 10px">No applications yet — add your first when the Summer 2027 cycle opens.</td></tr>'}
  state.apps.forEach((a,i)=>{
    const tr=document.createElement('tr');
    tr.innerHTML=`<td><input value="${esc(a.co||'')}" data-i="${i}" data-f="co" placeholder="Company"></td>
@@ -1278,6 +1279,7 @@ function renderApps(){
    <td><input type="date" value="${a.date||''}" data-i="${i}" data-f="date"></td>
    <td><select data-i="${i}" data-f="status" class="st st-${(a.status||'Applied').toLowerCase()}">${statuses.map(s=>`<option ${a.status===s?'selected':''}>${s}</option>`).join('')}</select></td>
    <td><input value="${esc(a.next||'')}" data-i="${i}" data-f="next" placeholder="—"></td>
+   <td>${appProof(a,i)}</td>
    <td style="text-align:center"><button class="rm" data-rm="${i}">×</button></td>`;
    b.appendChild(tr);
  });
@@ -1285,7 +1287,23 @@ function renderApps(){
    state.apps[e.target.dataset.i][e.target.dataset.f]=e.target.value;save();
    if(e.target.dataset.f==='status'){e.target.className='st st-'+e.target.value.toLowerCase()}
  });
+ b.querySelectorAll('[data-appproof]').forEach(btn=>btn.onclick=()=>{
+   const i=+btn.dataset.appproof, cur=(state.apps[i]||{}).proof||'';
+   const v=prompt('Paste a link to your confirmation screengrab or email — e.g. an image uploaded to Google Drive / Imgur, or the email thread URL. (Blank to remove.)', cur);
+   if(v===null) return;
+   if(!v.trim()) delete state.apps[i].proof; else state.apps[i].proof=v.trim();
+   save(); renderApps();
+ });
  b.querySelectorAll('[data-rm]').forEach(x=>x.onclick=e=>{state.apps.splice(e.target.dataset.rm,1);save();renderApps()});
+ const total=state.apps.length, withProof=state.apps.filter(a=>a.proof).length;
+ const sm=document.getElementById('appProofSummary');
+ if(sm) sm.innerHTML = total ? `<b>${total}</b> application${total>1?'s':''} logged · <b>${withProof}</b> with a confirmation attached.` : '';
+}
+function appProof(a,i){
+ if(a.proof){
+   return `<span class="proof set"><a href="${esc(a.proof)}" target="_blank" rel="noopener" title="${esc(a.proof)}">proof ↗</a><button class="proof-edit" data-appproof="${i}" title="Edit link">✎</button></span>`;
+ }
+ return `<button class="proof add" data-appproof="${i}" title="Attach a screengrab of the confirmation email (image or doc link)">+ proof</button>`;
 }
 function addApp(){state.apps.push({co:'',role:'',date:'',status:'Applied',next:''});save();renderApps()}
 
