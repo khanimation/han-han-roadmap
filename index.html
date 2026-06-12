@@ -327,6 +327,25 @@
     padding:6px 13px;border-radius:8px;cursor:pointer}
   .counts-summary{font-size:12.5px;color:var(--grey);margin:0 0 12px}
   .counts-summary b{color:var(--navy)}
+  /* capstone flagships */
+  .capcard{position:relative}
+  .caphead{display:flex;align-items:flex-start;gap:12px;margin-bottom:12px}
+  .capyear{flex:0 0 auto;background:var(--navy);color:#fff;font-size:11px;font-weight:800;padding:4px 11px;border-radius:999px;white-space:nowrap;margin-top:3px}
+  .captitle b{display:block;font-size:17px;color:var(--navy);line-height:1.22}
+  .captitle span{display:block;font-size:12.5px;color:var(--grey);margin-top:4px;line-height:1.5}
+  .capmetric{background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:14px}
+  .capmetric.hit{background:#F3FBF4;border-color:#9BD3A6}
+  .capnum b{font-size:26px;font-weight:800;color:var(--navy)}
+  .capnum span{font-size:13px;color:var(--grey);font-weight:600}
+  .captrack{height:10px;background:#fff;border:1px solid var(--line);border-radius:7px;overflow:hidden;margin:8px 0}
+  .captrack.thin{height:8px;border:0;background:var(--soft);margin:0 0 10px}
+  .capfill{height:100%;background:linear-gradient(90deg,#FFB7C5,#E08DA0);border-radius:7px;transition:width .5s}
+  .capmetric.hit .capfill{background:linear-gradient(90deg,#7FD08C,#2FA36B)}
+  .capbtns{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px}
+  .caphit{font-size:12px;font-weight:800;color:#1D8A3A}
+  .capprog{display:flex;justify-content:space-between;align-items:baseline;font-size:12.5px;color:var(--grey);margin-bottom:5px}
+  .capprog b{color:var(--navy)}
+  .capsug{margin:12px 0 0;font-size:12px;color:var(--blue);font-weight:600;background:#FFF6E6;border:1px solid #F0D9A6;border-radius:9px;padding:8px 11px}
   /* table */
   table{width:100%;border-collapse:collapse;font-size:13.5px}
   th{text-align:left;color:var(--grey);font-weight:600;font-size:11.5px;text-transform:uppercase;letter-spacing:.04em;
@@ -446,6 +465,7 @@
     <div class="tab" data-p="apps">Applications</div>
     <div class="tab" data-p="star">STAR Bank</div>
     <div class="tab" data-p="mlpath">AI/ML Path</div>
+    <div class="tab" data-p="capstone">Capstone</div>
     <div class="tab" data-p="network">Network</div>
     <div class="tab" data-p="visa">Visa</div>
   </div>
@@ -555,6 +575,15 @@
     </div>
   </div>
 
+  <!-- CAPSTONE -->
+  <div class="panel" id="capstone">
+    <div class="card">
+      <h2>Capstone flagships — build things that serve people</h2>
+      <p class="hint">These are the <b>headline projects</b> that make Han Han stand out against every other FAANG applicant. Not quick vibe-codes — each is a real product with a <b>mission and a user</b>, shipped, and <b>marketed</b> (use Claude for positioning, strategy, and organic growth). The loop is <span class="lc-strong">build → ship → grow → write it up</span>. Each finished capstone becomes a flagship on her portfolio — and proof she can take something from zero to real people using it.</p>
+    </div>
+    <div id="capList"></div>
+  </div>
+
   <!-- NETWORK -->
   <div class="panel" id="network">
     <div class="card">
@@ -612,7 +641,7 @@ const KEY='hanhan_faang_v1';
 let state=load();
 function load(){try{return JSON.parse(localStorage.getItem(KEY))||{}}catch(e){return {}}}
 /* the slice of state that is SHARED in the cloud (UI prefs like 'collapsed' stay local) */
-function cloudState(){return {checks:state.checks,lc:state.lc,lcDone:state.lcDone,apps:state.apps,star:state.star,mlDone:state.mlDone,contacts:state.contacts,visaDone:state.visaDone,proof:state.proof,lcProfile:state.lcProfile}}
+function cloudState(){return {checks:state.checks,lc:state.lc,lcDone:state.lcDone,apps:state.apps,star:state.star,mlDone:state.mlDone,contacts:state.contacts,visaDone:state.visaDone,proof:state.proof,lcProfile:state.lcProfile,capChecks:state.capChecks,capMetric:state.capMetric}}
 function save(){
   localStorage.setItem(KEY,JSON.stringify(state));
   if(window.CloudSync && window.CloudSync.save) window.CloudSync.save(cloudState());
@@ -630,11 +659,13 @@ window.applyRemoteState=function(d){
   if(d.visaDone && typeof d.visaDone==='object') state.visaDone=d.visaDone;
   if(d.proof && typeof d.proof==='object') state.proof=d.proof;
   if(typeof d.lcProfile==='string') state.lcProfile=d.lcProfile;
+  if(d.capChecks && typeof d.capChecks==='object') state.capChecks=d.capChecks;
+  if(d.capMetric && typeof d.capMetric==='object') state.capMetric=d.capMetric;
   if(Array.isArray(d.contacts)) state.contacts=d.contacts;
   if(Array.isArray(d.apps)) state.apps=d.apps;
   if(Array.isArray(d.star)) state.star=d.star;
   localStorage.setItem(KEY,JSON.stringify(state));
-  renderPhases();renderLC();renderLCList();renderTiles();renderApps();renderStar();renderMlPath();renderNet();renderVisa();
+  renderPhases();renderLC();renderLCList();renderTiles();renderApps();renderStar();renderMlPath();renderCapstones();renderNet();renderVisa();
   try{ renderLcProfile(); }catch(e){}
   try{ updateTabIndicators(); }catch(e){}
 };
@@ -801,6 +832,7 @@ function overallProgress(){
  if(typeof lcTotal==='function'){ total+=lcTotal(); done+=lcDoneCount(); }
  if(typeof mlTotal==='function'){ total+=mlTotal(); done+=Object.values(state.mlDone||{}).filter(Boolean).length; }
  if(typeof visaItems!=='undefined'){ total+=visaItems.length; done+=Object.values(state.visaDone||{}).filter(Boolean).length; }
+ if(typeof capstones!=='undefined'){ capstones.forEach(c=>{ total+=c.items.length; done+=c.items.filter((_,i)=>state.capChecks&&state.capChecks[c.id+'_'+i]).length; }); }
  return {done,total,pct: total?Math.round(done/total*100):0};
 }
 function smoothPath(pts){
@@ -1449,7 +1481,7 @@ let aiGrades={};               // key -> {grade,status,note} — published by Cl
 function loadGrades(){
  fetch('grades.json',{cache:'no-store'}).then(r=>r.ok?r.json():{}).then(d=>{
    aiGrades=d&&typeof d==='object'?d:{};
-   try{renderPhases();renderMlPath();renderVisaList();renderGradeStatus();}catch(e){}
+   try{renderPhases();renderMlPath();renderVisaList();renderCapstones();renderGradeStatus();}catch(e){}
  }).catch(()=>{});
 }
 function nextGradeDate(){
@@ -1606,6 +1638,82 @@ function renderVisa(){
  renderVisaList();
 }
 
+/* ---------- CAPSTONE FLAGSHIPS ---------- */
+const capstones=[
+ {id:'cap1',yearLabel:'Year 1',title:'Ship a real iOS app · 1,000+ downloads',
+  mission:'A purpose-built iPhone app that solves one real problem for real people — built with a mission and a user in mind, not a throwaway demo.',
+  metric:'downloads',target:1000,items:[
+   'Define the mission: one real problem, one target user, and why it matters',
+   'Validate demand first — talk to ~10 potential users or scan their communities',
+   'Design the MVP: one core feature done excellently (SwiftUI or Expo / React Native)',
+   'Build it well: clean, tested, with onboarding, an app icon, and a privacy policy',
+   'Enroll in the Apple Developer Program and submit to the App Store',
+   'Get approved and launch on the App Store (save the live link as proof)',
+   'Marketing plan with Claude: positioning, ASO keywords, screenshots, a landing page',
+   'Organic growth: short-form video (TikTok / Reels), Reddit & niche communities, Product Hunt',
+   'Reach 1,000+ downloads (track in App Store Connect)',
+   'Publish a case study on your portfolio: problem → build → growth → the numbers',
+ ]},
+ {id:'cap2',yearLabel:'Year 1–2',title:'Open-source a dev tool · 50+ GitHub stars',
+  mission:'A genuinely useful tool or Claude skill that other developers adopt — shipped, documented, and promoted like a product.',
+  metric:'GitHub stars',target:50,items:[
+   'Pick a real developer pain point (a CLI, library, agent, or Claude skill)',
+   'Build v1 with clean code and tests; make it trivial to install and use',
+   'Write an excellent README: problem, a demo GIF, quickstart, and examples',
+   'Publish to the right registry (npm / PyPI / marketplace) with a license',
+   'Launch it: “Show HN”, relevant subreddits, X / LinkedIn, and a dev.to writeup',
+   'Engage the community: respond to issues and PRs, ship improvements',
+   'Reach 50+ GitHub stars',
+   'Pin the repo and feature it as a flagship on your portfolio',
+ ]},
+ {id:'cap3',yearLabel:'Year 3',title:'AI-native flagship with real users + a public talk',suggested:true,
+  mission:'The headline project: a deployed AI product people actually use, backed by evals, a technical writeup, and a talk — and it doubles as O-1 visa evidence.',
+  metric:'active users',target:500,items:[
+   'Pick a high-value AI-native problem (an agent or RAG over a real domain)',
+   'Build & deploy it with retrieval and an eval harness (measure quality, not vibes)',
+   'Add real polish: auth, usage analytics, a feedback loop, and cost controls',
+   'Get real users — launch, share, iterate — aim for 500+',
+   'Write a technical deep-dive: architecture, evals, and what you learned',
+   'Give a talk or workshop (student org, meetup, or conference)',
+   'Open-source the core and gather feedback / contributions',
+   'Make it O-1 evidence and the centerpiece of your FAANG portfolio',
+ ]},
+];
+state.capChecks=state.capChecks||{};
+state.capMetric=state.capMetric||{};
+function renderCapstones(){
+ const host=document.getElementById('capList'); if(!host) return;
+ host.innerHTML=capstones.map(c=>{
+   const total=c.items.length, done=c.items.filter((_,i)=>state.capChecks[c.id+'_'+i]).length, pct=total?Math.round(done/total*100):0;
+   const cur=state.capMetric[c.id]||0, hit=cur>=c.target, mpct=Math.min(100,Math.round(cur/c.target*100));
+   return `<div class="card capcard">
+     <div class="caphead"><span class="capyear">${c.yearLabel}</span>
+       <div class="captitle"><b>${c.title}</b><span>${c.mission}</span></div></div>
+     <div class="capmetric ${hit?'hit':''}">
+       <div class="capnum"><b>${cur.toLocaleString()}</b> <span>/ ${c.target.toLocaleString()} ${c.metric}</span></div>
+       <div class="captrack"><div class="capfill" style="width:${mpct}%"></div></div>
+       <div class="capbtns">
+         <button class="b b-add" data-capm="${c.id}" data-d="1">+1</button>
+         <button class="b b-add" data-capm="${c.id}" data-d="10">+10</button>
+         <button class="b b-add" data-capm="${c.id}" data-d="100">+100</button>
+         <button class="b b-ghost" data-capset="${c.id}">set…</button>
+         ${hit?'<span class="caphit">🎉 target hit</span>':''}
+       </div>
+     </div>
+     <div class="capprog"><span>Build &amp; grow checklist</span><b>${done}/${total} · ${pct}%</b></div>
+     <div class="captrack thin"><div class="capfill" style="width:${pct}%"></div></div>
+     <div>${c.items.map((t,i)=>{const k=c.id+'_'+i,dn=!!state.capChecks[k];
+       return `<div class="lc-item ${dn?'done':''}"><input type="checkbox" ${dn?'checked':''} data-capk="${k}"><span class="mli">${t}</span>${proofHtml('cap:'+k)}</div>`;}).join('')}</div>
+     ${c.suggested?'<p class="capsug">★ Claude’s suggested capstone — a strong default; refine it with her once Year 3 is closer.</p>':''}
+   </div>`;
+ }).join('');
+ host.querySelectorAll('[data-capk]').forEach(cb=>cb.onchange=()=>{state.capChecks[cb.dataset.capk]=cb.checked;save();renderCapstones();refreshLinked();});
+ host.querySelectorAll('[data-capm]').forEach(btn=>btn.onclick=()=>{const id=btn.dataset.capm;state.capMetric[id]=Math.max(0,(state.capMetric[id]||0)+(+btn.dataset.d));save();renderCapstones();refreshLinked();});
+ host.querySelectorAll('[data-capset]').forEach(btn=>btn.onclick=()=>{const id=btn.dataset.capset;const v=prompt('Set current '+capstones.find(c=>c.id===id).metric+':',state.capMetric[id]||0);if(v!==null&&!isNaN(v)){state.capMetric[id]=Math.max(0,parseInt(v)||0);save();renderCapstones();refreshLinked();}});
+ wireProof(host, renderCapstones);
+}
+function pctCap(){let t=0,d=0;capstones.forEach(c=>c.items.forEach((_,i)=>{t++;if(state.capChecks[c.id+'_'+i])d++;}));return t?Math.round(d/t*100):0;}
+
 /* ---------- PER-TAB PROGRESS INDICATORS ---------- */
 function pctChecks(){const dv=derivedSet();let t=0,d=0;phases.forEach(ph=>ph.items.forEach((it,i)=>{const k=ph.id+'_'+i;t++;if(state.checks[k]||dv.has(k))d++;}));return t?Math.round(d/t*100):0;}
 function pctLeet(){const t=lcTotal();return t?Math.round(lcDoneCount()/t*100):0;}
@@ -1617,6 +1725,7 @@ const tabMeta={
  apps:{label:'Applications',type:'count',fn:()=>(state.apps||[]).length},
  star:{label:'STAR Bank',type:'bar',fn:pctStar},
  mlpath:{label:'AI/ML Path',type:'bar',fn:pctMlp},
+ capstone:{label:'Capstone',type:'bar',fn:pctCap},
  network:{label:'Network',type:'count',fn:()=>(state.contacts||[]).length},
  visa:{label:'Visa',type:'bar',fn:pctVisaO1},
 };
@@ -1630,7 +1739,7 @@ function updateTabIndicators(){
  });
 }
 
-renderRail();renderCounts();renderPhases();renderLC();renderLcProfile();renderLCList();renderTiles();renderApps();renderStar();renderMlPath();renderNet();renderVisa();updateTabIndicators();renderGradeStatus();
+renderRail();renderCounts();renderPhases();renderLC();renderLcProfile();renderLCList();renderTiles();renderApps();renderStar();renderMlPath();renderCapstones();renderNet();renderVisa();updateTabIndicators();renderGradeStatus();
 loadAutoCounts();loadGrades();
 window.addEventListener('resize',()=>{renderRail();renderMountain();});
 </script>
