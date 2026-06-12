@@ -1003,27 +1003,39 @@ function renderJourneyProg(){
    `<span class="jp-pct">${p}% of days</span>`;
 }
 
-/* ---------- FAANG ODDS MODEL ----------
-   odds = FLOOR + (CEIL-FLOOR) * p^GAMMA
-   p = weighted share of tasks completed (critical work weighted higher).
-   GAMMA>1 makes it convex: the last, hardest milestones move the needle far
-   more than early easy ones (finishing the set is worth a premium).
-   This is a motivational MODEL ESTIMATE, not a real probability.            */
+/* ---------- ODDS MODEL (roll-up) ----------
+   Target: a six-figure US SWE/AI offer that REQUIRES sponsorship.
+   odds = FLOOR + (CEIL-FLOOR) * (earned / total).
+   ROLL-UP principle: every task is worth 1 small point (the "1,1,1…"), but
+   FINISHING a whole group — a capstone, a year, an area — unlocks a big
+   completion bonus, and completing EVERYTHING unlocks a large GRAND bonus
+   that only lands on the very last task. So early steps add a little; the
+   final deliveries roll up into big jumps (the last task ≈ 30× an early one).
+   FLOOR = her rough baseline before executing the plan; CEIL = 88% if she
+   completes everything by 2029. MODEL ESTIMATE, not a real probability.       */
 function oddsModel(){
- const FLOOR=12, CEIL=65, GAMMA=2.0;
+ const FLOOR=20, CEIL=88;
  const dv=(typeof derivedSet==='function')?derivedSet():new Set();
- let w=0, dw=0; const add=(weight,done)=>{ w+=weight; if(done) dw+=weight; };
- const mw={intern:5,port:3,visa:3,school:2,algo:1.5};        // milestone weight by area
- phases.forEach(ph=>ph.items.forEach((it,i)=>{ const k=ph.id+'_'+i; add(mw[it[0]]||2, !!(state.checks&&state.checks[k])||dv.has(k)); }));
- if(typeof lcProblems!=='undefined') lcProblems.forEach(g=>g[1].forEach(it=>add(0.25, !!(state.lcDone&&state.lcDone[it[2]]))));   // each LeetCode problem = small
- if(typeof mlPath!=='undefined') mlPath.forEach(g=>g[1].forEach((it,i)=>add(1.5, !!(state.mlDone&&state.mlDone[g[0]+'_'+i]))));
- if(typeof visaItems!=='undefined') visaItems.forEach((t,i)=>add(1.2, !!(state.visaDone&&state.visaDone['o'+i])));
- if(typeof capstones!=='undefined') capstones.forEach(c=>{                    // capstones = high signal
-   c.items.forEach((t,i)=>add(4, !!(state.capChecks&&state.capChecks[c.id+'_'+i])));
-   add(6, (state.capMetric&&state.capMetric[c.id]||0)>=c.target);            // shipped + hit the target
+ let pts=0, earned=0; const add=(w,done)=>{ pts+=w; if(done) earned+=w; };
+ // base: every task = 1 point; track group completion for the roll-up bonuses
+ const yDone={1:true,2:true,3:true};
+ phases.forEach(ph=>{ const y=ph.year||1; ph.items.forEach((it,i)=>{ const k=ph.id+'_'+i, d=!!(state.checks&&state.checks[k])||dv.has(k); add(1,d); if(!d) yDone[y]=false; }); });
+ [1,2,3].forEach(y=>add(6, yDone[y]));                                         // finishing a whole year
+ let lcAll=true; if(typeof lcProblems!=='undefined') lcProblems.forEach(g=>g[1].forEach(it=>{ const d=!!(state.lcDone&&state.lcDone[it[2]]); add(1,d); if(!d) lcAll=false; }));
+ add(4,lcAll);
+ let mlAll=true; if(typeof mlPath!=='undefined') mlPath.forEach(g=>g[1].forEach((it,i)=>{ const d=!!(state.mlDone&&state.mlDone[g[0]+'_'+i]); add(1,d); if(!d) mlAll=false; }));
+ add(5,mlAll);
+ let vAll=true; if(typeof visaItems!=='undefined') visaItems.forEach((t,i)=>{ const d=!!(state.visaDone&&state.visaDone['o'+i]); add(1,d); if(!d) vAll=false; });
+ add(4,vAll);
+ if(typeof capstones!=='undefined') capstones.forEach(c=>{                     // capstones = the flagships
+   let cAll=true; c.items.forEach((t,i)=>{ const d=!!(state.capChecks&&state.capChecks[c.id+'_'+i]); add(1,d); if(!d) cAll=false; });
+   const hit=((state.capMetric&&state.capMetric[c.id])||0)>=c.target; add(6,hit); if(!hit) cAll=false;   // shipped + hit target
+   add(8,cAll);                                                                // whole capstone delivered
  });
- const p = w? dw/w : 0;
- const odds = Math.round(FLOOR + (CEIL-FLOOR)*Math.pow(p,GAMMA));
+ const allDone = pts>0 && earned===pts;                                        // everything else complete?
+ pts+=20; if(allDone) earned+=20;                                             // GRAND bonus lands on the last task
+ const p = pts? earned/pts : 0;
+ const odds = Math.round(FLOOR + (CEIL-FLOOR)*p);
  return {odds, max:CEIL, floor:FLOOR, p:Math.round(p*100)};
 }
 function renderOdds(){
@@ -1032,13 +1044,13 @@ function renderOdds(){
  el.innerHTML=`
    <div class="odds-main">
      <div class="odds-num">${m.odds}%</div>
-     <div class="odds-cap">estimated odds of a FAANG offer<span>model estimate · reaches ${m.max}% when she completes everything</span></div>
+     <div class="odds-cap">estimated odds of a six-figure SWE/AI offer (with sponsorship)<span>model estimate · reaches ${m.max}% when she completes everything by 2029</span></div>
    </div>
    <div class="odds-track">
      <div class="odds-fill" style="width:${m.odds}%"></div>
      <div class="odds-ceil" style="left:${m.max}%"><span>${m.max}% ceiling</span></div>
    </div>
-   <div class="odds-note">Every task she finishes nudges this up — and the final, hardest milestones (landing the internship, the offer, a shipped capstone) move it the most.</div>`;
+   <div class="odds-note">Roll-up scoring: each task adds a little, but finishing a whole capstone, a whole year, or the entire plan rolls up into big jumps — the final delivery is worth roughly 30× an early step.</div>`;
 }
 
 /* ---------- COUNTDOWNS ---------- */
