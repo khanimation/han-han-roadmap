@@ -193,6 +193,17 @@
   /* grade status chip in header */
   .grade-status{display:block;margin-top:8px;font-size:11.5px;color:#9A878C}
   .grade-status b{color:var(--navy)}
+  /* FAANG odds meter */
+  .odds{margin-top:14px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px 16px 12px;box-shadow:0 2px 8px rgba(224,141,160,.12)}
+  .odds-main{display:flex;align-items:baseline;gap:12px}
+  .odds-num{font-size:36px;font-weight:800;color:var(--blue);line-height:1}
+  .odds-cap{font-size:13px;color:var(--navy);font-weight:700;display:flex;flex-direction:column}
+  .odds-cap span{font-size:11px;color:#A8979C;font-weight:500;margin-top:2px}
+  .odds-track{position:relative;height:12px;background:var(--soft);border-radius:7px;margin:16px 0 7px;overflow:visible}
+  .odds-fill{height:100%;background:linear-gradient(90deg,#FFB7C5,#C45E7C);border-radius:7px;transition:width .6s}
+  .odds-ceil{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--gold)}
+  .odds-ceil span{position:absolute;top:-15px;left:50%;transform:translateX(-50%);white-space:nowrap;font-size:9.5px;font-weight:800;color:var(--gold)}
+  .odds-note{font-size:11px;color:var(--grey);line-height:1.45}
   /* journey % of days */
   .journey-prog{display:flex;align-items:center;gap:10px;margin-top:14px;flex-wrap:wrap}
   .jp-lab{font-size:12px;color:#7A6A6F;font-weight:600}
@@ -460,6 +471,7 @@
     <p class="sub">SWE / SD + AI role on the West Coast · six figures · by Summer 2029</p>
     <div class="who">Shared with <b>Han Han</b>, <b>Trang</b> &amp; <b>Khan</b> · update weekly (Sun) · <a href="https://drive.google.com/drive/folders/1uwrB4xTUpSVYzNXPzNRP6h7cUGK4xFix" target="_blank" rel="noopener" class="proofs-link">📁 Proofs folder ↗</a> <span id="syncChip" class="sync-chip">● On this device</span></div>
     <div class="grade-status" id="gradeStatus"></div>
+    <div class="odds" id="oddsMeter"></div>
     <div class="journey-prog" id="journeyProg"></div>
     <div class="counts" id="counts"></div>
   </div>
@@ -654,6 +666,7 @@ function save(){
   if(window.CloudSync && window.CloudSync.save) window.CloudSync.save(cloudState());
   flash();
   try{ updateTabIndicators(); }catch(e){}
+  try{ renderOdds(); }catch(e){}
 }
 /* called by the Firebase layer when another device changes the shared data */
 window.__getCloudState=cloudState;
@@ -675,6 +688,7 @@ window.applyRemoteState=function(d){
   renderPhases();renderLC();renderLCList();renderTiles();renderApps();renderStar();renderMlPath();renderCapstones();renderNet();renderVisa();
   try{ renderLcProfile(); }catch(e){}
   try{ updateTabIndicators(); }catch(e){}
+  try{ renderOdds(); }catch(e){}
 };
 window.addEventListener('cloud-status',e=>{
   const c=document.getElementById('syncChip'); if(!c) return;
@@ -989,6 +1003,44 @@ function renderJourneyProg(){
    `<span class="jp-pct">${p}% of days</span>`;
 }
 
+/* ---------- FAANG ODDS MODEL ----------
+   odds = FLOOR + (CEIL-FLOOR) * p^GAMMA
+   p = weighted share of tasks completed (critical work weighted higher).
+   GAMMA>1 makes it convex: the last, hardest milestones move the needle far
+   more than early easy ones (finishing the set is worth a premium).
+   This is a motivational MODEL ESTIMATE, not a real probability.            */
+function oddsModel(){
+ const FLOOR=12, CEIL=65, GAMMA=2.0;
+ const dv=(typeof derivedSet==='function')?derivedSet():new Set();
+ let w=0, dw=0; const add=(weight,done)=>{ w+=weight; if(done) dw+=weight; };
+ const mw={intern:5,port:3,visa:3,school:2,algo:1.5};        // milestone weight by area
+ phases.forEach(ph=>ph.items.forEach((it,i)=>{ const k=ph.id+'_'+i; add(mw[it[0]]||2, !!(state.checks&&state.checks[k])||dv.has(k)); }));
+ if(typeof lcProblems!=='undefined') lcProblems.forEach(g=>g[1].forEach(it=>add(0.25, !!(state.lcDone&&state.lcDone[it[2]]))));   // each LeetCode problem = small
+ if(typeof mlPath!=='undefined') mlPath.forEach(g=>g[1].forEach((it,i)=>add(1.5, !!(state.mlDone&&state.mlDone[g[0]+'_'+i]))));
+ if(typeof visaItems!=='undefined') visaItems.forEach((t,i)=>add(1.2, !!(state.visaDone&&state.visaDone['o'+i])));
+ if(typeof capstones!=='undefined') capstones.forEach(c=>{                    // capstones = high signal
+   c.items.forEach((t,i)=>add(4, !!(state.capChecks&&state.capChecks[c.id+'_'+i])));
+   add(6, (state.capMetric&&state.capMetric[c.id]||0)>=c.target);            // shipped + hit the target
+ });
+ const p = w? dw/w : 0;
+ const odds = Math.round(FLOOR + (CEIL-FLOOR)*Math.pow(p,GAMMA));
+ return {odds, max:CEIL, floor:FLOOR, p:Math.round(p*100)};
+}
+function renderOdds(){
+ const el=document.getElementById('oddsMeter'); if(!el) return;
+ const m=oddsModel();
+ el.innerHTML=`
+   <div class="odds-main">
+     <div class="odds-num">${m.odds}%</div>
+     <div class="odds-cap">estimated odds of a FAANG offer<span>model estimate · reaches ${m.max}% when she completes everything</span></div>
+   </div>
+   <div class="odds-track">
+     <div class="odds-fill" style="width:${m.odds}%"></div>
+     <div class="odds-ceil" style="left:${m.max}%"><span>${m.max}% ceiling</span></div>
+   </div>
+   <div class="odds-note">Every task she finishes nudges this up — and the final, hardest milestones (landing the internship, the offer, a shipped capstone) move it the most.</div>`;
+}
+
 /* ---------- COUNTDOWNS ---------- */
 function renderCounts(){
  const el=document.getElementById('counts');const now=new Date();
@@ -1048,7 +1100,7 @@ function derivedSet(){
  }));
  return s;
 }
-function refreshLinked(){try{renderOverview();}catch(e){}try{renderMountain();}catch(e){}try{updateTabIndicators();}catch(e){}}
+function refreshLinked(){try{renderOverview();}catch(e){}try{renderMountain();}catch(e){}try{updateTabIndicators();}catch(e){}try{renderOdds();}catch(e){}}
 function goTab(p){
  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.p===p));
  document.querySelectorAll('.panel').forEach(x=>x.classList.toggle('active',x.id===p));
@@ -1757,7 +1809,7 @@ function updateTabIndicators(){
  });
 }
 
-renderRail();renderCounts();renderJourneyProg();renderPhases();renderLC();renderLcProfile();renderLCList();renderTiles();renderApps();renderStar();renderMlPath();renderCapstones();renderNet();renderVisa();updateTabIndicators();renderGradeStatus();
+renderRail();renderCounts();renderJourneyProg();renderOdds();renderPhases();renderLC();renderLcProfile();renderLCList();renderTiles();renderApps();renderStar();renderMlPath();renderCapstones();renderNet();renderVisa();updateTabIndicators();renderGradeStatus();
 loadAutoCounts();loadGrades();
 window.addEventListener('resize',()=>{renderRail();renderMountain();});
 </script>
