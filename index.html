@@ -363,6 +363,25 @@
   .capprog{display:flex;justify-content:space-between;align-items:baseline;font-size:12.5px;color:var(--grey);margin-bottom:5px}
   .capprog b{color:var(--navy)}
   .capsug{margin:12px 0 0;font-size:12px;color:var(--blue);font-weight:600;background:#FFF6E6;border:1px solid #F0D9A6;border-radius:9px;padding:8px 11px}
+  /* $190K tangibility */
+  .comp-hero{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:2px}
+  .comp-hero .big{font-size:42px;font-weight:800;color:#1D8A3A;line-height:1}
+  .comp-hero .lab{font-size:12.5px;color:var(--grey);font-weight:600}
+  .comp-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:16px 0}
+  @media(max-width:680px){.comp-grid{grid-template-columns:repeat(2,1fr)}}
+  .comp-stat{background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+  .comp-stat b{display:block;font-size:23px;font-weight:800;color:var(--navy);line-height:1.1}
+  .comp-stat span{font-size:11.5px;color:var(--grey)}
+  .comp-bars{margin-top:6px}
+  .comp-bar{display:flex;align-items:center;gap:10px;margin:8px 0}
+  .comp-bar .cb-lab{flex:0 0 142px;font-size:12px;color:var(--ink)}
+  .comp-bar .cb-track{flex:1;height:18px;background:var(--soft);border-radius:6px;overflow:hidden}
+  .comp-bar .cb-fill{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,#FFB7C5,#C45E7C);min-width:3px}
+  .comp-bar.her .cb-fill{background:linear-gradient(90deg,#7FD08C,#2FA36B)}
+  .comp-bar .cb-val{flex:0 0 92px;font-size:12px;font-weight:800;color:var(--navy)}
+  @media(max-width:560px){.comp-bar .cb-lab{flex-basis:108px}.comp-bar .cb-val{flex-basis:80px;font-size:11px}}
+  .comp-note{font-size:11.5px;color:var(--grey);margin-top:12px;line-height:1.5}
+  .comp-note b{color:#1D8A3A}
   /* table */
   table{width:100%;border-collapse:collapse;font-size:13.5px}
   th{text-align:left;color:var(--grey);font-weight:600;font-size:11.5px;text-transform:uppercase;letter-spacing:.04em;
@@ -481,11 +500,10 @@
   <div class="tabs" id="tabs">
     <div class="tab active" data-p="overview">Overview</div>
     <div class="tab" data-p="leetcode">LeetCode</div>
-    <div class="tab" data-p="apps">Applications</div>
+    <div class="tab" data-p="apps">Apply &amp; Network</div>
     <div class="tab" data-p="star">STAR Bank</div>
     <div class="tab" data-p="mlpath">AI/ML Path</div>
     <div class="tab" data-p="capstone">Capstone</div>
-    <div class="tab" data-p="network">Network</div>
     <div class="tab" data-p="visa">Visa</div>
   </div>
 
@@ -570,6 +588,43 @@
       <p class="counts-summary" id="appProofSummary" style="margin:10px 0 0"></p>
       <button class="b b-add add-row" onclick="addApp()">+ Add application</button>
     </div>
+    <div class="card">
+      <h2>Networking &amp; referrals</h2>
+      <p class="hint">Applying isn't enough on its own — for an international candidate, one warm referral that gets her resume read beats fifty cold applications. So do <b>both</b>: apply above, and build relationships here. Track every recruiter, engineer, alum, and mentor, and attach <b>proof</b> of each real connection.</p>
+      <div class="netguide">
+        <div class="ng-h">How to network — the short version</div>
+        <ul>
+          <li><b>Start warm:</b> find UTD alumni at your target companies on LinkedIn (filter by school + company) and send a short, specific note.</li>
+          <li><b>Ask small:</b> request a 15-minute chat about their team and what they work on — not a referral up front.</li>
+          <li><b>Give first:</b> engage with their posts, share your own projects, be genuinely curious — be memorable for the right reasons.</li>
+          <li><b>Then ask:</b> after a good conversation, send your resume + GitHub and ask if they'd be comfortable referring you.</li>
+          <li><b>Go where engineers are:</b> career fairs, hackathons, ACM / AI club, and company Slack / Discord communities.</li>
+          <li><b>Always follow up</b> within 24 hours, and log it here with proof so nothing slips.</li>
+        </ul>
+      </div>
+      <table>
+        <thead><tr><th style="width:17%">Name</th><th style="width:16%">Company</th><th style="width:21%">Role / how you know them</th><th style="width:16%">Status</th><th style="width:14%">Next step</th><th style="width:12%">Proof</th><th></th></tr></thead>
+        <tbody id="netBody"></tbody>
+      </table>
+      <button class="b b-add add-row" onclick="addContact()">+ Add contact</button>
+    </div>
+    <div class="card">
+      <h2>What $190K really means</h2>
+      <p class="hint">This is the payoff that makes all the applying and networking worth it — an estimated new-grad total comp at a top company. Here's that number made tangible.</p>
+      <div class="comp-hero"><span class="big">$190,000</span><span class="lab">/ year · estimated new-grad total comp (base + stock + bonus)</span></div>
+      <div class="comp-grid">
+        <div class="comp-stat"><b>$91</b><span>every working hour</span></div>
+        <div class="comp-stat"><b>$15,800</b><span>per month (gross)</span></div>
+        <div class="comp-stat"><b>~$730</b><span>per working day</span></div>
+        <div class="comp-stat"><b>~$950K</b><span>over 5 years, before any raise</span></div>
+      </div>
+      <div class="comp-bars">
+        <div class="comp-bar"><span class="cb-lab">Vietnam avg income</span><span class="cb-track"><span class="cb-fill" style="width:1.3%"></span></span><span class="cb-val">$2,556/yr</span></div>
+        <div class="comp-bar"><span class="cb-lab">U.S. median household</span><span class="cb-track"><span class="cb-fill" style="width:44%"></span></span><span class="cb-val">$83,730/yr</span></div>
+        <div class="comp-bar her"><span class="cb-lab">Her FAANG target</span><span class="cb-track"><span class="cb-fill" style="width:100%"></span></span><span class="cb-val">$190,000/yr</span></div>
+      </div>
+      <p class="comp-note"><b>≈ 2.3×</b> the U.S. median household income · <b>≈ 74×</b> Vietnam's average annual income — one year of this comp is roughly what an average worker back home earns over a lifetime. Figures are gross and from the levels.fyi range; they vary by company, level, and location, and are shown here to make the goal feel real.</p>
+    </div>
   </div>
 
   <!-- STAR -->
@@ -599,30 +654,6 @@
       <p class="hint">These are the <b>headline projects</b> that make Han Han stand out against every other FAANG applicant. Not quick vibe-codes — each is a real product with a <b>mission and a user</b>, shipped, and <b>marketed</b> (use Claude for positioning, strategy, and organic growth). The loop is <span class="lc-strong">build → ship → grow → write it up</span>. Each finished capstone becomes a flagship on her portfolio — and proof she can take something from zero to real people using it.</p>
     </div>
     <div id="capList"></div>
-  </div>
-
-  <!-- NETWORK -->
-  <div class="panel" id="network">
-    <div class="card">
-      <h2>Networking & referrals</h2>
-      <p class="hint">For an international candidate, one warm referral that gets her resume read beats fifty cold applications. Track every recruiter, engineer, alum, and mentor here — and attach <b>proof</b> of each real connection (a LinkedIn message, an email, or a referral screenshot).</p>
-      <div class="netguide">
-        <div class="ng-h">How to network — the short version</div>
-        <ul>
-          <li><b>Start warm:</b> find UTD alumni at your target companies on LinkedIn (filter by school + company) and send a short, specific note.</li>
-          <li><b>Ask small:</b> request a 15-minute chat about their team and what they work on — not a referral up front.</li>
-          <li><b>Give first:</b> engage with their posts, share your own projects, be genuinely curious — be memorable for the right reasons.</li>
-          <li><b>Then ask:</b> after a good conversation, send your resume + GitHub and ask if they'd be comfortable referring you.</li>
-          <li><b>Go where engineers are:</b> career fairs, hackathons, ACM / AI club, and company Slack / Discord communities.</li>
-          <li><b>Always follow up</b> within 24 hours, and log it here with proof so nothing slips.</li>
-        </ul>
-      </div>
-      <table>
-        <thead><tr><th style="width:17%">Name</th><th style="width:16%">Company</th><th style="width:21%">Role / how you know them</th><th style="width:16%">Status</th><th style="width:14%">Next step</th><th style="width:12%">Proof</th><th></th></tr></thead>
-        <tbody id="netBody"></tbody>
-      </table>
-      <button class="b b-add add-row" onclick="addContact()">+ Add contact</button>
-    </div>
   </div>
 
   <!-- VISA -->
@@ -1802,11 +1833,10 @@ function pctVisaO1(){const t=visaItems.length;const d=Object.values(state.visaDo
 function pctStar(){const a=state.star||[];if(!a.length)return 0;const d=a.filter(s=>starFull(s).trim()).length;return Math.round(d/a.length*100);}
 const tabMeta={
  leetcode:{label:'LeetCode',type:'bar',fn:pctLeet},
- apps:{label:'Applications',type:'count',fn:()=>(state.apps||[]).length},
+ apps:{label:'Apply &amp; Network',type:'count',fn:()=>((state.apps||[]).length+(state.contacts||[]).length)},
  star:{label:'STAR Bank',type:'bar',fn:pctStar},
  mlpath:{label:'AI/ML Path',type:'bar',fn:pctMlp},
  capstone:{label:'Capstone',type:'bar',fn:pctCap},
- network:{label:'Network',type:'count',fn:()=>(state.contacts||[]).length},
  visa:{label:'Visa',type:'bar',fn:pctVisaO1},
 };
 function updateTabIndicators(){
