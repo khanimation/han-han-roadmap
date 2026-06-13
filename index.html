@@ -193,11 +193,8 @@
   /* grade status chip in header */
   .grade-status{display:block;margin-top:8px;font-size:11.5px;color:#9A878C}
   .grade-status b{color:var(--navy)}
-  /* header two-column top — identity left, odds right (fills the negative space) */
-  .head-top{display:flex;gap:22px;align-items:stretch;justify-content:space-between;flex-wrap:wrap}
-  .head-id{flex:1 1 360px;min-width:0;align-self:center}
   /* FAANG odds meter */
-  .odds{flex:1 1 380px;max-width:460px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px 16px 12px;box-shadow:0 2px 8px rgba(224,141,160,.12);align-self:center}
+  .odds{margin-top:14px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px 16px 12px;box-shadow:0 2px 8px rgba(224,141,160,.12)}
   .odds-main{display:flex;align-items:baseline;gap:12px}
   .odds-num{font-size:36px;font-weight:800;color:var(--blue);line-height:1}
   .odds-cap{font-size:13px;color:var(--navy);font-weight:700;display:flex;flex-direction:column}
@@ -489,16 +486,12 @@
 </script>
 <header>
   <div class="wrap">
-    <div class="head-top">
-      <div class="head-id">
-        <p class="eyebrow">Roadmap to FAANG · Accountability Tracker</p>
-        <h1>Han Han</h1>
-        <p class="sub">SWE / SD + AI role on the West Coast · six figures · by Summer 2029</p>
-        <div class="who">Shared with <b>Han Han</b>, <b>Trang</b> &amp; <b>Khan</b> · update weekly (Sun) · <a href="https://drive.google.com/drive/folders/1uwrB4xTUpSVYzNXPzNRP6h7cUGK4xFix" target="_blank" rel="noopener" class="proofs-link">📁 Proofs folder ↗</a> <span id="syncChip" class="sync-chip">● On this device</span></div>
-        <div class="grade-status" id="gradeStatus"></div>
-      </div>
-      <div class="odds" id="oddsMeter"></div>
-    </div>
+    <p class="eyebrow">Roadmap to FAANG · Accountability Tracker</p>
+    <h1>Han Han</h1>
+    <p class="sub">SWE / SD + AI role on the West Coast · six figures · by Summer 2029</p>
+    <div class="who">Shared with <b>Han Han</b>, <b>Trang</b> &amp; <b>Khan</b> · update weekly (Sun) · <a href="https://drive.google.com/drive/folders/1uwrB4xTUpSVYzNXPzNRP6h7cUGK4xFix" target="_blank" rel="noopener" class="proofs-link">📁 Proofs folder ↗</a> <span id="syncChip" class="sync-chip">● On this device</span></div>
+    <div class="grade-status" id="gradeStatus"></div>
+    <div class="odds" id="oddsMeter"></div>
     <div class="journey-prog" id="journeyProg"></div>
     <div class="counts" id="counts"></div>
   </div>
