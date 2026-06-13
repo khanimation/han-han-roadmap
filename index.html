@@ -85,6 +85,7 @@
   .rail-mark.goal .dot{border-color:var(--gold)} .rail-mark.goal.passed .dot{background:var(--gold)}
   .rail-mark .lab{font-size:11px;font-weight:700;color:var(--navy);line-height:1.22;text-align:center}
   .rail-mark .dte{font-size:10px;color:var(--grey);margin-top:1px}
+  .rail-mark .dys{display:block;font-size:9px;color:#BBA9AF;font-weight:500;margin-top:1px;white-space:nowrap}
   .rail-mark.up{flex-direction:column-reverse}
   .rail-mark.up .lab{margin-bottom:8px;margin-top:0} .rail-mark.up .dte{margin-top:0;margin-bottom:0;order:-1}
   .rail-mark.up{justify-content:flex-end;transform:translate(-50%,calc(-100% + 6px))}
@@ -835,8 +836,10 @@ function renderRail(){
  const tl=document.querySelector('#railToday .rt-lab'); if(tl) tl.textContent='TODAY · '+Math.round(tp)+'%';
  document.getElementById('railMarks').innerHTML=railMs.map((m,i)=>{
    const p=pos(m.d), passed=new Date(m.d)<=now, ud=i%2===0?'up':'down';
+   const dd=Math.round((new Date(m.d)-now)/864e5);
+   const dlab = dd>0?`(in ${dd.toLocaleString()} days)`:(dd===0?'(today)':`(${(-dd).toLocaleString()} days ago)`);
    return `<div class="rail-mark ${ud} ${m.cls||''} ${passed?'passed':''}" data-mi="${i}" style="left:${bandLeft(p)}">
-     <span class="lab">${m.lab}</span><span class="dte">${fmt(m.d)}</span><span class="dot"></span></div>`;
+     <span class="lab">${m.lab}</span><span class="dte">${fmt(m.d)}<span class="dys">${dlab}</span></span><span class="dot"></span></div>`;
  }).join('');
  document.querySelectorAll('#railMarks .rail-mark').forEach(el=>el.onclick=()=>openRailDetail(+el.dataset.mi));
  if(railSel>=0){ const cur=railSel; railSel=-1; openRailDetail(cur); }   // restore open state after a re-render
