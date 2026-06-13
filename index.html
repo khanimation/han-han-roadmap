@@ -209,7 +209,8 @@
   /* journey % of days — same bar language as the others */
   .journey-prog{display:flex;align-items:center;gap:12px;margin-top:16px;flex-wrap:wrap}
   .jp-lab{flex:0 0 auto;font-size:12.5px;color:#7A6A6F;font-weight:700}
-  .jp-track{flex:1;min-width:140px;height:12px;background:#fff;border:1px solid var(--line);border-radius:7px;overflow:hidden}
+  .jp-track{flex:1;min-width:140px;height:12px;background:var(--soft);border:1px solid var(--line);border-radius:7px;overflow:hidden}
+  #overview .journey-prog{margin-top:14px}
   .jp-fill{display:block;height:100%;background:linear-gradient(90deg,var(--teal),var(--blue));border-radius:7px;transition:width .6s}
   .jp-meta{flex:0 0 auto;font-size:12.5px;font-weight:800;color:var(--navy)}
   .jp-meta small{font-weight:600;color:var(--grey)}
@@ -495,7 +496,6 @@
     <h1>Han Han</h1>
     <div class="who">Shared with <b>Han Han</b>, <b>Trang</b> &amp; <b>Khan</b> · update weekly (Sun) · <a href="https://drive.google.com/drive/folders/1uwrB4xTUpSVYzNXPzNRP6h7cUGK4xFix" target="_blank" rel="noopener" class="proofs-link">📁 Proofs folder ↗</a> <span id="syncChip" class="sync-chip">● On this device</span> <span class="grade-status" id="gradeStatus"></span></div>
     <div class="odds" id="oddsMeter"></div>
-    <div class="journey-prog" id="journeyProg"></div>
     <div class="counts" id="counts"></div>
   </div>
 </header>
@@ -524,6 +524,7 @@
         </div>
       </div>
       <div class="rail-pop" id="railPop" hidden></div>
+      <div class="journey-prog" id="journeyProg"></div>
       <h3 class="q" style="margin-top:22px">The climb to FAANG</h3>
       <p class="hint">The climber rises on her own as Han Han completes tasks anywhere in the tracker — no clicking needed; the summit is a signed FAANG offer.</p>
       <div class="mtn-wrap"><svg id="mountain" viewBox="0 0 1000 560" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Mountain climb progress"></svg></div>
