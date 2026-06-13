@@ -505,7 +505,6 @@
       <div class="tab" data-p="visa">Visa</div>
     </div>
     <div class="odds" id="oddsMeter"></div>
-    <div class="counts" id="counts"></div>
   </div>
 </header>
 
@@ -1090,7 +1089,7 @@ function renderOdds(){
 
 /* ---------- COUNTDOWNS ---------- */
 function renderCounts(){
- const el=document.getElementById('counts');const now=new Date();
+ const el=document.getElementById('counts'); if(!el) return; const now=new Date();
  el.innerHTML=keyDates.map(([l,d])=>{
    const days=Math.ceil((new Date(d)-now)/864e5);
    const txt=days>0?days+' days':'now';
