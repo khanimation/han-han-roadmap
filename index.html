@@ -119,8 +119,7 @@
   @media(max-width:560px){.rd-row{flex-direction:column;gap:2px}.rd-when{flex-basis:auto}}
   /* mountain climb */
   .mtn-wrap{width:100%;overflow-x:auto;border-radius:14px;background:#FFF8FB}
-  #mountain{width:60%;height:auto;display:block;margin:0 auto;border-radius:14px}
-  @media(max-width:620px){#mountain{width:100%}}
+  #mountain{width:100%;height:auto;display:block;border-radius:14px}
   #mountain path,#mountain line,#mountain rect,#mountain text,#mountain ellipse,#mountain circle{pointer-events:none}
   #mountain [data-key]{cursor:default}
   .mtn-legend{display:flex;flex-wrap:wrap;gap:9px 16px;margin-top:14px;justify-content:center}
@@ -466,7 +465,8 @@
    Password is stored as a SHA-256 hash (not plain text).
    To CHANGE the password: open this page, open the browser console (F12),
    run:  await (async s=>{const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')})('YOUR-NEW-PASSWORD')
-   then paste the printed hash in place of GATE_HASH below. Current password: HanHan2029 */
+   then paste the printed hash in place of GATE_HASH below.
+   (The plaintext password is intentionally NOT stored in this file — only its SHA-256 hash lives in GATE_HASH, and the check runs client-side.) */
 (function(){
   const GATE_HASH='e6046c0a1f436808d3fff0f26c9b470f6a54a29efa611ab14c9fa30aeddf3e57';
   const KEY='hanhan_gate_ok_v1';
