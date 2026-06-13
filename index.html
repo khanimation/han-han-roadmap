@@ -1040,10 +1040,10 @@ function renderJourneyProg(){
    completion bonus, and completing EVERYTHING unlocks a large GRAND bonus
    that only lands on the very last task. So early steps add a little; the
    final deliveries roll up into big jumps (the last task ≈ 30× an early one).
-   FLOOR = her rough baseline before executing the plan; CEIL = 88% if she
-   completes everything by 2029. MODEL ESTIMATE, not a real probability.       */
+   Scale runs 0% (nothing done) → 88% (everything done by 2029): the full
+   0→88 span IS the 0→100% of the plan. MODEL ESTIMATE, not a real probability. */
 function oddsModel(){
- const FLOOR=20, CEIL=88;
+ const FLOOR=0, CEIL=88;
  const dv=(typeof derivedSet==='function')?derivedSet():new Set();
  let pts=0, earned=0; const add=(w,done)=>{ pts+=w; if(done) earned+=w; };
  // base: every task = 1 point; track group completion for the roll-up bonuses
