@@ -193,23 +193,27 @@
   /* grade status chip in header */
   .grade-status{display:block;margin-top:8px;font-size:11.5px;color:#9A878C}
   .grade-status b{color:var(--navy)}
+  /* header two-column top — identity left, odds right (fills the negative space) */
+  .head-top{display:flex;gap:22px;align-items:stretch;justify-content:space-between;flex-wrap:wrap}
+  .head-id{flex:1 1 360px;min-width:0;align-self:center}
   /* FAANG odds meter */
-  .odds{margin-top:14px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px 16px 12px;box-shadow:0 2px 8px rgba(224,141,160,.12)}
+  .odds{flex:1 1 380px;max-width:460px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px 16px 12px;box-shadow:0 2px 8px rgba(224,141,160,.12);align-self:center}
   .odds-main{display:flex;align-items:baseline;gap:12px}
   .odds-num{font-size:36px;font-weight:800;color:var(--blue);line-height:1}
   .odds-cap{font-size:13px;color:var(--navy);font-weight:700;display:flex;flex-direction:column}
   .odds-cap span{font-size:11px;color:#A8979C;font-weight:500;margin-top:2px}
-  .odds-track{position:relative;height:12px;background:var(--soft);border-radius:7px;margin:16px 0 7px;overflow:visible}
+  .odds-track{height:12px;background:var(--soft);border-radius:7px;margin:16px 0 5px;overflow:hidden}
   .odds-fill{height:100%;background:linear-gradient(90deg,#FFB7C5,#C45E7C);border-radius:7px;transition:width .6s}
-  .odds-ceil{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--gold)}
-  .odds-ceil span{position:absolute;top:-15px;left:50%;transform:translateX(-50%);white-space:nowrap;font-size:9.5px;font-weight:800;color:var(--gold)}
+  .odds-scale{display:flex;justify-content:space-between;font-size:9.5px;font-weight:800;color:#A8979C;margin-bottom:7px}
+  .odds-scale b{color:var(--gold)}
   .odds-note{font-size:11px;color:var(--grey);line-height:1.45}
-  /* journey % of days */
-  .journey-prog{display:flex;align-items:center;gap:10px;margin-top:14px;flex-wrap:wrap}
-  .jp-lab{font-size:12px;color:#7A6A6F;font-weight:600}
-  .jp-track{flex:1;min-width:120px;max-width:320px;height:9px;background:#fff;border:1px solid var(--line);border-radius:6px;overflow:hidden}
-  .jp-fill{display:block;height:100%;background:linear-gradient(90deg,var(--teal),var(--blue));border-radius:6px;transition:width .6s}
-  .jp-pct{font-size:13px;font-weight:800;color:var(--navy)}
+  /* journey % of days — same bar language as the others */
+  .journey-prog{display:flex;align-items:center;gap:12px;margin-top:16px;flex-wrap:wrap}
+  .jp-lab{flex:0 0 auto;font-size:12.5px;color:#7A6A6F;font-weight:700}
+  .jp-track{flex:1;min-width:140px;height:12px;background:#fff;border:1px solid var(--line);border-radius:7px;overflow:hidden}
+  .jp-fill{display:block;height:100%;background:linear-gradient(90deg,var(--teal),var(--blue));border-radius:7px;transition:width .6s}
+  .jp-meta{flex:0 0 auto;font-size:12.5px;font-weight:800;color:var(--navy)}
+  .jp-meta small{font-weight:600;color:var(--grey)}
   /* checklist */
   .phase{margin-bottom:8px}
   .phase-h{display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px 4px;user-select:none}
@@ -485,12 +489,16 @@
 </script>
 <header>
   <div class="wrap">
-    <p class="eyebrow">Roadmap to FAANG · Accountability Tracker</p>
-    <h1>Han Han</h1>
-    <p class="sub">SWE / SD + AI role on the West Coast · six figures · by Summer 2029</p>
-    <div class="who">Shared with <b>Han Han</b>, <b>Trang</b> &amp; <b>Khan</b> · update weekly (Sun) · <a href="https://drive.google.com/drive/folders/1uwrB4xTUpSVYzNXPzNRP6h7cUGK4xFix" target="_blank" rel="noopener" class="proofs-link">📁 Proofs folder ↗</a> <span id="syncChip" class="sync-chip">● On this device</span></div>
-    <div class="grade-status" id="gradeStatus"></div>
-    <div class="odds" id="oddsMeter"></div>
+    <div class="head-top">
+      <div class="head-id">
+        <p class="eyebrow">Roadmap to FAANG · Accountability Tracker</p>
+        <h1>Han Han</h1>
+        <p class="sub">SWE / SD + AI role on the West Coast · six figures · by Summer 2029</p>
+        <div class="who">Shared with <b>Han Han</b>, <b>Trang</b> &amp; <b>Khan</b> · update weekly (Sun) · <a href="https://drive.google.com/drive/folders/1uwrB4xTUpSVYzNXPzNRP6h7cUGK4xFix" target="_blank" rel="noopener" class="proofs-link">📁 Proofs folder ↗</a> <span id="syncChip" class="sync-chip">● On this device</span></div>
+        <div class="grade-status" id="gradeStatus"></div>
+      </div>
+      <div class="odds" id="oddsMeter"></div>
+    </div>
     <div class="journey-prog" id="journeyProg"></div>
     <div class="counts" id="counts"></div>
   </div>
@@ -1026,10 +1034,13 @@ function heartFlower(x,y){
 function journeyPct(){const now=new Date();return Math.max(0,Math.min(100,Math.round((now-railStart)/(railEnd-railStart)*100)));}
 function renderJourneyProg(){
  const el=document.getElementById('journeyProg'); if(!el) return;
- const p=journeyPct();
+ const now=new Date();
+ const total=Math.max(1,Math.round((railEnd-railStart)/864e5));
+ const elapsed=Math.max(0,Math.min(total,Math.round((now-railStart)/864e5)));
+ const p=Math.round(elapsed/total*100);
  el.innerHTML=`<span class="jp-lab">Journey to West Coast start</span>`+
    `<span class="jp-track"><span class="jp-fill" style="width:${p}%"></span></span>`+
-   `<span class="jp-pct">${p}% of days</span>`;
+   `<span class="jp-meta">${elapsed} / ${total} <small>days</small> · ${p}%</span>`;
 }
 
 /* ---------- ODDS MODEL (roll-up) ----------
@@ -1075,10 +1086,8 @@ function renderOdds(){
      <div class="odds-num">${m.odds}%</div>
      <div class="odds-cap">estimated odds of a six-figure SWE/AI offer (with sponsorship)<span>model estimate · reaches ${m.max}% when she completes everything by 2029</span></div>
    </div>
-   <div class="odds-track">
-     <div class="odds-fill" style="width:${m.odds}%"></div>
-     <div class="odds-ceil" style="left:${m.max}%"><span>${m.max}% ceiling</span></div>
-   </div>
+   <div class="odds-track"><div class="odds-fill" style="width:${Math.round(m.odds/m.max*100)}%"></div></div>
+   <div class="odds-scale"><span>0%</span><span><b>${m.max}% = ceiling</b></span></div>
    <div class="odds-note">Roll-up scoring: each task adds a little, but finishing a whole capstone, a whole year, or the entire plan rolls up into big jumps — the final delivery is worth roughly 30× an early step.</div>`;
 }
 
