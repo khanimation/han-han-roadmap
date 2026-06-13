@@ -211,6 +211,10 @@
   .jp-lab{flex:0 0 auto;font-size:12.5px;color:#7A6A6F;font-weight:700}
   .jp-track{flex:1;min-width:140px;height:12px;background:var(--soft);border:1px solid var(--line);border-radius:7px;overflow:hidden}
   #overview .journey-prog{margin-top:14px}
+  .jcard-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap}
+  .jcard-head h2{margin:0}
+  .jdays{font-size:14px;font-weight:800;color:var(--navy);white-space:nowrap}
+  .jdays small{font-weight:600;color:var(--grey)}
   .jp-fill{display:block;height:100%;background:linear-gradient(90deg,var(--teal),var(--blue));border-radius:7px;transition:width .6s}
   .jp-meta{flex:0 0 auto;font-size:12.5px;font-weight:800;color:var(--navy)}
   .jp-meta small{font-weight:600;color:var(--grey)}
@@ -514,7 +518,7 @@
   <!-- OVERVIEW -->
   <div class="panel active" id="overview">
     <div class="card">
-      <h2>The journey at a glance</h2>
+      <div class="jcard-head"><h2>The journey at a glance</h2><span class="jdays" id="journeyDays"></span></div>
       <p class="hint">Today against the dates that matter — the marker moves as time passes. <b>Tap any point</b> to see what's happening that semester (academics, career moves, and the milestone).</p>
       <div class="rail-scroll">
         <div class="rail-wrap">
@@ -524,7 +528,6 @@
         </div>
       </div>
       <div class="rail-pop" id="railPop" hidden></div>
-      <div class="journey-prog" id="journeyProg"></div>
       <h3 class="q" style="margin-top:22px">The climb to FAANG</h3>
       <p class="hint">The climber rises on her own as Han Han completes tasks anywhere in the tracker — no clicking needed; the summit is a signed FAANG offer.</p>
       <div class="mtn-wrap"><svg id="mountain" viewBox="0 0 1000 560" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Mountain climb progress"></svg></div>
@@ -1035,14 +1038,12 @@ function heartFlower(x,y){
 /* ---------- JOURNEY % OF DAYS ---------- */
 function journeyPct(){const now=new Date();return Math.max(0,Math.min(100,Math.round((now-railStart)/(railEnd-railStart)*100)));}
 function renderJourneyProg(){
- const el=document.getElementById('journeyProg'); if(!el) return;
+ const el=document.getElementById('journeyDays'); if(!el) return;
  const now=new Date();
  const total=Math.max(1,Math.round((railEnd-railStart)/864e5));
  const elapsed=Math.max(0,Math.min(total,Math.round((now-railStart)/864e5)));
  const p=Math.round(elapsed/total*100);
- el.innerHTML=`<span class="jp-lab">Journey to West Coast start</span>`+
-   `<span class="jp-track"><span class="jp-fill" style="width:${p}%"></span></span>`+
-   `<span class="jp-meta">${elapsed} / ${total} <small>days</small> · ${p}%</span>`;
+ el.innerHTML=`${elapsed} / ${total} <small>days · ${p}%</small>`;
 }
 
 /* ---------- ODDS MODEL (roll-up) ----------
