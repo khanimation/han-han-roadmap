@@ -1862,6 +1862,15 @@ function updateTabIndicators(){
 renderRail();renderCounts();renderJourneyProg();renderOdds();renderPhases();renderLC();renderLcProfile();renderLCList();renderTiles();renderApps();renderStar();renderMlPath();renderCapstones();renderNet();renderVisa();updateTabIndicators();renderGradeStatus();
 loadAutoCounts();loadGrades();
 window.addEventListener('resize',()=>{renderRail();renderMountain();});
+/* keep the day-based counters live: recompute on tab focus, on date rollover, and hourly */
+function refreshDateUI(){ try{renderCounts();renderJourneyProg();renderRail();}catch(e){} }
+document.addEventListener('visibilitychange',()=>{ if(!document.hidden) refreshDateUI(); });
+window.addEventListener('focus', refreshDateUI);
+setInterval(refreshDateUI, 600000);                 // re-check every 10 minutes
+(function scheduleMidnight(){                        // and snap exactly at local midnight
+  const now=new Date(), next=new Date(now.getFullYear(),now.getMonth(),now.getDate()+1,0,0,5);
+  setTimeout(()=>{ refreshDateUI(); scheduleMidnight(); }, next-now);
+})();
 </script>
 
 <!-- ============================================================
