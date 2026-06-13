@@ -211,10 +211,9 @@
   .jp-lab{flex:0 0 auto;font-size:12.5px;color:#7A6A6F;font-weight:700}
   .jp-track{flex:1;min-width:140px;height:12px;background:var(--soft);border:1px solid var(--line);border-radius:7px;overflow:hidden}
   #overview .journey-prog{margin-top:14px}
-  .jcard-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap}
+  .jcard-head{display:flex;align-items:baseline;justify-content:flex-start;gap:10px;flex-wrap:wrap}
   .jcard-head h2{margin:0}
-  .jdays{font-size:14px;font-weight:800;color:var(--navy);white-space:nowrap}
-  .jdays small{font-weight:600;color:var(--grey)}
+  .jdays{font-size:12.5px;font-weight:600;color:var(--grey);white-space:nowrap}
   .jp-fill{display:block;height:100%;background:linear-gradient(90deg,var(--teal),var(--blue));border-radius:7px;transition:width .6s}
   .jp-meta{flex:0 0 auto;font-size:12.5px;font-weight:800;color:var(--navy)}
   .jp-meta small{font-weight:600;color:var(--grey)}
@@ -1043,7 +1042,7 @@ function renderJourneyProg(){
  const total=Math.max(1,Math.round((railEnd-railStart)/864e5));
  const elapsed=Math.max(0,Math.min(total,Math.round((now-railStart)/864e5)));
  const p=Math.round(elapsed/total*100);
- el.innerHTML=`${elapsed} / ${total} <small>days · ${p}%</small>`;
+ el.innerHTML=`${elapsed} / ${total} days · ${p}%`;
 }
 
 /* ---------- ODDS MODEL (roll-up) ----------
