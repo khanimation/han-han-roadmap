@@ -736,9 +736,9 @@ let flashT;function flash(){const n=document.getElementById('saveNote');n.classL
 
 /* ---------- DATA ---------- */
 const phases=[
- {id:'q1',year:1,name:'Q1 · Summer 2026 — Foundation + Transfer',items:[
-   ['school','Submit UT Dallas transfer application'],
-   ['school','Meet UTD CS advisor; map transferable credits'],
+ {id:'q1',year:1,name:'Q1 · Summer 2026 — Foundation + Re-apply',items:[
+   ['school','Re-apply to UT Dallas for a Spring 2027 transfer (Fall 2026 was a no)'],
+   ['school','Meet a UTD CS advisor; map transferable credits + a Spring-start plan'],
    ['algo','Pick ONE interview language (Python or Java) and commit'],
    ['algo','Finish arrays / strings / hashing unit'],
    ['algo','Solve 40–50 easy LeetCode'],
@@ -746,17 +746,17 @@ const phases=[
    ['port','Clean GitHub: pin 100-AI-agents project with full README + demo'],
    ['intern','Build target list of 40–60 Summer 2027 internships'],
  ]},
- {id:'q2',year:1,name:'Q2 · Fall 2026 — First UTD Semester + Apply',items:[
-   ['school','Start strong at UTD; protect first-semester GPA'],
-   ['school','Join a CS / AI student org (ACM, AI club)'],
+ {id:'q2',year:1,name:'Q2 · Fall 2026 — Final Dallas College term + Apply',items:[
+   ['school','Finish your final Dallas College term with a strong GPA'],
+   ['school','Submit the Spring 2027 UTD transfer app by the deadline; confirm admission'],
    ['algo','Linked lists, stacks/queues, trees, recursion'],
    ['algo','Reach ~120 LeetCode total'],
    ['port','Ship one new deployed AI project (LLM/agent) with writeup'],
    ['intern','Apply early + in volume to Summer 2027 roles (Jul–Oct window)'],
    ['intern','Apply to Google the week its short window opens'],
  ]},
- {id:'q3',year:1,name:'Q3 · Spring 2027 — Interviews + Land Internship',items:[
-   ['school','Take data-structures-heavy + intro ML course; GPA ≥ 3.7'],
+ {id:'q3',year:1,name:'Q3 · Spring 2027 — Transfer to UTD + Interviews + Land Internship',items:[
+   ['school','Transfer to UTD (junior): take a DS-heavy + intro ML course; GPA ≥ 3.7'],
    ['algo','Graphs, dynamic programming, sorting/searching'],
    ['algo','Reach ~200 LeetCode total'],
    ['algo','Start weekly timed mock interviews'],
@@ -801,9 +801,9 @@ const tagName={algo:'Algo',port:'Portfolio',intern:'Intern',school:'School',visa
 const tagClass={algo:'t-algo',port:'t-port',intern:'t-intern',school:'t-school',visa:'t-visa'};
 
 const timeline=[
- ['Summer 2026','Finish Dallas College; submit UTD transfer','Start DSA; rebuild resume + GitHub','UTD app submitted'],
- ['Fall 2026','First semester at UT Dallas (junior)','100+ LeetCode; apply Summer 2027','Transfer complete'],
- ['Spring 2027','UTD core CS; GPA ≥ 3.7','Land a Summer 2027 internship','First internship'],
+ ['Summer 2026','Continue at Dallas College; re-apply to UTD (Spring 2027)','Start DSA; rebuild resume + GitHub','UTD app re-submitted'],
+ ['Fall 2026','Final term at Dallas College; strengthen the app','100+ LeetCode; apply Summer 2027','Spring 2027 transfer app in'],
+ ['Spring 2027','Transfer to UTD (junior); core CS; GPA ≥ 3.7','Land a Summer 2027 internship','Transfer complete + first internship'],
  ['Summer 2027','—','Intern #1; apply Summer 2028 FAANG','FAANG apps sent'],
  ['Fall 2027','UTD upper-div CS + AI/ML','FAANG interview loops; mocks','FAANG interviews'],
  ['Spring 2028','UTD AI/ML specialization','Convert → Summer 2028 FAANG intern','Internship offer'],
@@ -821,9 +821,9 @@ const keyDates=[
 /* ---------- HORIZONTAL RAIL ---------- */
 const railStart=new Date('2026-05-01'), railEnd=new Date('2029-07-15');
 const railMs=[
- {d:'2026-06-16',lab:'Focus year begins',cls:'first',rows:[0]},
- {d:'2026-08-26',lab:'Transfer to UTD',rows:[1]},
- {d:'2027-06-01',lab:'Internship #1',rows:[2,3]},
+ {d:'2026-06-16',lab:'Focus year begins',cls:'first',rows:[0,1]},
+ {d:'2027-01-13',lab:'Transfer to UTD',rows:[2]},
+ {d:'2027-06-01',lab:'Internship #1',rows:[3]},
  {d:'2027-08-01',lab:'★ FAANG apps open',cls:'goal',rows:[4,5]},
  {d:'2028-06-01',lab:'FAANG internship',rows:[6]},
  {d:'2029-05-15',lab:'Graduate',rows:[7,8]},
