@@ -498,11 +498,11 @@
     <div class="who">Shared with <b>Han Han</b>, <b>Trang</b> &amp; <b>Khan</b> · update weekly (Sun) · <a href="https://drive.google.com/drive/folders/1uwrB4xTUpSVYzNXPzNRP6h7cUGK4xFix" target="_blank" rel="noopener" class="proofs-link">📁 Proofs folder ↗</a> <span id="syncChip" class="sync-chip">● On this device</span> <span class="grade-status" id="gradeStatus"></span></div>
     <div class="tabs" id="tabs">
       <div class="tab active" data-p="overview">Overview</div>
+      <div class="tab" data-p="capstone">Capstone</div>
+      <div class="tab" data-p="mlpath">AI/ML Path</div>
+      <div class="tab" data-p="star">STAR Bank</div>
       <div class="tab" data-p="leetcode">LeetCode</div>
       <div class="tab" data-p="apps">Apply &amp; Network</div>
-      <div class="tab" data-p="star">STAR Bank</div>
-      <div class="tab" data-p="mlpath">AI/ML Path</div>
-      <div class="tab" data-p="capstone">Capstone</div>
       <div class="tab" data-p="visa">Visa</div>
     </div>
     <div class="odds" id="oddsMeter"></div>
@@ -1199,7 +1199,7 @@ function renderOverview(){
    </div>${ex?ovItemsHtml(tagItems[k],false,derived):''}`;
  }).join('');
  document.querySelectorAll('#yearBars [data-ovexp],#pillarBars [data-ovexp]').forEach(el=>el.onclick=()=>{const k=el.dataset.ovexp;ovExp[k]=!ovExp[k];renderOverview();});
- document.querySelectorAll('#yearBars [data-ovk],#pillarBars [data-ovk]').forEach(cb=>cb.onchange=(e)=>{e.stopPropagation();if(!cb.disabled)toggle(cb.dataset.ovk,cb.checked);});
+ document.querySelectorAll('#yearBars [data-ovk],#pillarBars [data-ovk]').forEach(cb=>cb.onchange=(e)=>{e.stopPropagation();if(cb.disabled)return;const k=cb.dataset.ovk,ck=cb.checked;toggle(k,ck);if(ck){const t=milestoneTag(k);if(t==='port'||t==='intern')promptProofOnCheck('ms:'+k,renderOverview);}});
  document.querySelectorAll('#yearBars [data-go],#pillarBars [data-go]').forEach(a=>a.onclick=(e)=>{e.stopPropagation();e.preventDefault();goTab(a.dataset.go);});
  wireProof(document.getElementById('yearBars'), renderOverview);
  wireProof(document.getElementById('pillarBars'), renderOverview);
@@ -1628,6 +1628,12 @@ function proofHtml(key){
  }
  return `<button class="proof add" data-proofadd="${esc(key)}" title="Attach a GitHub repo, deployed URL, or image link — Claude will grade it">+ proof</button>`;
 }
+function milestoneTag(key){for(const ph of phases){for(let i=0;i<ph.items.length;i++){if(ph.id+'_'+i===key)return ph.items[i][0];}}return null;}
+function promptProofOnCheck(proofKey,rerender){
+ if(state.proof && state.proof[proofKey] && state.proof[proofKey].url) return;   // already has proof
+ const v=prompt('✓ Checked! Add proof to back it up.\n\nPaste a link — a GitHub repo, a deployed URL, or a screengrab saved in your Drive “Proofs — Han Han Roadmap” folder (link in the page header). Claude grades proofs on the 1st & 15th.\n\n(Leave blank to check it off without proof for now.)','');
+ if(v && v.trim()){ state.proof=state.proof||{}; state.proof[proofKey]=Object.assign({},state.proof[proofKey],{url:v.trim()}); save(); if(rerender){try{rerender();}catch(e){}} }
+}
 function wireProof(host, rerender){
  host.querySelectorAll('[data-proofadd],[data-proofedit]').forEach(b=>b.onclick=(e)=>{
    e.preventDefault(); e.stopPropagation();
@@ -1663,7 +1669,7 @@ function renderMlPath(){
       return `<div class="lc-item ${dn?'done':''}"><input type="checkbox" ${dn?'checked':''} data-mlkey="${esc(key)}">${label}${proofHtml('ml:'+key)}</div>`;
     }).join('')+`</div>`;
  }).join('');
- host.querySelectorAll('input[type=checkbox]').forEach(cb=>cb.onchange=()=>{state.mlDone[cb.dataset.mlkey]=cb.checked;save();renderMlPath();refreshLinked();});
+ host.querySelectorAll('input[type=checkbox]').forEach(cb=>cb.onchange=()=>{const k=cb.dataset.mlkey,ck=cb.checked;state.mlDone[k]=ck;save();renderMlPath();refreshLinked();if(ck)promptProofOnCheck('ml:'+k,renderMlPath);});
  wireProof(host, renderMlPath);
  const done=Object.values(state.mlDone).filter(Boolean).length,total=mlTotal();
  const c=document.getElementById('mlSetCount'); if(c)c.textContent=`${done} / ${total} done`;
@@ -1737,7 +1743,7 @@ function renderVisaList(){
  const host=document.getElementById('visaList'); if(!host) return;
  host.innerHTML=visaItems.map((t,i)=>{const dn=!!state.visaDone['o'+i];
    return `<div class="lc-item ${dn?'done':''}"><input type="checkbox" ${dn?'checked':''} data-vkey="o${i}"><span class="mli">${t}</span>${proofHtml('o1:o'+i)}</div>`;}).join('');
- host.querySelectorAll('input[type=checkbox]').forEach(cb=>cb.onchange=()=>{state.visaDone[cb.dataset.vkey]=cb.checked;save();renderVisaList();refreshLinked();});
+ host.querySelectorAll('input[type=checkbox]').forEach(cb=>cb.onchange=()=>{const k=cb.dataset.vkey,ck=cb.checked;state.visaDone[k]=ck;save();renderVisaList();refreshLinked();if(ck)promptProofOnCheck('o1:'+k,renderVisaList);});
  wireProof(host, renderVisaList);
  const done=Object.values(state.visaDone).filter(Boolean).length,total=visaItems.length;
  const c=document.getElementById('visaSetCount'); if(c)c.textContent=`${done} / ${total} done`;
@@ -1820,7 +1826,7 @@ function renderCapstones(){
      ${c.suggested?'<p class="capsug">★ Claude’s suggested capstone — a strong default; refine it with her once Year 3 is closer.</p>':''}
    </div>`;
  }).join('');
- host.querySelectorAll('[data-capk]').forEach(cb=>cb.onchange=()=>{state.capChecks[cb.dataset.capk]=cb.checked;save();renderCapstones();refreshLinked();});
+ host.querySelectorAll('[data-capk]').forEach(cb=>cb.onchange=()=>{const k=cb.dataset.capk,ck=cb.checked;state.capChecks[k]=ck;save();renderCapstones();refreshLinked();if(ck)promptProofOnCheck('cap:'+k,renderCapstones);});
  host.querySelectorAll('[data-capm]').forEach(btn=>btn.onclick=()=>{const id=btn.dataset.capm;state.capMetric[id]=Math.max(0,(state.capMetric[id]||0)+(+btn.dataset.d));save();renderCapstones();refreshLinked();});
  host.querySelectorAll('[data-capset]').forEach(btn=>btn.onclick=()=>{const id=btn.dataset.capset;const v=prompt('Set current '+capstones.find(c=>c.id===id).metric+':',state.capMetric[id]||0);if(v!==null&&!isNaN(v)){state.capMetric[id]=Math.max(0,parseInt(v)||0);save();renderCapstones();refreshLinked();}});
  wireProof(host, renderCapstones);
