@@ -129,6 +129,8 @@
   /* sticky top bar: tabs + odds stay pinned while scrolling */
   .topbar{position:sticky;top:0;z-index:6;background:var(--bg);padding:6px 0 8px;box-shadow:0 6px 14px -10px rgba(196,94,124,.35)}
   .tabs{display:flex;gap:7px;flex-wrap:wrap;margin:0 0 6px;background:transparent;padding:8px 0 4px}
+  /* on phones, keep the tabs to one scrollable row so the sticky bar stays short */
+  @media(max-width:700px){.tabs{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding-bottom:8px}.tabs::-webkit-scrollbar{display:none}.tab{flex:0 0 auto}}
   .tab{position:relative;border:1px solid var(--line);background:#fff;color:var(--navy);padding:9px 16px 13px;border-radius:999px;
     font-size:13.5px;font-weight:600;cursor:pointer;transition:.15s;box-shadow:0 1px 3px rgba(224,141,160,.12)}
   .tab:hover{border-color:var(--rose);color:var(--blue);box-shadow:0 4px 10px rgba(224,141,160,.22)}
@@ -534,7 +536,7 @@
       <p class="hint">The payoff at the summit — an estimated new-grad total comp at a top company, made tangible.</p>
       <div class="comp-hero"><span class="big">$190,000</span><span class="lab">/ year · estimated new-grad total comp (base + stock + bonus)</span></div>
       <div class="comp-bars">
-        <div class="comp-bar her"><span class="cb-lab">Her FAANG target</span><span class="cb-track"><span class="cb-fill" style="width:100%"></span></span><span class="cb-val">$190,000/yr</span></div>
+        <div class="comp-bar her"><span class="cb-lab">Her six-figure target</span><span class="cb-track"><span class="cb-fill" style="width:100%"></span></span><span class="cb-val">$190,000/yr</span></div>
         <div class="comp-bar"><span class="cb-lab">U.S. median household</span><span class="cb-track"><span class="cb-fill" style="width:44%"></span></span><span class="cb-val">$83,730/yr</span></div>
         <div class="comp-bar"><span class="cb-lab">Vietnam avg income</span><span class="cb-track"><span class="cb-fill" style="width:1.3%"></span></span><span class="cb-val">$2,556/yr</span></div>
       </div>
