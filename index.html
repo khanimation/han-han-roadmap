@@ -119,7 +119,7 @@
   @media(max-width:560px){.rd-row{flex-direction:column;gap:2px}.rd-when{flex-basis:auto}}
   /* mountain climb */
   .mtn-wrap{width:100%;overflow-x:auto;border-radius:14px;background:#FFF8FB}
-  #mountain{width:100%;height:auto;display:block;border-radius:14px}
+  #mountain{width:100%;aspect-ratio:1000 / 280;height:auto;display:block;border-radius:14px}
   #mountain path,#mountain line,#mountain rect,#mountain text,#mountain ellipse,#mountain circle{pointer-events:none}
   #mountain [data-key]{cursor:default}
   .mtn-legend{display:flex;flex-wrap:wrap;gap:9px 16px;margin-top:14px;justify-content:center}
@@ -530,7 +530,7 @@
         </div>
       </div>
       <div class="rail-pop" id="railPop" hidden></div>
-      <div class="mtn-wrap" style="margin-top:18px"><svg id="mountain" viewBox="0 0 1000 560" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Mountain climb progress"></svg></div>
+      <div class="mtn-wrap" style="margin-top:18px"><svg id="mountain" viewBox="0 0 1000 560" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Mountain climb progress"></svg></div>
       <div class="mtn-legend" id="mtnLegend"></div>
     </div>
     <div class="card">
@@ -542,7 +542,6 @@
         <div class="comp-bar"><span class="cb-lab">U.S. median household</span><span class="cb-track"><span class="cb-fill" style="width:44%"></span></span><span class="cb-val">$83,730/yr</span></div>
         <div class="comp-bar"><span class="cb-lab">Vietnam avg income</span><span class="cb-track"><span class="cb-fill" style="width:1.3%"></span></span><span class="cb-val">$2,556/yr</span></div>
       </div>
-      <p class="comp-note"><b>≈ 2.3×</b> the U.S. median household income · <b>≈ 74×</b> Vietnam's average annual income — one year of this comp is roughly what an average worker back home earns over a lifetime. Figures are gross and from the levels.fyi range; they vary by company, level, and location, and are shown here to make the goal feel real.</p>
     </div>
     <div class="card">
       <h2>Milestones — where things stand</h2>
@@ -555,6 +554,7 @@
       <h2>The one thing that matters most</h2>
       <p class="hint" style="margin:0">FAANG hiring runs ~2 years ahead of graduation. The internship that converts to a full-time offer is <b>Summer 2028</b> — and its applications open <b>July–October 2027</b>. Everything here points at being interview-ready by then: transfer done, ~250 LeetCode solved, a deployed AI portfolio, and ideally a Summer 2027 internship already on the resume.</p>
     </div>
+    <p class="comp-note" style="margin:8px 4px 0;text-align:center"><b>≈ 2.3×</b> the U.S. median household income · <b>≈ 74×</b> Vietnam's average annual income — one year of this comp is roughly what an average worker back home earns over a lifetime. Figures are gross and from the levels.fyi range; they vary by company, level, and location, and are shown here to make the goal feel real.</p>
   </div>
 
   <!-- LEETCODE -->
