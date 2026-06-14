@@ -719,6 +719,16 @@
   .pf-or span{padding:0 10px}
   .pf-link{width:100%;box-sizing:border-box;border:2px solid var(--soft);border-radius:12px;padding:11px 12px;font-size:14px;font-family:inherit}
   .pf-link:focus{outline:none;border-color:var(--blue)}
+  .capfee{margin:12px 0 4px;border:1.5px solid #F0C36D;background:#FFF8E8;border-radius:12px;padding:12px 14px}
+  .capfee-row{display:flex;gap:10px;align-items:flex-start}
+  .capfee-tag{flex:0 0 auto;font-size:10px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;color:#9A6B00;background:#FBE6B5;border-radius:6px;padding:3px 7px;margin-top:2px}
+  .capfee-txt{display:flex;flex-direction:column;min-width:0}
+  .capfee-txt b{font-size:14px;color:var(--navy)}
+  .capfee-txt span{font-size:12px;color:var(--grey);line-height:1.45;margin-top:2px}
+  .capfee-paid{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink);font-weight:600;margin:11px 0 0;cursor:pointer}
+  .capfee-launch{display:block;margin-top:10px;border:none;background:linear-gradient(135deg,var(--blue),var(--teal));color:#fff;font-weight:800;font-size:14px;border-radius:10px;padding:11px 14px;cursor:pointer;width:100%}
+  .capfee-launch:hover{filter:brightness(1.06)}
+  .capfee-note{display:block;margin-top:8px;font-size:12px;font-weight:700;color:#13A89E}
 </style>
 <button class="fb-fab" id="fbFab" onclick="openFeedback()" title="Tell us how to make this better">💬 Feedback</button>
 <div class="fb-overlay" id="fbOverlay" onclick="if(event.target===this)closeFeedback()">
@@ -755,7 +765,7 @@ const KEY='hanhan_faang_v1';
 let state=load();
 function load(){try{return JSON.parse(localStorage.getItem(KEY))||{}}catch(e){return {}}}
 /* the slice of state that is SHARED in the cloud (UI prefs like 'collapsed' stay local) */
-function cloudState(){return {checks:state.checks,lc:state.lc,lcDone:state.lcDone,apps:state.apps,star:state.star,mlDone:state.mlDone,contacts:state.contacts,visaDone:state.visaDone,proof:state.proof,lcProfile:state.lcProfile,capChecks:state.capChecks,capMetric:state.capMetric,feedback:state.feedback||[]}}
+function cloudState(){return {checks:state.checks,lc:state.lc,lcDone:state.lcDone,apps:state.apps,star:state.star,mlDone:state.mlDone,contacts:state.contacts,visaDone:state.visaDone,proof:state.proof,lcProfile:state.lcProfile,capChecks:state.capChecks,capMetric:state.capMetric,feedback:state.feedback||[],appleFeePaid:!!state.appleFeePaid,launchNotified:state.launchNotified||0}}
 function save(){
   localStorage.setItem(KEY,JSON.stringify(state));
   if(window.CloudSync && window.CloudSync.save) window.CloudSync.save(cloudState());
@@ -780,6 +790,8 @@ window.applyRemoteState=function(d){
   if(Array.isArray(d.apps)) state.apps=d.apps;
   if(Array.isArray(d.star)) state.star=d.star;
   if(Array.isArray(d.feedback)) state.feedback=fbMerge(state.feedback||[],d.feedback);
+  if(typeof d.appleFeePaid==='boolean') state.appleFeePaid=d.appleFeePaid;
+  if(typeof d.launchNotified==='number') state.launchNotified=d.launchNotified;
   localStorage.setItem(KEY,JSON.stringify(state));
   renderPhases();renderLC();renderLCList();renderTiles();renderApps();renderStar();renderMlPath();renderCapstones();renderNet();renderVisa();
   try{ renderLcProfile(); }catch(e){}
@@ -1965,6 +1977,7 @@ function renderCapstones(){
          ${hit?'<span class="caphit">🎉 target hit</span>':''}
        </div>
      </div>
+     ${c.id==='cap1'?capAppleExtras():''}
      <div class="capprog"><span>Build &amp; grow checklist</span><b>${done}/${total} · ${pct}%</b></div>
      <div class="captrack thin"><div class="capfill" style="width:${pct}%"></div></div>
      <div>${c.items.map((t,i)=>{const k=c.id+'_'+i,dn=!!state.capChecks[k];
@@ -1975,7 +1988,27 @@ function renderCapstones(){
  host.querySelectorAll('[data-capk]').forEach(cb=>cb.onchange=()=>{const k=cb.dataset.capk,ck=cb.checked;state.capChecks[k]=ck;save();renderCapstones();refreshLinked();if(ck)promptProofOnCheck('cap:'+k,renderCapstones);});
  host.querySelectorAll('[data-capm]').forEach(btn=>btn.onclick=()=>{const id=btn.dataset.capm;state.capMetric[id]=Math.max(0,(state.capMetric[id]||0)+(+btn.dataset.d));save();renderCapstones();refreshLinked();});
  host.querySelectorAll('[data-capset]').forEach(btn=>btn.onclick=()=>{const id=btn.dataset.capset;const v=prompt('Set current '+capstones.find(c=>c.id===id).metric+':',state.capMetric[id]||0);if(v!==null&&!isNaN(v)){state.capMetric[id]=Math.max(0,parseInt(v)||0);save();renderCapstones();refreshLinked();}});
+ const fp=document.getElementById('appleFeePaid'); if(fp) fp.onchange=()=>{state.appleFeePaid=fp.checked;save();renderCapstones();};
+ const lb=document.getElementById('appleLaunchBtn'); if(lb) lb.onclick=()=>{launchReadyEmail();};
  wireProof(host, renderCapstones);
+}
+function capAppleExtras(){
+ const paid=!!state.appleFeePaid, notified=state.launchNotified;
+ const when=notified?new Date(notified).toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'}):'';
+ return `<div class="capfee">
+   <div class="capfee-row"><span class="capfee-tag">Required cost</span>
+     <div class="capfee-txt"><b>Apple Developer Program — $99 / year</b><span>Apple charges <b>$99/year</b> to publish on the App Store. This must be active <b>before</b> the app can be submitted and launched.</span></div></div>
+   <label class="capfee-paid"><input type="checkbox" id="appleFeePaid" ${paid?'checked':''}> $99/year Apple Developer fee is paid &amp; active</label>
+   <button class="capfee-launch" id="appleLaunchBtn">🚀 Ready to activate &amp; launch — email Khan</button>
+   ${notified?`<span class="capfee-note">✓ Khan notified she’s ready on ${when}</span>`:''}
+ </div>`;
+}
+function launchReadyEmail(){
+ state.launchNotified=Date.now(); save();
+ const subj=encodeURIComponent('Han Han is ready to activate & launch her iOS app 🚀');
+ const body=encodeURIComponent('Hi Khan,\n\nHan Han is ready to activate and launch her iOS app (Capstone — "Ship a real iOS app · 1,000+ downloads").\n\nNext step: the Apple Developer Program ($99/year) needs to be active so she can submit to the App Store. Let’s get it set up so she can launch.\n\nOpen the tracker: https://khanimation.github.io/han-han-roadmap/\n\n— sent from the Roadmap Tracker');
+ try{window.location.href='mailto:kltxmail@gmail.com?subject='+subj+'&body='+body;}catch(e){}
+ renderCapstones();
 }
 function pctCap(){let t=0,d=0;capstones.forEach(c=>c.items.forEach((_,i)=>{t++;if(state.capChecks[c.id+'_'+i])d++;}));return t?Math.round(d/t*100):0;}
 
