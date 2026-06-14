@@ -1541,6 +1541,7 @@ document.getElementById('tabs').addEventListener('click',e=>{
  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
  e.target.classList.add('active');
  document.getElementById(e.target.dataset.p).classList.add('active');
+ window.scrollTo({top:0,behavior:'smooth'});
 });
 
 /* ---------- AI/ML PATH ---------- */
