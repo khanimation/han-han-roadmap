@@ -711,6 +711,14 @@
   .fb-past h4{margin:0 0 6px;font-size:12px;text-transform:uppercase;letter-spacing:.4px;color:var(--grey)}
   .fb-item{font-size:13px;color:var(--ink);background:var(--bg);border-radius:10px;padding:8px 10px;margin-bottom:6px;line-height:1.45}
   .fb-item .fb-when{display:block;font-size:11px;color:var(--grey);margin-top:3px}
+  .pf-up{width:100%;box-sizing:border-box;border:2px dashed var(--blue);background:rgba(45,95,160,.06);color:var(--navy);font-weight:800;font-size:15px;border-radius:12px;padding:15px;cursor:pointer;margin-top:2px}
+  .pf-up:hover{background:rgba(45,95,160,.12)}
+  .pf-up.busy{opacity:.6;cursor:default}
+  .pf-or{display:flex;align-items:center;text-align:center;color:var(--grey);font-size:12px;margin:13px 0 9px}
+  .pf-or:before,.pf-or:after{content:'';flex:1;height:1px;background:var(--soft)}
+  .pf-or span{padding:0 10px}
+  .pf-link{width:100%;box-sizing:border-box;border:2px solid var(--soft);border-radius:12px;padding:11px 12px;font-size:14px;font-family:inherit}
+  .pf-link:focus{outline:none;border-color:var(--blue)}
 </style>
 <button class="fb-fab" id="fbFab" onclick="openFeedback()" title="Tell us how to make this better">💬 Feedback</button>
 <div class="fb-overlay" id="fbOverlay" onclick="if(event.target===this)closeFeedback()">
@@ -725,6 +733,20 @@
     </div>
     <div class="fb-note" id="fbNote"></div>
     <div class="fb-past" id="fbPast"></div>
+  </div>
+</div>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<div class="fb-overlay" id="pfOverlay" onclick="if(event.target===this)closeProofDlg()">
+  <div class="fb-modal">
+    <button class="fb-x" onclick="closeProofDlg()" aria-label="Close">×</button>
+    <h3 id="pfTitle">Add proof</h3>
+    <p class="fb-sub" id="pfSub">Upload a screenshot, photo, or PDF — or paste a link. Claude grades proofs on the 1st &amp; 15th.</p>
+    <button class="pf-up" id="pfUpBtn">📤 Upload screenshot / photo / PDF</button>
+    <input type="file" id="pfFile" accept="image/*,application/pdf,.png,.jpg,.jpeg,.pdf,.heic,.webp,.gif" style="display:none">
+    <div class="pf-or"><span>or paste a link</span></div>
+    <input class="pf-link" id="pfLink" type="url" placeholder="GitHub repo, deployed URL, or Drive share link">
+    <div class="fb-row"><button class="fb-send" id="pfSaveBtn">Save proof</button></div>
+    <div class="fb-note" id="pfNote"></div>
   </div>
 </div>
 
@@ -785,6 +807,74 @@ let fbRec=null,fbRecording=false;
 function setMicUI(on){const m=document.getElementById('fbMic');const lab=document.getElementById('fbMicLab');if(!m)return;m.classList.toggle('rec',on);if(lab)lab.textContent=on?'Listening… tap to stop':'Speak';}
 function toggleMic(){const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){fbNote('Voice input isn’t supported in this browser — please type instead (try Chrome).');return;}if(fbRecording){try{fbRec&&fbRec.stop()}catch(e){}return;}fbRec=new SR();fbRec.lang='en-US';fbRec.interimResults=true;fbRec.continuous=true;let base=document.getElementById('fbText').value;if(base&&!/\s$/.test(base))base+=' ';fbRec.onresult=e=>{let fin='',interim='';for(let i=e.resultIndex;i<e.results.length;i++){const r=e.results[i];if(r.isFinal)fin+=r[0].transcript;else interim+=r[0].transcript;}if(fin)base+=fin;document.getElementById('fbText').value=base+interim;};fbRec.onend=()=>{fbRecording=false;setMicUI(false);};fbRec.onerror=ev=>{fbRecording=false;setMicUI(false);if(ev.error==='not-allowed'||ev.error==='service-not-allowed')fbNote('Microphone access was blocked — allow the mic, or just type instead.');else if(ev.error==='no-speech')fbNote('Didn’t catch that — tap Speak and try again.');};try{fbRec.start();fbRecording=true;setMicUI(true);}catch(e){fbNote('Couldn’t start the mic — please type instead.');}}
 window.addEventListener('keydown',e=>{if(e.key==='Escape')closeFeedback();});
+
+/* ---------- PROOF UPLOAD (in-page → Google Drive) ---------- */
+const GDRIVE_CLIENT_ID='446356386047-odamo23rbjuqmdeo0m6ugkc5o46eqi1t.apps.googleusercontent.com';   /* OAuth Web client — project maintenance-tracker-bot */
+const GDRIVE_FOLDER='1uwrB4xTUpSVYzNXPzNRP6h7cUGK4xFix';   /* Proofs — Han Han Roadmap */
+const GDRIVE_SCOPE='https://www.googleapis.com/auth/drive';
+let _gtok=null,_gtokExp=0,_gtc=null;
+function gdriveReady(){return !!GDRIVE_CLIENT_ID && typeof google!=='undefined' && google.accounts && google.accounts.oauth2;}
+function gdriveToken(cb,err){
+  if(!gdriveReady()){err&&err('not-configured');return;}
+  if(_gtok && Date.now()<_gtokExp-60000){cb(_gtok);return;}
+  if(!_gtc){_gtc=google.accounts.oauth2.initTokenClient({client_id:GDRIVE_CLIENT_ID,scope:GDRIVE_SCOPE,callback:()=>{}});}
+  _gtc.callback=(resp)=>{if(resp&&resp.access_token){_gtok=resp.access_token;_gtokExp=Date.now()+((resp.expires_in||3600)*1000);cb(_gtok);}else{err&&err('no-token');}};
+  _gtc.error_callback=(e)=>{err&&err((e&&e.type)||'error');};
+  _gtc.requestAccessToken({prompt:_gtok?'':'consent'});
+}
+function gdriveUpload(file,fileKey,label,onDone,onErr){
+  gdriveToken(function(tok){
+    const ext=((file.name||'').split('.').pop()||'').toLowerCase();
+    const safe=(fileKey||'proof').replace(/[^a-z0-9]+/gi,'-');
+    const t=new Date(),p=n=>String(n).padStart(2,'0');
+    const stamp=t.getFullYear()+p(t.getMonth()+1)+p(t.getDate())+'-'+p(t.getHours())+p(t.getMinutes())+p(t.getSeconds());
+    const name='proof__'+safe+'__'+stamp+(ext?'.'+ext:'');
+    const meta={name:name,parents:[GDRIVE_FOLDER],description:(label||'Tracker proof')+' · key='+(fileKey||'')};
+    const form=new FormData();
+    form.append('metadata',new Blob([JSON.stringify(meta)],{type:'application/json'}));
+    form.append('file',file);
+    fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&supportsAllDrives=true&fields=id,name,webViewLink',{method:'POST',headers:{Authorization:'Bearer '+tok},body:form})
+      .then(r=>r.ok?r.json():r.json().then(j=>Promise.reject(j)))
+      .then(d=>onDone(d)).catch(e=>onErr&&onErr(e));
+  },function(e){onErr&&onErr({error:{message:e}});});
+}
+let _pfCtx=null;
+function pfNote(m){const n=document.getElementById('pfNote');if(n)n.textContent=m||'';}
+function openProofDialog(cfg){
+  _pfCtx=cfg||{};
+  document.getElementById('pfTitle').textContent=cfg.title||'Add proof';
+  if(cfg.sub)document.getElementById('pfSub').textContent=cfg.sub;
+  document.getElementById('pfLink').value=cfg.current||'';
+  pfNote('');
+  const up=document.getElementById('pfUpBtn');up.classList.remove('busy');
+  if(!GDRIVE_CLIENT_ID){up.textContent='📤 Upload (being set up — paste a link for now)';up.disabled=true;up.style.opacity=.55;up.style.borderStyle='solid';}
+  else{up.textContent='📤 Upload screenshot / photo / PDF';up.disabled=false;up.style.opacity=1;up.style.borderStyle='dashed';}
+  document.getElementById('pfOverlay').classList.add('show');
+}
+function closeProofDlg(){document.getElementById('pfOverlay').classList.remove('show');_pfCtx=null;}
+function wireProofDialog(){
+  const f=document.getElementById('pfFile');if(!f)return;
+  document.getElementById('pfUpBtn').onclick=()=>{if(!GDRIVE_CLIENT_ID)return;f.value='';f.click();};
+  f.onchange=()=>{const file=f.files&&f.files[0];if(!file||!_pfCtx)return;
+    if(file.size>25*1024*1024){pfNote('That file is over 25 MB — please use a smaller screenshot.');return;}
+    const up=document.getElementById('pfUpBtn');up.classList.add('busy');up.textContent='Uploading “'+file.name+'”…';pfNote('A Google sign-in may pop up the first time — that’s expected.');
+    gdriveUpload(file,_pfCtx.fileKey,_pfCtx.label,function(d){
+      up.classList.remove('busy');up.textContent='✓ Uploaded!';
+      const link=d.webViewLink||('https://drive.google.com/file/d/'+d.id+'/view');
+      try{_pfCtx.onSave(link,{kind:'upload',fid:d.id,name:d.name});}catch(e){}
+      pfNote('Saved to your Proofs folder. Claude will grade it on the next pass. 💛');
+      setTimeout(closeProofDlg,1000);
+    },function(err){
+      up.classList.remove('busy');up.textContent='📤 Upload screenshot / photo / PDF';
+      const code=(err&&err.error&&err.error.message)||(err&&err.error)||(err&&err.message)||'';
+      if(code==='not-configured')pfNote('Upload isn’t set up yet — paste a link for now.');
+      else if((''+code).indexOf('popup')>-1||code==='popup_closed'||code==='access_denied')pfNote('Sign-in was closed or declined — tap Upload to try again, or paste a link.');
+      else pfNote('Upload failed ('+(code||'error')+'). You can paste a link instead.');
+    });
+  };
+  document.getElementById('pfSaveBtn').onclick=()=>{if(!_pfCtx)return;const v=(document.getElementById('pfLink').value||'').trim();try{_pfCtx.onSave(v,{kind:'link'});}catch(e){}closeProofDlg();};
+}
+try{wireProofDialog();}catch(e){}
 
 /* ---------- DATA ---------- */
 const phases=[
@@ -1499,10 +1589,8 @@ function renderApps(){
  });
  b.querySelectorAll('[data-appproof]').forEach(btn=>btn.onclick=()=>{
    const i=+btn.dataset.appproof, cur=(state.apps[i]||{}).proof||'';
-   const v=prompt('Paste a link to your confirmation screengrab or email.\n\nBest: drop the screengrab in your Drive “Proofs — Han Han Roadmap” folder (link in the page header), then paste its share link here. Claude scans the folder on the 1st & 15th and tallies your confirmed applications. (Blank to remove.)', cur);
-   if(v===null) return;
-   if(!v.trim()) delete state.apps[i].proof; else state.apps[i].proof=v.trim();
-   save(); renderApps();
+   const co=(state.apps[i]||{}).co||('application '+(i+1));
+   openProofDialog({title:'Application confirmation',sub:'Upload a screengrab of the confirmation email (or photo/PDF) — or paste a link. Claude tallies confirmed applications on the 1st & 15th.',current:cur,fileKey:'app-'+i+'-'+(co.replace(/[^a-z0-9]+/gi,'')||'app'),label:'application confirmation · '+co,onSave:function(url,meta){ if(!url||!url.trim()) delete state.apps[i].proof; else state.apps[i].proof=url.trim(); save(); renderApps(); }});
  });
  b.querySelectorAll('[data-rm]').forEach(x=>x.onclick=e=>{state.apps.splice(e.target.dataset.rm,1);save();renderApps()});
  const total=state.apps.length, withProof=state.apps.filter(a=>a.proof).length;
@@ -1696,19 +1784,14 @@ function proofHtml(key){
 function milestoneTag(key){for(const ph of phases){for(let i=0;i<ph.items.length;i++){if(ph.id+'_'+i===key)return ph.items[i][0];}}return null;}
 function promptProofOnCheck(proofKey,rerender){
  if(state.proof && state.proof[proofKey] && state.proof[proofKey].url) return;   // already has proof
- const v=prompt('✓ Checked! Add proof to back it up.\n\nPaste a link — a GitHub repo, a deployed URL, or a screengrab saved in your Drive “Proofs — Han Han Roadmap” folder (link in the page header). Claude grades proofs on the 1st & 15th.\n\n(Leave blank to check it off without proof for now.)','');
- if(v && v.trim()){ state.proof=state.proof||{}; state.proof[proofKey]=Object.assign({},state.proof[proofKey],{url:v.trim()}); save(); if(rerender){try{rerender();}catch(e){}} }
+ openProofDialog({title:'✓ Checked! Add proof to back it up',sub:'Upload a screenshot, photo, or PDF — or paste a link (GitHub, deployed URL, Drive). Claude grades proofs on the 1st & 15th. You can close this to skip for now.',current:'',fileKey:proofKey,label:proofKey,onSave:function(url,meta){ if(url&&url.trim()){ state.proof=state.proof||{}; state.proof[proofKey]=Object.assign({},state.proof[proofKey],{url:url.trim(),kind:(meta&&meta.kind)||'link'}); save(); if(rerender){try{rerender();}catch(e){}} } }});
 }
 function wireProof(host, rerender){
  host.querySelectorAll('[data-proofadd],[data-proofedit]').forEach(b=>b.onclick=(e)=>{
    e.preventDefault(); e.stopPropagation();
    const key=b.dataset.proofadd||b.dataset.proofedit;
    const cur=(state.proof[key]||{}).url||'';
-   const v=prompt('Paste a link as proof — a GitHub repo, a deployed URL, or a screengrab.\n\nFor screengrabs: drop the image in your Google Drive “Proofs — Han Han Roadmap” folder (link in the page header), then paste its share link here. Claude scans the proofs folder on the 1st & 15th of each month and grades them. (Blank to remove.)', cur);
-   if(v===null) return;
-   if(!v.trim()) delete state.proof[key];
-   else state.proof[key]=Object.assign({},state.proof[key],{url:v.trim()});
-   save(); if(rerender) rerender();
+   openProofDialog({title:'Attach proof',sub:'Upload a screenshot, photo, or PDF — or paste a link (GitHub, deployed URL, Drive). Leave the link blank and Save to remove.',current:cur,fileKey:key,label:key,onSave:function(url,meta){ state.proof=state.proof||{}; if(!url||!url.trim()){ delete state.proof[key]; } else { state.proof[key]=Object.assign({},state.proof[key],{url:url.trim(),kind:(meta&&meta.kind)||'link'}); } save(); if(rerender) rerender(); }});
  });
 }
 /* LeetCode profile link */
@@ -1762,10 +1845,8 @@ function renderNet(){
  b.querySelectorAll('input,select').forEach(x=>x.onchange=e=>{state.contacts[e.target.dataset.i][e.target.dataset.f]=e.target.value;save();if(e.target.dataset.f==='status'){e.target.className='st st-net'+Math.max(0,netStatuses.indexOf(e.target.value));}});
  b.querySelectorAll('[data-netproof]').forEach(btn=>btn.onclick=()=>{
    const i=+btn.dataset.netproof, cur=(state.contacts[i]||{}).proof||'';
-   const v=prompt('Paste a link as proof of this connection — a LinkedIn message or profile, an email thread, a calendar invite, or a screenshot.\n\nFor screenshots: save the image in your Drive “Proofs — Han Han Roadmap” folder (link in the page header), then paste its share link. Claude reviews proofs on the 1st & 15th. (Blank to remove.)', cur);
-   if(v===null) return;
-   if(!v.trim()) delete state.contacts[i].proof; else state.contacts[i].proof=v.trim();
-   save(); renderNet();
+   const nm=(state.contacts[i]||{}).name||('connection '+(i+1));
+   openProofDialog({title:'Proof of connection',sub:'Upload a screenshot of the LinkedIn message, email, or invite (or a photo/PDF) — or paste a link. Claude reviews proofs on the 1st & 15th.',current:cur,fileKey:'net-'+i+'-'+(nm.replace(/[^a-z0-9]+/gi,'')||'net'),label:'networking proof · '+nm,onSave:function(url,meta){ if(!url||!url.trim()) delete state.contacts[i].proof; else state.contacts[i].proof=url.trim(); save(); renderNet(); }});
  });
  b.querySelectorAll('[data-rm]').forEach(x=>x.onclick=e=>{state.contacts.splice(+e.target.dataset.rm,1);save();renderNet();});
 }
