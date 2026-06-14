@@ -163,12 +163,12 @@
   .track{height:9px;background:var(--soft);border-radius:6px;overflow:hidden}
   .fill{height:100%;background:linear-gradient(90deg,var(--teal),var(--blue));border-radius:6px;transition:width .5s}
   /* year progress rows */
-  .yearrow{display:flex;align-items:center;gap:14px;padding:12px 14px;border:1px solid var(--line);border-radius:14px;margin-bottom:10px;background:#fff}
+  .yearrow{display:flex;align-items:center;gap:14px;padding:8px 14px;border:1px solid var(--line);border-radius:14px;margin-bottom:7px;background:#fff}
   .yearrow.hit{border-color:#9BD3A6;background:#F3FBF4}
-  .yearrow .ylabel{flex:0 0 200px;min-width:0}
+  .yearrow .ylabel{flex:0 0 300px;min-width:0}
   .yearrow .ylabel b{display:block;font-size:15px;color:var(--navy);font-weight:800}
-  .yearrow .ylabel span{font-size:11.5px;color:var(--grey)}
-  .yearrow .ytrack{flex:1;height:12px;background:var(--soft);border-radius:7px;overflow:hidden}
+  .yearrow .ylabel span{display:block;font-size:11px;color:var(--grey);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .yearrow .ytrack{flex:1;height:10px;background:var(--soft);border-radius:7px;overflow:hidden}
   .yearrow .yfill{height:100%;width:0;background:linear-gradient(90deg,#FFB7C5,#E08DA0);border-radius:7px;transition:width .6s}
   .yearrow.hit .yfill{background:linear-gradient(90deg,#7FD08C,#2FA36B)}
   .yearrow .ypct{flex:0 0 auto;text-align:right;font-size:18px;font-weight:800;color:var(--navy);min-width:64px}
@@ -180,10 +180,12 @@
   .yearrow:hover,.pillrow:hover{background:var(--soft)}
   .ov-chev{flex:0 0 auto;color:var(--grey);font-size:12px;transition:transform .2s;margin-right:2px}
   .yearrow.open .ov-chev,.pillrow.open .ov-chev{transform:rotate(90deg)}
-  .pillrow{display:flex;align-items:center;gap:10px;padding:8px 8px;border-radius:10px;margin-bottom:2px}
-  .pillrow .pill-main{flex:1;min-width:0}
-  .pillrow .lab{display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px;color:var(--ink)}
-  .pillrow .lab b{color:var(--grey);font-weight:600}
+  .pillrow{display:flex;align-items:center;gap:12px;padding:6px 8px;border-radius:10px;margin-bottom:3px}
+  .pillrow .plabel{flex:0 0 150px;font-size:13px;color:var(--ink)}
+  .pillrow .ptrack{flex:1;height:9px;background:var(--soft);border-radius:6px;overflow:hidden}
+  .pillrow .pfill{height:100%;background:linear-gradient(90deg,var(--teal),var(--blue));border-radius:6px;transition:width .5s}
+  .pillrow .ppct{flex:0 0 auto;text-align:right;font-size:14px;font-weight:800;color:var(--navy);min-width:52px}
+  .pillrow .ppct small{display:block;font-size:10px;font-weight:700;color:var(--grey)}
   .ov-items{margin:0 0 12px 26px;border-left:2px solid var(--line);padding-left:12px}
   .ov-item{display:flex;align-items:flex-start;gap:9px;padding:6px 8px;border-radius:9px}
   .ov-item:hover{background:var(--soft)}
@@ -1198,7 +1200,9 @@ function renderOverview(){
    const [d,t]=byTag[k],p=t?Math.round(d/t*100):0, ex=!!ovExp[k];
    return `<div class="pillrow ${ex?'open':''}" data-ovexp="${k}">
      <span class="ov-chev">▸</span>
-     <div class="pill-main"><div class="lab">${labels[k]} <b>${d}/${t}</b></div><div class="track"><div class="fill" style="width:${p}%"></div></div></div>
+     <div class="plabel">${labels[k]}</div>
+     <div class="ptrack"><div class="pfill" style="width:${p}%"></div></div>
+     <div class="ppct">${p}%<small>${d}/${t}</small></div>
    </div>${ex?ovItemsHtml(tagItems[k],false,derived):''}`;
  }).join('');
  document.querySelectorAll('#yearBars [data-ovexp],#pillarBars [data-ovexp]').forEach(el=>el.onclick=()=>{const k=el.dataset.ovexp;ovExp[k]=!ovExp[k];renderOverview();});
