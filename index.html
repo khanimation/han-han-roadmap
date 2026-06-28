@@ -750,7 +750,7 @@
   <div class="fb-modal">
     <button class="fb-x" onclick="closeProofDlg()" aria-label="Close">×</button>
     <h3 id="pfTitle">Add proof</h3>
-    <p class="fb-sub" id="pfSub">Upload a screenshot, photo, or PDF — or paste a link. Claude grades proofs on the 1st &amp; 15th.</p>
+    <p class="fb-sub" id="pfSub">Upload a screenshot, photo, or PDF — or paste a link. Claude grades proofs every Sunday.</p>
     <button class="pf-up" id="pfUpBtn">📤 Upload screenshot / photo / PDF</button>
     <input type="file" id="pfFile" accept="image/*,application/pdf,.png,.jpg,.jpeg,.pdf,.heic,.webp,.gif" style="display:none">
     <div class="pf-or"><span>or paste a link</span></div>
@@ -1602,7 +1602,7 @@ function renderApps(){
  b.querySelectorAll('[data-appproof]').forEach(btn=>btn.onclick=()=>{
    const i=+btn.dataset.appproof, cur=(state.apps[i]||{}).proof||'';
    const co=(state.apps[i]||{}).co||('application '+(i+1));
-   openProofDialog({title:'Application confirmation',sub:'Upload a screengrab of the confirmation email (or photo/PDF) — or paste a link. Claude tallies confirmed applications on the 1st & 15th.',current:cur,fileKey:'app-'+i+'-'+(co.replace(/[^a-z0-9]+/gi,'')||'app'),label:'application confirmation · '+co,onSave:function(url,meta){ if(!url||!url.trim()) delete state.apps[i].proof; else state.apps[i].proof=url.trim(); save(); renderApps(); }});
+   openProofDialog({title:'Application confirmation',sub:'Upload a screengrab of the confirmation email (or photo/PDF) — or paste a link. Claude tallies confirmed applications every Sunday.',current:cur,fileKey:'app-'+i+'-'+(co.replace(/[^a-z0-9]+/gi,'')||'app'),label:'application confirmation · '+co,onSave:function(url,meta){ if(!url||!url.trim()) delete state.apps[i].proof; else state.apps[i].proof=url.trim(); save(); renderApps(); }});
  });
  b.querySelectorAll('[data-rm]').forEach(x=>x.onclick=e=>{state.apps.splice(e.target.dataset.rm,1);save();renderApps()});
  const total=state.apps.length, withProof=state.apps.filter(a=>a.proof).length;
@@ -1763,14 +1763,16 @@ function loadGrades(){
  }).catch(()=>{});
 }
 function nextGradeDate(){
- const n=new Date(), y=n.getFullYear(), m=n.getMonth(), d=n.getDate();
- return d<15 ? new Date(y,m,15) : new Date(y,m+1,1);   // grades run on the 1st & 15th
+ const n=new Date();                       // grades refresh every Sunday (2 AM CT)
+ const dd=(7-n.getDay())%7||7;             // days until the next Sunday (always upcoming)
+ const nx=new Date(n.getFullYear(),n.getMonth(),n.getDate()+dd);
+ return nx;
 }
 function renderGradeStatus(){
  const el=document.getElementById('gradeStatus'); if(!el) return;
  const fmt=dt=>new Date(dt).toLocaleDateString('en-US',{month:'short',day:'numeric'});
  const last=aiGrades._lastReviewed;
- el.innerHTML=`Graded by Claude (1st &amp; 15th) — last <b>${last?fmt(last+'T00:00:00'):'not yet'}</b> · next <b>${fmt(nextGradeDate())}</b>`;
+ el.innerHTML=`Graded by Claude (every Sun) — last <b>${last?fmt(last+'T00:00:00'):'not yet'}</b> · next <b>${fmt(nextGradeDate())}</b>`;
 }
 function gradeBadge(key){
  const g=aiGrades[key];
@@ -1779,6 +1781,8 @@ function gradeBadge(key){
  const lab = g.grade ? `AI: ${esc(g.grade)}` : (g.status==='verified'?'AI ✓':(g.status==='needs-work'?'needs work':'reviewing'));
  return `<span class="g-badge ${cls}" title="${esc(g.note||'Graded by Claude')}">${lab}</span>`;
 }
+/* an item Claude graded "verified" counts as completed (checked + counted in %) */
+function gradeDone(key){return !!(aiGrades[key]&&aiGrades[key].status==='verified');}
 function proofHtml(key){
  const p=state.proof[key]||{};
  if(p.url){
@@ -1796,7 +1800,7 @@ function proofHtml(key){
 function milestoneTag(key){for(const ph of phases){for(let i=0;i<ph.items.length;i++){if(ph.id+'_'+i===key)return ph.items[i][0];}}return null;}
 function promptProofOnCheck(proofKey,rerender){
  if(state.proof && state.proof[proofKey] && state.proof[proofKey].url) return;   // already has proof
- openProofDialog({title:'✓ Checked! Add proof to back it up',sub:'Upload a screenshot, photo, or PDF — or paste a link (GitHub, deployed URL, Drive). Claude grades proofs on the 1st & 15th. You can close this to skip for now.',current:'',fileKey:proofKey,label:proofKey,onSave:function(url,meta){ if(url&&url.trim()){ state.proof=state.proof||{}; state.proof[proofKey]=Object.assign({},state.proof[proofKey],{url:url.trim(),kind:(meta&&meta.kind)||'link'}); save(); if(rerender){try{rerender();}catch(e){}} } }});
+ openProofDialog({title:'✓ Checked! Add proof to back it up',sub:'Upload a screenshot, photo, or PDF — or paste a link (GitHub, deployed URL, Drive). Claude grades proofs every Sunday. You can close this to skip for now.',current:'',fileKey:proofKey,label:proofKey,onSave:function(url,meta){ if(url&&url.trim()){ state.proof=state.proof||{}; state.proof[proofKey]=Object.assign({},state.proof[proofKey],{url:url.trim(),kind:(meta&&meta.kind)||'link'}); save(); if(rerender){try{rerender();}catch(e){}} } }});
 }
 function wireProof(host, rerender){
  host.querySelectorAll('[data-proofadd],[data-proofedit]').forEach(b=>b.onclick=(e)=>{
@@ -1822,11 +1826,11 @@ function mlTotal(){return mlPath.reduce((a,g)=>a+g[1].length,0)}
 function renderMlPath(){
  const host=document.getElementById('mlList'); if(!host) return;
  host.innerHTML=mlPath.map(([group,items])=>{
-   const gd=items.filter((it,i)=>state.mlDone[group+'_'+i]).length;
+   const gd=items.filter((it,i)=>state.mlDone[group+'_'+i]||gradeDone('ml:'+group+'_'+i)).length;
    return `<div class="lc-group"><div class="lc-group-h">${group}<span class="gp">${gd}/${items.length}</span></div>`+
-    items.map((it,i)=>{const key=group+'_'+i,dn=!!state.mlDone[key];
+    items.map((it,i)=>{const key=group+'_'+i,gv=gradeDone('ml:'+key),dn=!!state.mlDone[key]||gv;
       const label=it[1]?`<a href="${it[1]}" target="_blank" rel="noopener">${it[0]}</a><span class="ext">↗</span>`:`<span class="mli">${it[0]}</span>`;
-      return `<div class="lc-item ${dn?'done':''}"><input type="checkbox" ${dn?'checked':''} data-mlkey="${esc(key)}">${label}${proofHtml('ml:'+key)}</div>`;
+      return `<div class="lc-item ${dn?'done':''}"><input type="checkbox" ${dn?'checked':''} ${gv&&!state.mlDone[key]?'disabled title="Auto-completed — AI-verified from her GitHub/portfolio"':''} data-mlkey="${esc(key)}">${label}${proofHtml('ml:'+key)}</div>`;
     }).join('')+`</div>`;
  }).join('');
  host.querySelectorAll('input[type=checkbox]').forEach(cb=>cb.onchange=()=>{const k=cb.dataset.mlkey,ck=cb.checked;state.mlDone[k]=ck;save();renderMlPath();refreshLinked();if(ck)promptProofOnCheck('ml:'+k,renderMlPath);});
@@ -1858,7 +1862,7 @@ function renderNet(){
  b.querySelectorAll('[data-netproof]').forEach(btn=>btn.onclick=()=>{
    const i=+btn.dataset.netproof, cur=(state.contacts[i]||{}).proof||'';
    const nm=(state.contacts[i]||{}).name||('connection '+(i+1));
-   openProofDialog({title:'Proof of connection',sub:'Upload a screenshot of the LinkedIn message, email, or invite (or a photo/PDF) — or paste a link. Claude reviews proofs on the 1st & 15th.',current:cur,fileKey:'net-'+i+'-'+(nm.replace(/[^a-z0-9]+/gi,'')||'net'),label:'networking proof · '+nm,onSave:function(url,meta){ if(!url||!url.trim()) delete state.contacts[i].proof; else state.contacts[i].proof=url.trim(); save(); renderNet(); }});
+   openProofDialog({title:'Proof of connection',sub:'Upload a screenshot of the LinkedIn message, email, or invite (or a photo/PDF) — or paste a link. Claude reviews proofs every Sunday.',current:cur,fileKey:'net-'+i+'-'+(nm.replace(/[^a-z0-9]+/gi,'')||'net'),label:'networking proof · '+nm,onSave:function(url,meta){ if(!url||!url.trim()) delete state.contacts[i].proof; else state.contacts[i].proof=url.trim(); save(); renderNet(); }});
  });
  b.querySelectorAll('[data-rm]').forEach(x=>x.onclick=e=>{state.contacts.splice(+e.target.dataset.rm,1);save();renderNet();});
 }
@@ -1899,8 +1903,8 @@ const visaLinks=[
 state.visaDone=state.visaDone||{};
 function renderVisaList(){
  const host=document.getElementById('visaList'); if(!host) return;
- host.innerHTML=visaItems.map((t,i)=>{const dn=!!state.visaDone['o'+i];
-   return `<div class="lc-item ${dn?'done':''}"><input type="checkbox" ${dn?'checked':''} data-vkey="o${i}"><span class="mli">${t}</span>${proofHtml('o1:o'+i)}</div>`;}).join('');
+ host.innerHTML=visaItems.map((t,i)=>{const gv=gradeDone('o1:o'+i),dn=!!state.visaDone['o'+i]||gv;
+   return `<div class="lc-item ${dn?'done':''}"><input type="checkbox" ${dn?'checked':''} ${gv&&!state.visaDone['o'+i]?'disabled title="Auto-completed — AI-verified"':''} data-vkey="o${i}"><span class="mli">${t}</span>${proofHtml('o1:o'+i)}</div>`;}).join('');
  host.querySelectorAll('input[type=checkbox]').forEach(cb=>cb.onchange=()=>{const k=cb.dataset.vkey,ck=cb.checked;state.visaDone[k]=ck;save();renderVisaList();refreshLinked();if(ck)promptProofOnCheck('o1:'+k,renderVisaList);});
  wireProof(host, renderVisaList);
  const done=Object.values(state.visaDone).filter(Boolean).length,total=visaItems.length;
@@ -1961,7 +1965,7 @@ state.capMetric=state.capMetric||{};
 function renderCapstones(){
  const host=document.getElementById('capList'); if(!host) return;
  host.innerHTML=capstones.map(c=>{
-   const total=c.items.length, done=c.items.filter((_,i)=>state.capChecks[c.id+'_'+i]).length, pct=total?Math.round(done/total*100):0;
+   const total=c.items.length, done=c.items.filter((_,i)=>state.capChecks[c.id+'_'+i]||gradeDone('cap:'+c.id+'_'+i)).length, pct=total?Math.round(done/total*100):0;
    const cur=state.capMetric[c.id]||0, hit=cur>=c.target, mpct=Math.min(100,Math.round(cur/c.target*100));
    return `<div class="card capcard">
      <div class="caphead"><span class="capyear">${c.yearLabel}</span>
@@ -1980,8 +1984,8 @@ function renderCapstones(){
      ${c.id==='cap1'?capAppleExtras():''}
      <div class="capprog"><span>Build &amp; grow checklist</span><b>${done}/${total} · ${pct}%</b></div>
      <div class="captrack thin"><div class="capfill" style="width:${pct}%"></div></div>
-     <div>${c.items.map((t,i)=>{const k=c.id+'_'+i,dn=!!state.capChecks[k];
-       return `<div class="lc-item ${dn?'done':''}"><input type="checkbox" ${dn?'checked':''} data-capk="${k}"><span class="mli">${t}</span>${proofHtml('cap:'+k)}</div>`;}).join('')}</div>
+     <div>${c.items.map((t,i)=>{const k=c.id+'_'+i,gv=gradeDone('cap:'+k),dn=!!state.capChecks[k]||gv;
+       return `<div class="lc-item ${dn?'done':''}"><input type="checkbox" ${dn?'checked':''} ${gv&&!state.capChecks[k]?'disabled title="Auto-completed — AI-verified from her GitHub/portfolio"':''} data-capk="${k}"><span class="mli">${t}</span>${proofHtml('cap:'+k)}</div>`;}).join('')}</div>
      ${c.suggested?'<p class="capsug">★ Claude’s suggested capstone — a strong default; refine it with her once Year 3 is closer.</p>':''}
    </div>`;
  }).join('');
@@ -2010,13 +2014,13 @@ function launchReadyEmail(){
  try{window.location.href='mailto:kltxmail@gmail.com?subject='+subj+'&body='+body;}catch(e){}
  renderCapstones();
 }
-function pctCap(){let t=0,d=0;capstones.forEach(c=>c.items.forEach((_,i)=>{t++;if(state.capChecks[c.id+'_'+i])d++;}));return t?Math.round(d/t*100):0;}
+function pctCap(){let t=0,d=0;capstones.forEach(c=>c.items.forEach((_,i)=>{t++;if(state.capChecks[c.id+'_'+i]||gradeDone('cap:'+c.id+'_'+i))d++;}));return t?Math.round(d/t*100):0;}
 
 /* ---------- PER-TAB PROGRESS INDICATORS ---------- */
 function pctChecks(){const dv=derivedSet();let t=0,d=0;phases.forEach(ph=>ph.items.forEach((it,i)=>{const k=ph.id+'_'+i;t++;if(state.checks[k]||dv.has(k))d++;}));return t?Math.round(d/t*100):0;}
 function pctLeet(){const t=lcTotal();return t?Math.round(lcDoneCount()/t*100):0;}
-function pctMlp(){const t=mlTotal();const d=Object.values(state.mlDone||{}).filter(Boolean).length;return t?Math.round(d/t*100):0;}
-function pctVisaO1(){const t=visaItems.length;const d=Object.values(state.visaDone||{}).filter(Boolean).length;return t?Math.round(d/t*100):0;}
+function pctMlp(){let t=0,d=0;mlPath.forEach(([g,items])=>items.forEach((it,i)=>{t++;const k=g+'_'+i;if(state.mlDone[k]||gradeDone('ml:'+k))d++;}));return t?Math.round(d/t*100):0;}
+function pctVisaO1(){let d=0;visaItems.forEach((t,i)=>{if(state.visaDone['o'+i]||gradeDone('o1:o'+i))d++;});return visaItems.length?Math.round(d/visaItems.length*100):0;}
 function pctStar(){const a=state.star||[];if(!a.length)return 0;const d=a.filter(s=>starFull(s).trim()).length;return Math.round(d/a.length*100);}
 const tabMeta={
  leetcode:{label:'LeetCode',type:'bar',fn:pctLeet},
