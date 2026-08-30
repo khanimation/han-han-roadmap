@@ -1,15 +1,67 @@
 {
-"_baselineDate": "2026-06-21",
-"_lastReviewed": "2026-08-23",
-"_nextReview": "2026-08-30",
-"_overall": "Baseline — 9 weeks, no new verified work",
-"_odds": 3,
-"_note": "Baseline set 2026-06-21. Han Han's prior portfolio — including the completed 120 'Vibe Code' AI-agent assignment and all repos/sites that exist on or before this date — is a separate, already-finished project and does NOT count toward this roadmap. Only NEW, distinct, roadmap-relevant work created or updated AFTER this date is graded and counts toward completion (verified items auto-check on the tracker).",
-"_emailSummary": "Week 9 past the 2026-06-21 baseline. Newest commit anywhere on her GitHub is still 2026-06-02 — 82 days without writing code, 19 days before the roadmap even started. Zero new repos, zero proofs, zero applications, zero networking contacts, 0 of 3 starter LeetCode problems, STAR bank still blank. Odds 4% to 3%. The ask is still 90 minutes: one new repo, ~100 lines of RAG over her own files, one README, one screengrab.",
-"_overallNote": "Ninth grading pass (Sun 2026-08-23). No NEW, post-baseline, roadmap-relevant work found — the ninth consecutive week at zero. Verified directly against the GitHub REST API (users/hhanng/repos?sort=pushed&direction=desc): the single most recently pushed repo across all repos is still agent-116-advanced-patterns-trainer at 2026-06-02T23:30:15Z — unchanged from last week. That is 82 days ago and 19 days before the baseline, so there is no post-baseline commit anywhere on the account. Portfolio hhanng.github.io is unchanged: the excluded 120-agent 'Vibe Code' set, the two TTTT items, and pre-baseline projects (Spotify Roaster, Reminder-Bot, Pixel Mood Diary, Egg/Study timers, nail-salon sites, ULUX) — all EXCLUDED per the baseline rule. Drive Proofs folder (1uwrB4xTUpSVYzNXPzNRP6h7cUGK4xFix) holds only prior grading artifacts — zero files named proof__, so 0 confirmed applications and 0 networking proofs. Live in-app state read from localStorage hanhan_faang_v1 after Firebase sync: feedback [], launchNotified 0, appleFeePaid false, apps 0, contacts 0, mlDone {}, visaDone {}, capChecks {cap1_1:false}, proof {}, LeetCode 0/3 starter problems, STAR bank has 7 prompt titles with every field blank. Milestone q1_4 remains the only ticked checkbox and is still self-checked with no proof attached — self-checks do not verify and do not move the meter. Odds trimmed 4 -> 3: nine weeks of zero output is itself evidence, and the Summer 2027 internship application window is now open and filling at most large employers.",
-"_topAction": "Shrink it until it gets done. ONE thing this week, 90 minutes, not a weekend: new repo, ~100 lines of Python that loads 20 of your own documents, embeds them, and answers a question over them with a real model call, plus a README with a 3-line architecture sketch. That is a RAG system. Push it, screengrab it, drop the screengrab in the Proofs folder. Nine weeks of planning has moved the meter 0%. Ninety minutes of shipping moves it next Sunday.",
-"_proofsThisRun": 0,
-"_confirmedApplications": 0,
-"_networkingProofs": 0,
-"_meta": "No item keys (ms:/ml:/o1:/cap:/app-*/net-*) written this run — no qualifying evidence, so nothing was fabricated. Prior grades.json had no item keys, so nothing to preserve or change. Evidence this run: GitHub REST API push timestamps read in-browser (newest push 2026-06-02T23:30:15Z, pre-baseline, unchanged from last run); portfolio fetched and compared (unchanged); Drive Proofs folder listed by parentId (no proof__ files); live localStorage state read after Firebase sync (unchanged). HTML/PNG snapshot skipped. Committed to khanimation/han-han-roadmap via the GitHub web editor from the scheduled Sunday run. No email sent and no draft created by this task — the Apps Script sends at ~2:30 AM."
+  "_baselineDate": "2026-06-21",
+  "_lastReviewed": "2026-08-30",
+  "_nextReview": "2026-09-06",
+  "_overall": "First real post-baseline week — 5 new repos, 3 milestones verified",
+  "_odds": 7,
+  "_note": "Baseline set 2026-06-21. Han Han's prior portfolio — including the completed 120 'Vibe Code' AI-agent assignment and all repos/sites that exist on or before this date — is a separate, already-finished project and does NOT count toward this roadmap. Only NEW, distinct, roadmap-relevant work created or updated AFTER this date is graded and counts toward completion (verified items auto-check on the tracker).",
+  "_emailSummary": "Week 10 past baseline, and the first week with real output: 5 new repos (Aug 25-30), 3 of them genuinely shipped with live GitHub Pages demos. Two (condensate, neonpoint) are legit applied-ML work — real-time MediaPipe hand-tracking with Web Worker architecture and excellent READMEs. A third (study-hub) calls the Gemini API live for flashcards/quizzes. She also rebuilt her resume in FAANG format, cleaned up and repinned her GitHub with a polished README, and built a 50-company target list — all three reviewed and verified. Odds 3% to 7%. Still zero: LeetCode, applications, networking, STAR bank. She also clicked 'ready to activate & launch' on the iOS capstone Aug 27 — that's waiting on you for the $99 Apple Developer fee.",
+  "_overallNote": "Tenth grading pass (Sun 2026-08-30) — the first with real, verified, post-baseline work after 9 straight weeks at zero. GitHub REST API (users/hhanng/repos?sort=pushed) shows 5 new repos created Aug 25-30: condensate (Aug 27, hand-tracking + mic 'fogged mirror' demo), neonpoint (Aug 30, two-hand neon drawing tool), study-hub (Aug 25, React/Vite homework tracker with live Gemini API calls for flashcards/quizzes/practice problems), ThyThyChecker (Aug 25), and Voxel-My-Image (Aug 25). condensate and neonpoint are genuinely strong: both use MediaPipe HandLandmarker (a real pretrained CV model) for live hand-gesture tracking, run inference in a Web Worker so it doesn't block rendering, and ship with excellent, detailed READMEs covering architecture and tuning. Both are deployed on GitHub Pages and linked from hhanng.github.io under a new 'HAND TRACKING' section. study-hub is a solid, practical personal tool with real Gemini API integration, decent README, and a GitHub Actions deploy pipeline. ThyThyChecker is a concern, not a win: its README.md, package.json, and index.html title are byte-identical (same git blob SHAs) to study-hub's unedited scaffold — it reads 'Study Hub' throughout and does not describe its stated purpose ('checker for Thy Thy's school work'); it is NOT counted as a second distinct project this run. Voxel-My-Image has a real server-side Gemini call (services/gemini.ts) but metadata.json explicitly labels it a 'Remix' of an existing AI Studio community app — not an original build — has no README, and isn't linked from her own portfolio; also not counted as qualifying original work. Separately, three Q1 milestone items were submitted with proof links and directly reviewed: (1) resume rebuilt in FAANG metrics-driven format (Google Doc reviewed — strong, quantified bullets across all projects) — VERIFIED; (2) GitHub cleaned up, hhanng.github.io repinned with a genuinely polished README (live-demo section, categorized project table, last-updated stamp) — VERIFIED; (3) a 40-60 target internship list — she delivered 50 named companies (Databricks, OpenAI, Scale AI, Hugging Face, Google, Meta, Amazon, Apple, Microsoft, NVIDIA, and more) with role types and hiring-bar notes, as a reviewed PDF — VERIFIED, exceeds the range. Drive Proofs folder (1uwrB4xTUpSVYzNXPzNRP6h7cUGK4xFix) still holds zero proof__ files — all evidence reviewed this run came from in-app proof links attached directly to milestone items, not the Drive folder — so confirmed applications and networking proofs remain 0. Live in-app state (localStorage hanhan_faang_v1, synced): feedback [], apps 0, contacts 0, LeetCode 0/3 starter problems still, STAR bank still blank. launchNotified is NEW this run (timestamp corresponds to 2026-08-27) — she clicked 'Ready to activate & launch' on the Year-1 iOS capstone; appleFeePaid is still false, so the $99/year Apple Developer Program fee has not been paid and the capstone checklist is still 0/10 with 0 downloads. Odds raised 3 -> 7: this is the first non-zero week the roadmap has ever had, with two pieces of real applied-ML engineering and three independently-verified deliverables, but it's one week against nine of silence, and the roadmap's core asks (LeetCode, applications, networking, RAG/agent/eval-harness specifically) are all still untouched.",
+  "_topAction": "For Han Han: keep the streak going, but aim the next build at the actual gap — a RAG system or an agent with an eval harness (the ★ In-Demand Builds items), not another hand-tracking demo. condensate and neonpoint prove she can ship polished, documented work fast; now point that at retrieval over her own notes or a real multi-step agent. Also: LeetCode is still 0/3 and applications are still 0 — pick one and move it this week. For Khan: the iOS capstone is stalled on you — she flagged ready to activate on Aug 27, waiting on the $99/year Apple Developer Program decision.",
+  "_proofsThisRun": 0,
+  "_confirmedApplications": 0,
+  "_networkingProofs": 0,
+  "ms:q1_5": {
+    "grade": "A",
+    "status": "verified",
+    "note": "Resume rebuilt in FAANG format — metrics-driven bullets (120 apps shipped in ~1 month, cut build time from ~1 week to <4hrs, 525% IG growth, 40% new-client increase), correct sections (Education/Experience/Projects/Skills), all real projects. Google Doc proof reviewed directly."
+  },
+  "ms:q1_6": {
+    "grade": "A",
+    "status": "verified",
+    "note": "GitHub genuinely cleaned up: hhanng.github.io is pinned with a polished README — live-demo section, categorized project table with links, last-updated timestamp. Meets the bar as written."
+  },
+  "ms:q1_7": {
+    "grade": "A-",
+    "status": "verified",
+    "note": "Target list of Summer 2027 internships reviewed (PDF, 'tech_internships_nyc_remote_target_list.pdf') — 50 named companies across AI/ML, infra, and big tech with role types and hiring-bar notes. Exceeds the 40-60 target range."
+  },
+  "ml:★ In-demand builds (ship these — Meta-engineer picks)_3": {
+    "grade": "B+",
+    "status": "verified",
+    "note": "First real 'ship publicly' evidence on the roadmap: condensate and neonpoint are both public repos with live GitHub Pages demos and real READMEs; study-hub is also public and deployed. Three qualifying shipped projects in one week."
+  },
+  "ml:LLMs & generative AI (her edge)_3": {
+    "grade": "B",
+    "status": "verified",
+    "note": "study-hub is a new, deployed app making live Gemini API calls (flashcard/quiz/practice-problem generation) — distinct from the excluded 120-agent set, with a real README covering setup and the Gemini key/deploy pipeline."
+  },
+  "_portfolioGrades": {
+    "condensate": {
+      "grade": "A-",
+      "status": "verified",
+      "note": "A digital 'fogged mirror' — real-time MediaPipe HandLandmarker pinch tracking + Web Audio blow-detection, inference offloaded to a Web Worker. Excellent README with architecture and tuning notes. Deployed on GitHub Pages. Improvement: add a demo GIF/video to the README."
+    },
+    "neonpoint": {
+      "grade": "A-",
+      "status": "verified",
+      "note": "Two-handed neon drawing tool using MediaPipe two-hand tracking with custom gesture classifiers (index-extend to draw, open-palm to drag). Sibling architecture to condensate, equally well documented. Improvement: same — a demo GIF would make this land faster on a resume/portfolio scan."
+    },
+    "study-hub": {
+      "grade": "B",
+      "status": "verified",
+      "note": "Homework/exam/study tracker, React+Vite, live Gemini API calls for flashcards/quizzes/practice problems. Practical, clearly documented (setup, deploy pipeline, Gemini key wiring). Improvement: no advanced engineering here — this is a solid personal tool, not a portfolio flagship; the RAG/agent items are still open."
+    },
+    "thythychecker": {
+      "grade": "C+",
+      "status": "needs-work",
+      "note": "Byte-identical duplicate of study-hub's scaffold (same git blob SHAs for README.md, package.json, App.jsx) — the README, package.json name, and page <title> all still literally read 'Study Hub', not customized to its stated purpose. Improvement: rename the branding, swap in Thy Thy's real class data, and write an actual README before this counts as a second distinct project."
+    },
+    "voxel-my-image": {
+      "grade": "C-",
+      "status": "needs-work",
+      "note": "Real server-side Gemini API call (services/gemini.ts) but metadata.json explicitly labels it a 'Remix' of an existing Google AI Studio community app, not an original build; no README; not linked from her own portfolio. Improvement: write a README, meaningfully customize it, and link it from the site if she wants credit for it."
+    }
+  },
+  "_meta": "Evidence this run: GitHub REST API (users/hhang/repos?sort=pushed, plus per-repo contents/README/blob-SHA comparisons) read in-browser; live tracker localStorage (hanhan_faang_v1) read after Firebase sync; three Drive files opened directly via their proof links (Google Doc resume, PDF target list) and the GitHub profile/README for the GitHub-cleanup item; hhanng.github.io portfolio fetched and compared to the pre-existing (pre-baseline) content. Drive Proofs folder (1uwrB4xTUpSVYzNXPzNRP6h7cUGK4xFix) listed by parentId: still zero proof__ files, so 0 confirmed applications and 0 networking proofs from that channel this run. ms:q1_4 (LeetCode 40-50 easy) remains self-checked with no proof attached, unchanged, not verified. ThyThyChecker and Voxel-My-Image were reviewed and intentionally NOT credited toward ml: item completion, to avoid double-crediting near-duplicate or remixed work when condensate/neonpoint/study-hub already qualify more cleanly. launchNotified (iOS capstone 'ready to activate') is new this run, timestamped ~2026-08-27; appleFeePaid is false. No email sent and no draft created by this task — the Apps Script sends at ~2:30 AM. Committed to khanimation/han-han-roadmap via the GitHub web editor from the scheduled Sunday run."
 }
