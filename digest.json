@@ -1,5 +1,5 @@
 {
-  "subject": "Han Han · Roadmap weekly digest — Sep 6, 2026 · odds 9%",
-  "builtAt": "2026-09-06T07:13:59Z",
-  "summary": "Second straight live week: 3 more shipped repos (photobooth, catscradle, guess-my-drawing) but no new roadmap gaps closed — LeetCode, applications, networking, and RAG/agent/eval-harness work are all still zero."
+  "subject": "Han Han · Roadmap weekly digest — Sep 13, 2026 · odds 9%",
+  "builtAt": "2026-09-13T07:08:47Z",
+  "summary": "No new repos this week, but she closed the deployment gap flagged last Sunday -- guess-my-drawing is now live. Core roadmap gaps (RAG/agent/eval harness, LeetCode, applications, networking) are at zero for the 12th straight week."
 }

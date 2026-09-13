@@ -1,82 +1,82 @@
 {
-"_baselineDate": "2026-06-21",
-"_lastReviewed": "2026-09-06",
-"_nextReview": "2026-09-13",
-"_overall": "Second straight live week — 3 more shipped repos, no new roadmap gaps closed",
-"_odds": 9,
-"_note": "Baseline set 2026-06-21. Han Han's prior portfolio — including the completed 120 'Vibe Code' AI-agent assignment and all repos/sites that exist on or before this date — is a separate, already-finished project and does NOT count toward this roadmap. Only NEW, distinct, roadmap-relevant work created or updated AFTER this date is graded and counts toward completion (verified items auto-check on the tracker).",
-"_emailSummary": "Week 11 past baseline, second straight live week. 3 more shipped repos since last Sunday: photobooth and catscradle (both live, both polished — catscradle's README documents real frame-budget/GPU-cost engineering) extend the hand-tracking series to 4 entries, and guess-my-drawing adds real-time multiplayer over Firebase Firestore with e2e/smoke test harnesses — her most architecturally mature project yet, though not deployed. Odds 7% to 9%. Still zero, for the 11th straight week: LeetCode, applications, networking, STAR bank, and any RAG/agent/eval-harness project — the roadmap's actual open asks. iOS capstone still waiting on your $99 Apple Developer fee decision (flagged Aug 27).",
-"_overallNote": "Eleventh grading pass (Sun 2026-09-06). GitHub REST API (users/hhanng/repos?sort=pushed) shows three repos created/pushed after the 2026-08-30 review: photobooth (created 2026-09-01, pushed 2026-09-04, has_pages true), guess-my-drawing (created 2026-09-03, pushed 2026-09-04, has_pages false — not deployed), and catscradle (created 2026-08-30 14:21 — after that Sunday's review ran — pushed 2026-08-30, has_pages true; missed by the prior pass). All three READMEs were read directly. photobooth is a fourth entry in the MediaPipe hand-tracking series (webcam gesture-framed photo strip, 4 filter styles, mini-game before capture), deployed on GitHub Pages, with a CI badge and a detailed mechanics writeup — same quality bar as condensate/neonpoint. catscradle is the strongest of the three: its README documents actual performance-engineering work (a targeted warm-up call to pre-pay a measured GPU shadowBlur/composite-operation cost so it doesn't land as a stutter on first two-hand detection, handedness correction reasoning for the mirrored camera feed, and a direct per-frame timing check confirming well under the 16.7ms/60fps budget) — genuine systems-level reasoning, not just a feature list. guess-my-drawing is architecturally her most advanced project on the roadmap: a real-time multiplayer Pictionary built on the neonpoint drawing engine, synced through Firebase Firestore with a documented data model (rooms/strokes/guesses), disconnect and round-end race handling (status-guarded transactions, host-absent fallback), and two dedicated test harnesses (a full e2e game-flow test against live Firestore, plus a hand-tracking smoke test) with a CI badge — real distributed-systems thinking, a step beyond the client-only demos. It is not yet deployed, so it does not fully satisfy 'ship publicly' on its own merits; the portfolio (hhanng.github.io, confirmed repinned and current) correctly links it as 'View on GitHub' rather than a live demo. None of the three unlock a NEW roadmap item: 'ml:★ In-demand builds_3' (ship every project publicly) was already verified last week and these are additional evidence for the same already-checked item, not a new one — the three still-open items in that group (RAG system, autonomous multi-step agent, eval harness) remain untouched, as does 'Post a build on LinkedIn/X'. ThyThyChecker's pushed_at is unchanged since 2026-08-25 (still byte-identical to study-hub's scaffold per last week's review) — remains needs-work, not re-credited. Drive Proofs folder (1uwrB4xTUpSVYzNXPzNRP6h7cUGK4xFix) still holds zero proof__ files (7 files total, all prior grading artifacts) — 0 confirmed applications, 0 networking proofs. Live in-app state (localStorage hanhan_faang_v1, read after gate-unlock + ~5s Firebase sync): feedback empty, apps 0, contacts 0, LeetCode still 0/3 starter problems, STAR bank still blank, capChecks unchanged (cap1_1 false). launchNotified timestamp is unchanged from the 2026-08-27 'ready to activate & launch' click already reported last week — not a new signal this run; appleFeePaid still false. Odds raised 7 -> 9: a second consecutive live week, with one project (guess-my-drawing) showing a real jump in engineering maturity (testing, data modeling, race-condition handling), is a genuine trend after nine weeks of zero — but it is still four projects in one visual/interaction genre (hand-tracking) against zero movement on the roadmap's explicitly named gaps (RAG, agent, eval harness, LeetCode, applications, networking, STAR bank), some flagged in the same terms for two straight weeks now.",
-"_topAction": "For Han Han: the hand-tracking series (now 4 deep) and guess-my-drawing have proven you can ship polished, tested, well-documented work fast — that's not in question anymore. Point that exact discipline at ONE of the three still-open ★ In-demand-builds items instead of a fifth demo in the same genre: a RAG system over your own notes, a real multi-step autonomous agent, or an eval harness that scores and self-corrects an agent. Also: LeetCode is still 0/3 and applications are still 0 — pick one and move it this week, it's been named two Sundays running. For Khan: the iOS capstone is still stalled on you — she flagged ready to activate on Aug 27, now 10 days waiting on the $99/year Apple Developer Program decision.",
-"_proofsThisRun": 0,
-"_confirmedApplications": 0,
-"_networkingProofs": 0,
-"ms:q1_5": {
-"grade": "A",
-"status": "verified",
-"note": "Resume rebuilt in FAANG format — metrics-driven bullets (120 apps shipped in ~1 month, cut build time from ~1 week to <4hrs, 525% IG growth, 40% new-client increase), correct sections (Education/Experience/Projects/Skills), all real projects. Google Doc proof reviewed directly."
-},
-"ms:q1_6": {
-"grade": "A",
-"status": "verified",
-"note": "GitHub genuinely cleaned up: hhanng.github.io is pinned with a polished README — live-demo section, categorized project table with links, last-updated timestamp. Meets the bar as written. Confirmed still current and now includes a dedicated HAND TRACKING section for the five webcam-gesture projects."
-},
-"ms:q1_7": {
-"grade": "A-",
-"status": "verified",
-"note": "Target list of Summer 2027 internships reviewed (PDF, 'tech_internships_nyc_remote_target_list.pdf') — 50 named companies across AI/ML, infra, and big tech with role types and hiring-bar notes. Exceeds the 40-60 target range."
-},
-"ml:★ In-demand builds (ship these — Meta-engineer picks)_3": {
-"grade": "A-",
-"status": "verified",
-"note": "'Ship every project publicly' now has six qualifying examples across two weeks: condensate, neonpoint, study-hub, plus this week's photobooth and catscradle (all public repos with live GitHub Pages demos and real READMEs). guess-my-drawing is public but not yet deployed, so it reinforces the pattern without independently qualifying. The three remaining items in this group — RAG system, autonomous multi-step agent, eval harness — are still untouched; this entry does not extend to them."
-},
-"ml:LLMs & generative AI (her edge)_3": {
-"grade": "B",
-"status": "verified",
-"note": "study-hub is a new, deployed app making live Gemini API calls (flashcard/quiz/practice-problem generation) — distinct from the excluded 120-agent set, with a real README covering setup and the Gemini key/deploy pipeline. Unchanged this run; no new LLM-calling project shipped this week specifically (guess-my-drawing and the hand-tracking series don't call a model)."
-},
-"_portfolioGrades": {
-"condensate": {
-"grade": "A-",
-"status": "verified",
-"note": "A digital 'fogged mirror' — real-time MediaPipe HandLandmarker pinch tracking + Web Audio blow-detection, inference offloaded to a Web Worker. Excellent README with architecture and tuning notes. Deployed on GitHub Pages. Improvement: add a demo GIF/video to the README."
-},
-"neonpoint": {
-"grade": "A-",
-"status": "verified",
-"note": "Two-handed neon drawing tool using MediaPipe two-hand tracking with custom gesture classifiers (index-extend to draw, open-palm to drag). Sibling architecture to condensate, equally well documented. Improvement: same — a demo GIF would make this land faster on a resume/portfolio scan."
-},
-"study-hub": {
-"grade": "B",
-"status": "verified",
-"note": "Homework/exam/study tracker, React+Vite, live Gemini API calls for flashcards/quizzes/practice problems. Practical, clearly documented (setup, deploy pipeline, Gemini key wiring). Improvement: no advanced engineering here — this is a solid personal tool, not a portfolio flagship; the RAG/agent items are still open."
-},
-"thythychecker": {
-"grade": "C+",
-"status": "needs-work",
-"note": "Byte-identical duplicate of study-hub's scaffold (same git blob SHAs for README.md, package.json, App.jsx) — the README, package.json name, and page <title> all still literally read 'Study Hub', not customized to its stated purpose. Unchanged since 2026-08-25 (pushed_at identical) — still not fixed. Improvement: rename the branding, swap in Thy Thy's real class data, and write an actual README before this counts as a second distinct project."
-},
-"voxel-my-image": {
-"grade": "C-",
-"status": "needs-work",
-"note": "Real server-side Gemini API call (services/gemini.ts) but metadata.json explicitly labels it a 'Remix' of an existing Google AI Studio community app, not an original build; no README; not linked from her own portfolio. Improvement: write a README, meaningfully customize it, and link it from the site if she wants credit for it."
-},
-"photobooth": {
-"grade": "A-",
-"status": "verified",
-"note": "Fourth entry in the MediaPipe hand-tracking series — gesture-framed photo strip with 4 filter styles and a pre-capture mini-game. Deployed on GitHub Pages, CI badge, detailed README on the gesture mechanics. Same quality bar as condensate/neonpoint. Improvement: this is the fourth project in the same genre — the next build should be a RAG/agent/eval-harness project instead, per the roadmap's still-open items."
-},
-"catscradle": {
-"grade": "A-",
-"status": "verified",
-"note": "A two-hand 'cat's cradle' string-web effect built on MediaPipe HandLandmarker. The README documents real performance engineering: a startup warm-up call to pre-pay a measured GPU shadowBlur cost so it doesn't stutter on first two-hand detection, handedness correction for the mirrored feed, and a direct per-frame timing check (<1ms vs. the 16.7ms/60fps budget). Deployed on GitHub Pages. Best-documented of the hand-tracking series so far. Improvement: same note as its siblings — time to point this skill at a new genre (RAG/agent/eval harness)."
-},
-"guess-my-drawing": {
-"grade": "B+",
-"status": "verified",
-"note": "Her most architecturally mature project on the roadmap: real-time multiplayer Pictionary over Firebase Firestore, with a documented data model (rooms/strokes/guesses), disconnect and round-end race handling via status-guarded transactions, and two dedicated test harnesses (full e2e game-flow test plus a hand-tracking smoke test) behind a CI badge. Genuine distributed-systems thinking — a step up from the client-only demos. Not yet deployed (no GitHub Pages/homepage), so it doesn't independently satisfy 'ship publicly'; portfolio correctly links it as 'View on GitHub' rather than a live demo. Improvement: deploy a live multiplayer instance (a real Firebase project, not just local dev) and link a live URL."
-}
-},
-"_meta": "Evidence this run: GitHub REST API (users/hhanng/repos?sort=pushed) read in-browser, identifying photobooth, guess-my-drawing, and catscradle as created/pushed after the 2026-08-30 review; each repo's README fetched directly via raw.githubusercontent.com and/or the contents API; has_pages/homepage checked per repo to confirm deployment status. hhanng.github.io portfolio fetched and confirmed current, with a HAND TRACKING section now listing all five gesture projects (guess-my-drawing correctly marked 'View on GitHub' since it isn't deployed). ThyThyChecker's pushed_at reconfirmed unchanged since 2026-08-25 — not re-reviewed file-by-file since nothing changed. Drive Proofs folder (1uwrB4xTUpSVYzNXPzNRP6h7cUGK4xFix) listed by parentId: 7 files total, zero named proof__, so 0 confirmed applications/networking proofs this run (unchanged mechanism from prior weeks). Live tracker localStorage (hanhan_faang_v1) read after unlocking the client gate and a ~5s wait for Firebase sync: feedback [], apps 0, contacts 0, capChecks {cap1_1:false}, proof keys unchanged (ms:q1_5/6/7). launchNotified timestamp matches the 2026-08-27 value already reported last week, not a new signal. No new ms:/o1:/cap:/app-*/net-* item keys were added or changed — the only additions this run are the three new _portfolioGrades entries and light updates to the two ml: item notes reflecting the new evidence (no new item index unlocked, since 'ship every project publicly' was already verified). No email sent and no draft created by this task — the Apps Script sends at ~2:30 AM. Committed to khanimation/han-han-roadmap via the GitHub web editor from the scheduled Sunday run."
+ "_baselineDate": "2026-06-21",
+ "_lastReviewed": "2026-09-13",
+ "_nextReview": "2026-09-20",
+ "_overall": "Quiet week -- no new repos, but she closed the one gap flagged last Sunday (guess-my-drawing now live)",
+ "_odds": 9,
+ "_note": "Baseline set 2026-06-21. Han Han's prior portfolio — including the completed 120 'Vibe Code' AI-agent assignment and all repos/sites that exist on or before this date — is a separate, already-finished project and does NOT count toward this roadmap. Only NEW, distinct, roadmap-relevant work created or updated AFTER this date is graded and counts toward completion (verified items auto-check on the tracker).",
+ "_emailSummary": "Week 12 past baseline. No new repos created this week -- but she fixed exactly what last Sunday's review flagged: guess-my-drawing is now deployed live (hhanng.github.io/guess-my-drawing/, confirmed working), and the portfolio card was updated to a Live Demo button instead of View on GitHub. That's a real signal of listening to feedback and closing gaps fast, and it bumps guess-my-drawing to A-. Odds held at 9% -- good execution hygiene, but zero forward motion again on the roadmap's actual open asks: LeetCode, applications, networking, STAR bank, and any RAG/agent/eval-harness project, all at zero for the 12th straight week. iOS capstone still stalled on Khan's $99 Apple Developer fee decision -- 17 days waiting since she clicked ready-to-launch on Aug 27.",
+ "_overallNote": "Twelfth grading pass (Sun 2026-09-13). GitHub REST API (users/hhanng/repos?sort=pushed) shows zero new repos created since guess-my-drawing on 2026-09-03 -- unchanged from last week. hhanng.github.io itself was pushed 2026-09-07T01:05:40Z (after last week's review), so its commit history was checked directly: three commits (2026-09-06T20:07 'Add Live Demo link to Guess My Drawing card -- Now deployed at hhanng.github.io/guess-my-drawing/', 2026-09-07T01:02 'Shorten Photobooth card description to technical copy', 2026-09-07T01:05 'Remove View on GitHub button from Guess My Drawing card'). Live-fetched https://hhanng.github.io/guess-my-drawing/ directly and confirmed it loads and renders (title 'Guess My Drawing', room create/join UI present) -- this closes the exact gap called out last week ('deploy a live multiplayer instance ... and link a live URL'). guess-my-drawing upgraded B+ to A- accordingly: it now independently satisfies 'ship publicly' rather than riding on the pattern from other projects. No other repo changed (photobooth, catscradle, neonpoint, condensate, study-hub, Voxel-My-Image, ThyThyChecker all unchanged pushed_at from last week; ThyThyChecker still not re-branded from the study-hub scaffold, stays needs-work). Drive Proofs folder (1uwrB4xTUpSVYzNXPzNRP6h7cUGK4xFix) listed by parentId: still 7 files total, zero named proof__ -- 0 confirmed applications, 0 networking proofs, unchanged mechanism for the entire baseline period. Live tracker localStorage (hanhan_faang_v1) read after gate-unlock + 5s wait: feedback [], apps 0, contacts 0, capChecks {cap1_1:false}, launchNotified timestamp confirmed unchanged at 2026-08-27T14:15:58Z (still the same 'ready to activate & launch' click reported three weeks ago now, not a new signal), appleFeePaid still false. No new ms:/o1:/cap:/app-*/net-* item keys unlocked this run -- 'ship every project publicly' was already verified two weeks ago and guess-my-drawing's deployment reinforces it rather than opening anything new. Odds held flat at 9: closing a flagged gap fast is good discipline and worth crediting, but it is maintenance on already-shipped work, not new ground, and the roadmap's four explicitly-named open items (RAG system, autonomous agent, eval harness; LeetCode; applications; networking/STAR bank) have now gone twelve straight weeks at zero.",
+ "_topAction": "For Han Han: good instinct closing the guess-my-drawing deployment gap the same week it was named -- that responsiveness is real and worth keeping. Now point it at something the roadmap hasn't seen yet: pick ONE of RAG system / autonomous agent / eval harness and start it this week, not a sixth polish pass on an already-shipped demo. LeetCode is still 0/3 and applications are still 0 -- twelve Sundays running on both. For Khan: the iOS capstone has now been sitting on your $99/year Apple Developer Program decision for 17 days since she flagged ready-to-launch on Aug 27 -- decide this week or tell her explicitly it's on hold, the silence itself is a cost.",
+ "_proofsThisRun": 0,
+ "_confirmedApplications": 0,
+ "_networkingProofs": 0,
+ "ms:q1_5": {
+  "grade": "A",
+  "status": "verified",
+  "note": "Resume rebuilt in FAANG format — metrics-driven bullets (120 apps shipped in ~1 month, cut build time from ~1 week to <4hrs, 525% IG growth, 40% new-client increase), correct sections (Education/Experience/Projects/Skills), all real projects. Google Doc proof reviewed directly."
+ },
+ "ms:q1_6": {
+  "grade": "A",
+  "status": "verified",
+  "note": "GitHub genuinely cleaned up: hhanng.github.io is pinned with a polished README — live-demo section, categorized project table with links, last-updated timestamp. Meets the bar as written. Confirmed still current and now includes a dedicated HAND TRACKING section for the five webcam-gesture projects."
+ },
+ "ms:q1_7": {
+  "grade": "A-",
+  "status": "verified",
+  "note": "Target list of Summer 2027 internships reviewed (PDF, 'tech_internships_nyc_remote_target_list.pdf') — 50 named companies across AI/ML, infra, and big tech with role types and hiring-bar notes. Exceeds the 40-60 target range."
+ },
+ "ml:★ In-demand builds (ship these — Meta-engineer picks)_3": {
+  "grade": "A-",
+  "status": "verified",
+  "note": "'Ship every project publicly' now has seven qualifying examples: condensate, neonpoint, study-hub, photobooth, catscradle, and (as of this week) guess-my-drawing, now deployed live and independently satisfying the bar rather than riding on the pattern. The three remaining items in this group -- RAG system, autonomous multi-step agent, eval harness -- remain untouched for the twelfth straight week; this entry does not extend to them."
+ },
+ "ml:LLMs & generative AI (her edge)_3": {
+  "grade": "B",
+  "status": "verified",
+  "note": "study-hub is a new, deployed app making live Gemini API calls (flashcard/quiz/practice-problem generation) — distinct from the excluded 120-agent set, with a real README covering setup and the Gemini key/deploy pipeline. Unchanged this run; no new LLM-calling project shipped this week specifically (guess-my-drawing and the hand-tracking series don't call a model)."
+ },
+ "_portfolioGrades": {
+  "condensate": {
+   "grade": "A-",
+   "status": "verified",
+   "note": "A digital 'fogged mirror' — real-time MediaPipe HandLandmarker pinch tracking + Web Audio blow-detection, inference offloaded to a Web Worker. Excellent README with architecture and tuning notes. Deployed on GitHub Pages. Improvement: add a demo GIF/video to the README."
+  },
+  "neonpoint": {
+   "grade": "A-",
+   "status": "verified",
+   "note": "Two-handed neon drawing tool using MediaPipe two-hand tracking with custom gesture classifiers (index-extend to draw, open-palm to drag). Sibling architecture to condensate, equally well documented. Improvement: same — a demo GIF would make this land faster on a resume/portfolio scan."
+  },
+  "study-hub": {
+   "grade": "B",
+   "status": "verified",
+   "note": "Homework/exam/study tracker, React+Vite, live Gemini API calls for flashcards/quizzes/practice problems. Practical, clearly documented (setup, deploy pipeline, Gemini key wiring). Improvement: no advanced engineering here — this is a solid personal tool, not a portfolio flagship; the RAG/agent items are still open."
+  },
+  "thythychecker": {
+   "grade": "C+",
+   "status": "needs-work",
+   "note": "Byte-identical duplicate of study-hub's scaffold (same git blob SHAs for README.md, package.json, App.jsx) — the README, package.json name, and page <title> all still literally read 'Study Hub', not customized to its stated purpose. Unchanged since 2026-08-25 (pushed_at identical) — still not fixed. Improvement: rename the branding, swap in Thy Thy's real class data, and write an actual README before this counts as a second distinct project."
+  },
+  "voxel-my-image": {
+   "grade": "C-",
+   "status": "needs-work",
+   "note": "Real server-side Gemini API call (services/gemini.ts) but metadata.json explicitly labels it a 'Remix' of an existing Google AI Studio community app, not an original build; no README; not linked from her own portfolio. Improvement: write a README, meaningfully customize it, and link it from the site if she wants credit for it."
+  },
+  "photobooth": {
+   "grade": "A-",
+   "status": "verified",
+   "note": "Fourth entry in the MediaPipe hand-tracking series — gesture-framed photo strip with 4 filter styles and a pre-capture mini-game. Deployed on GitHub Pages, CI badge, detailed README on the gesture mechanics. Same quality bar as condensate/neonpoint. Improvement: this is the fourth project in the same genre — the next build should be a RAG/agent/eval-harness project instead, per the roadmap's still-open items."
+  },
+  "catscradle": {
+   "grade": "A-",
+   "status": "verified",
+   "note": "A two-hand 'cat's cradle' string-web effect built on MediaPipe HandLandmarker. The README documents real performance engineering: a startup warm-up call to pre-pay a measured GPU shadowBlur cost so it doesn't stutter on first two-hand detection, handedness correction for the mirrored feed, and a direct per-frame timing check (<1ms vs. the 16.7ms/60fps budget). Deployed on GitHub Pages. Best-documented of the hand-tracking series so far. Improvement: same note as its siblings — time to point this skill at a new genre (RAG/agent/eval harness)."
+  },
+  "guess-my-drawing": {
+   "grade": "A-",
+   "status": "verified",
+   "note": "Now deployed live at hhanng.github.io/guess-my-drawing/ (confirmed loading/functional) -- closes the exact gap flagged last week. Real-time multiplayer Pictionary over Firebase Firestore, documented data model (rooms/strokes/guesses), disconnect and round-end race handling via status-guarded transactions, two dedicated test harnesses (e2e game-flow + hand-tracking smoke test) behind a CI badge. Portfolio card updated to a Live Demo button (View on GitHub button removed). Upgraded from B+: it now independently satisfies 'ship publicly' rather than needing the rest of the hand-tracking series to carry it. Improvement: still the same underlying ask as the other four hand-tracking projects -- the next build should be outside this genre (RAG/agent/eval harness)."
+  }
+ },
+ "_meta": "Evidence this run: GitHub REST API (users/hhanng/repos?sort=pushed) read via browser fetch, confirming zero new repo creations since 2026-09-03 (guess-my-drawing, already graded). hhanng.github.io's own pushed_at (2026-09-07T01:05:40Z) triggered a direct commit-log check (repos/hhanng/hhanng.github.io/commits?since=2026-09-06) -- three commits found, all portfolio-card copy edits, the key one adding a Live Demo link for guess-my-drawing because it's 'now deployed'. Verified by fetching https://hhanng.github.io/guess-my-drawing/ directly in-browser: loads, renders room create/join UI. Portfolio page (hhanng.github.io, redirects to custom domain vuhanhan.com) re-read in full and confirmed the Hand Tracking section now shows Live Demo for all five gesture projects. Drive Proofs folder (1uwrB4xTUpSVYzNXPzNRP6h7cUGK4xFix) listed by parentId: 7 files, all pre-existing grading artifacts (grades-*.json, tracker docs), zero proof__ files -- 0 confirmed applications/networking proofs this run. Live tracker localStorage (hanhan_faang_v1) read after unlocking the client gate and a 5s wait for Firebase sync: feedback [], apps 0, contacts 0, capChecks {cap1_1:false}, launchNotified 1787840158256ms = 2026-08-27T14:15:58Z (unchanged, not a new signal), appleFeePaid still false. Only change to grades.json this run: guess-my-drawing's _portfolioGrades entry (B+ to A-, deployment note) and a refreshed ml-in-demand-builds note; no new item keys added or removed. No email sent and no draft created by this task -- the Apps Script sends at ~2:30 AM. Committed to khanimation/han-han-roadmap via the GitHub web editor from the scheduled Sunday run (no git push credentials available in this sandbox)."
 }
